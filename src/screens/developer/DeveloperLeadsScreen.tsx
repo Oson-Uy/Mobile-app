@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { FlatList, Linking, RefreshControl, StyleSheet, View } from "react-native";
-import { Button, Card, Chip, Divider, Snackbar, Text, TextInput } from "react-native-paper";
+import { Button, Card, Chip, Divider, Snackbar, Text, TextInput, useTheme } from "react-native-paper";
 import * as Clipboard from "expo-clipboard";
 
 import { apiFetch } from "../../api/client";
 import { useI18n } from "../../i18n/I18nProvider";
 import { Screen } from "../../ui/Screen";
-import { palette, radii, spacing } from "../../theme/tokens";
+import { useAppTheme } from "../../theme/AppThemeProvider";
+import { radii, spacing } from "../../theme/tokens";
 
 type LeadStatus = "NEW" | "CONTACTED";
 type ApiLead = {
@@ -21,12 +22,19 @@ type ApiLead = {
 
 export function DeveloperLeadsScreen() {
   const { t } = useI18n();
+  const theme = useTheme();
+  const { palette: p, mode } = useAppTheme();
   const [items, setItems] = useState<ApiLead[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [query, setQuery] = useState("");
   const [snack, setSnack] = useState<string | null>(null);
   const [busyFeedbackId, setBusyFeedbackId] = useState<number | null>(null);
   const [feedbackLink, setFeedbackLink] = useState<string | null>(null);
+
+  const chipNewBg = mode === "dark" ? "rgba(251,191,36,0.25)" : "#FEF3C7";
+  const chipNewFg = mode === "dark" ? "#FCD34D" : "#92400E";
+  const chipDoneBg = mode === "dark" ? "rgba(52,211,153,0.2)" : "#DCFCE7";
+  const chipDoneFg = mode === "dark" ? "#6EE7B7" : "#166534";
 
   const load = async () => {
     const leads = await apiFetch<ApiLead[]>("/leads");
@@ -132,28 +140,41 @@ export function DeveloperLeadsScreen() {
               value={query}
               onChangeText={setQuery}
               left={<TextInput.Icon icon="magnify" />}
+              textColor={theme.colors.onSurface}
             />
             <View style={styles.statsRow}>
-              <Chip style={styles.statChip}>{t("developer.statsAll")}: {stats.total}</Chip>
-              <Chip style={styles.statChip}>{t("developer.statsNew")}: {stats.newCount}</Chip>
-              <Chip style={styles.statChip}>{t("developer.statsContacted")}: {stats.contacted}</Chip>
+              <Chip style={[styles.statChip, { backgroundColor: p.surfaceMuted }]}>
+                {t("developer.statsAll")}: {stats.total}
+              </Chip>
+              <Chip style={[styles.statChip, { backgroundColor: p.surfaceMuted }]}>
+                {t("developer.statsNew")}: {stats.newCount}
+              </Chip>
+              <Chip style={[styles.statChip, { backgroundColor: p.surfaceMuted }]}>
+                {t("developer.statsContacted")}: {stats.contacted}
+              </Chip>
             </View>
           </View>
         }
         renderItem={({ item }) => (
-          <Card mode="elevated" style={styles.card} elevation={2}>
+          <Card
+            mode="elevated"
+            style={[styles.card, { borderColor: p.outline }]}
+            elevation={2}
+          >
             <Card.Title
               title={item.name}
-              titleStyle={styles.cardTitle}
+              titleStyle={[styles.cardTitle, { color: p.text }]}
               subtitle={`${item.project?.name ?? "—"}${
                 item.floor
                   ? ` · ${t("developer.leadFloor", { n: item.floor.floor })}`
                   : ""
               }`}
-              subtitleStyle={styles.sub}
+              subtitleStyle={[styles.sub, { color: p.textMuted }]}
             />
             <Card.Content style={styles.content}>
-              <Text variant="bodyMedium" style={styles.phone}>{item.phone}</Text>
+              <Text variant="bodyMedium" style={[styles.phone, { color: p.text }]}>
+                {item.phone}
+              </Text>
               <View style={styles.quickRow}>
                 <Button mode="outlined" compact onPress={() => void callPhone(item.phone)}>
                   {t("developer.call")}
@@ -169,9 +190,14 @@ export function DeveloperLeadsScreen() {
               <View style={styles.row}>
                 <Chip
                   style={
-                    item.status === "NEW" ? styles.chipNew : styles.chipDone
+                    item.status === "NEW"
+                      ? { backgroundColor: chipNewBg }
+                      : { backgroundColor: chipDoneBg }
                   }
-                  textStyle={styles.chipTxt}
+                  textStyle={[
+                    styles.chipTxt,
+                    { color: item.status === "NEW" ? chipNewFg : chipDoneFg },
+                  ]}
                 >
                   {item.status === "NEW"
                     ? t("developer.statusNew")
@@ -200,7 +226,7 @@ export function DeveloperLeadsScreen() {
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text variant="bodyLarge" style={styles.emptyTxt}>
+            <Text variant="bodyLarge" style={[styles.emptyTxt, { color: p.textMuted }]}>
               {t("developer.emptyLeads")}
             </Text>
           </View>
@@ -229,15 +255,14 @@ const styles = StyleSheet.create({
   list: { padding: spacing.lg, paddingBottom: spacing.xxl * 2 },
   header: { marginBottom: spacing.md, gap: spacing.sm },
   statsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  statChip: { backgroundColor: palette.surfaceMuted },
+  statChip: {},
   card: {
     marginBottom: spacing.md,
     borderRadius: radii.card,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: palette.outline,
   },
   cardTitle: { fontWeight: "800" },
-  sub: { opacity: 0.75 },
+  sub: {},
   content: { gap: spacing.sm, paddingTop: 0 },
   phone: { fontWeight: "700" },
   quickRow: { flexDirection: "row", gap: spacing.sm, flexWrap: "wrap" },
@@ -247,9 +272,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexWrap: "wrap",
   },
-  chipNew: { backgroundColor: "#FEF3C7" },
-  chipDone: { backgroundColor: "#DCFCE7" },
   chipTxt: { fontWeight: "700", fontSize: 12 },
   empty: { paddingVertical: spacing.xxl * 2, alignItems: "center" },
-  emptyTxt: { opacity: 0.75, textAlign: "center" },
+  emptyTxt: { textAlign: "center" },
 });

@@ -11,8 +11,37 @@
     "loadError": "Could not load data",
     "back": "Back"
   },
+  "onboarding": {
+    "title": "Who are you?",
+    "subtitle": "We’ll tailor the app: catalog for buyers or a dashboard for developers.",
+    "buyerTitle": "I’m buying a home",
+    "buyerHint": "Project catalog, filters, and lead forms",
+    "buyerCta": "I’m a buyer",
+    "developerTitle": "Developer",
+    "developerHint": "Projects, floors, leads, and subscription",
+    "developerCta": "I’m a developer"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "role": "Profile type",
+    "roleBuyer": "Buyer",
+    "roleDeveloper": "Developer",
+    "done": "Done",
+    "langRu": "Russian",
+    "langUz": "Uzbek",
+    "langEn": "English"
+  },
   "catalog": {
     "title": "Project catalog",
+    "settings": "Settings",
+    "hero": {
+      "tagline": "New builds in Uzbekistan: clear pricing and verified developers",
+      "sub": "Oson Uy — find a home without the noise."
+    },
     "filters": "Filters",
     "open": "Open",
     "noResults": "No results for these filters",
@@ -22,6 +51,8 @@
     "locationPlaceholder": "e.g. Tashkent",
     "districtLabel": "District",
     "districtPlaceholder": "e.g. Chilanzar",
+    "filtersAdvanced": "More filters",
+    "filtersAdvancedHint": "City, district, installment",
     "drawer": {
       "title": "Search filters",
       "description": "Tune your search",
@@ -35,7 +66,13 @@
       "area_to": "Area to",
       "pricePerM2Label": "Price per m² (UZS)",
       "areaLabel": "Area (m²)",
-      "additionalLabel": "More"
+      "additionalLabel": "More",
+      "region": "Region",
+      "district": "District",
+      "selectRegion": "Select region",
+      "selectDistrict": "Select district",
+      "anyRegion": "All regions",
+      "anyDistrict": "Any district"
     }
   },
   "projectCard": {
@@ -74,7 +111,13 @@
     "nearbyTitle": "Nearby complexes",
     "priceFromShort": "from",
     "floorStackTitle": "Floors & prices",
-    "floorNotPublished": "Floors and prices are not published yet."
+    "floorNotPublished": "Floors and prices are not published yet.",
+    "videoTitle": "Project video",
+    "videoSubtitle": "Overview in motion",
+    "reviewsTitle": "Buyer reviews",
+    "reviewsHint": "Ratings and comments from leads",
+    "noComment": "No comment",
+    "ratingCount": "{n} reviews"
   },
   "leadModal": {
     "title": "Contact us",
@@ -104,9 +147,13 @@
   "developer": {
     "title": "Dashboard",
     "login": "Sign in",
+    "loginSubtitle": "Sign in to your developer dashboard",
     "email": "Email",
     "password": "Password",
     "signIn": "Sign in",
+    "edit": "Edit",
+    "filterByProject": "Building",
+    "noFloorsForProject": "No floors for this building yet",
     "signOut": "Sign out",
     "projects": "Projects",
     "floors": "Floors",

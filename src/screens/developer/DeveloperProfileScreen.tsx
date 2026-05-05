@@ -11,7 +11,8 @@ import { useI18n } from "../../i18n/I18nProvider";
 import { Screen } from "../../ui/Screen";
 import { SectionCard } from "../../ui/SectionCard";
 import { uploadImageAsset } from "../../dev/uploadImage";
-import { palette, radii, spacing } from "../../theme/tokens";
+import { useAppTheme } from "../../theme/AppThemeProvider";
+import { radii, spacing } from "../../theme/tokens";
 
 type ApiDeveloper = {
   id: number;
@@ -28,6 +29,7 @@ type ApiDeveloper = {
 
 export function DeveloperProfileScreen() {
   const { t } = useI18n();
+  const { palette: p } = useAppTheme();
   const [dev, setDev] = useState<ApiDeveloper | null>(null);
   const [busy, setBusy] = useState(false);
   const [snack, setSnack] = useState<string | null>(null);
@@ -132,22 +134,30 @@ export function DeveloperProfileScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <SectionCard>
-          <Text variant="titleMedium" style={styles.title}>
+          <Text variant="titleMedium" style={[styles.title, { color: p.primary }]}>
             {t("developer.profile")}
           </Text>
-          <Text variant="bodySmall" style={styles.email}>
+          <Text variant="bodySmall" style={[styles.email, { color: p.textMuted }]}>
             {dev?.email ?? ""}
           </Text>
-          <Text variant="titleSmall" style={styles.name}>
+          <Text variant="titleSmall" style={[styles.name, { color: p.text }]}>
             {dev?.name ?? ""}
           </Text>
 
           <View style={styles.logoRow}>
-            <View style={styles.logoBox}>
+            <View
+              style={[
+                styles.logoBox,
+                {
+                  backgroundColor: p.surfaceMuted,
+                  borderColor: p.outline,
+                },
+              ]}
+            >
               {dev?.logoUrl ? (
                 <Image source={{ uri: dev.logoUrl }} style={styles.logoImg} />
               ) : (
-                <Text style={styles.logoPh}>{t("developer.noLogo")}</Text>
+                <Text style={[styles.logoPh, { color: p.textMuted }]}>{t("developer.noLogo")}</Text>
               )}
             </View>
             <View style={{ flex: 1, gap: 8 }}>
@@ -213,10 +223,10 @@ export function DeveloperProfileScreen() {
 
           <Divider style={styles.div} />
 
-          <Text variant="titleSmall" style={styles.blockTitle}>
+          <Text variant="titleSmall" style={[styles.blockTitle, { color: p.primary }]}>
             Telegram
           </Text>
-          <Text variant="bodySmall" style={styles.muted}>
+          <Text variant="bodySmall" style={[styles.muted, { color: p.textMuted }]}>
             {dev?.telegramLinked ? t("developer.telegramLinked") : t("developer.telegramNotLinked")}
           </Text>
           <View style={styles.row}>
@@ -274,28 +284,26 @@ export function DeveloperProfileScreen() {
 
 const styles = StyleSheet.create({
   scroll: { padding: spacing.lg, paddingBottom: spacing.xxl * 2 },
-  title: { fontWeight: "900", color: palette.primary, marginBottom: 4 },
-  email: { opacity: 0.65, marginBottom: spacing.sm },
+  title: { fontWeight: "900", marginBottom: 4 },
+  email: { marginBottom: spacing.sm },
   name: { fontWeight: "800", marginBottom: spacing.md },
   field: { marginBottom: spacing.md },
   btn: { marginTop: spacing.sm, borderRadius: 12 },
   div: { marginVertical: spacing.md },
   row: { flexDirection: "row", gap: spacing.sm, alignItems: "center" },
   flex: { flex: 1 },
-  muted: { opacity: 0.75, marginBottom: spacing.sm },
-  blockTitle: { fontWeight: "900", color: palette.primary, marginBottom: 6 },
+  muted: { marginBottom: spacing.sm },
+  blockTitle: { fontWeight: "900", marginBottom: 6 },
   logoRow: { flexDirection: "row", gap: spacing.md, marginBottom: spacing.md, alignItems: "center" },
   logoBox: {
     width: 84,
     height: 84,
     borderRadius: radii.lg,
-    backgroundColor: palette.surfaceMuted,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: palette.outline,
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
   },
   logoImg: { width: "100%", height: "100%", resizeMode: "contain" },
-  logoPh: { opacity: 0.65, fontWeight: "700", fontSize: 11, textAlign: "center" },
+  logoPh: { fontWeight: "700", fontSize: 11, textAlign: "center" },
 });

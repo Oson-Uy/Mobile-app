@@ -9,25 +9,28 @@ import {
   type NativeSyntheticEvent,
   type NativeScrollEvent,
 } from "react-native";
-import { Card, Chip, Text } from "react-native-paper";
+import { Button, Card, Chip, Text } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { minPricePerM2FromApiProject } from "../../lib/project-price";
 import { formatUzs } from "../../lib/currency";
 import { useI18n } from "../../i18n/I18nProvider";
 import type { ApiProjectListItem } from "../../types/project";
-import { palette, radii, spacing } from "../../theme/tokens";
+import { useAppTheme } from "../../theme/AppThemeProvider";
+import { radii, spacing } from "../../theme/tokens";
 
 type Props = {
   project: ApiProjectListItem;
   onPress: () => void;
+  onLeaveRequest: () => void;
 };
 
 const localeFor = (l: string) =>
   l === "uz" ? "uz-UZ" : l === "en" ? "en-US" : "ru-RU";
 
-export function ProjectCatalogCard({ project, onPress }: Props) {
+export function ProjectCatalogCard({ project, onPress, onLeaveRequest }: Props) {
   const { t, locale } = useI18n();
+  const { palette: p } = useAppTheme();
   const loc = localeFor(locale);
   const width = Dimensions.get("window").width - spacing.lg * 2;
   const [imgIndex, setImgIndex] = useState(0);
@@ -53,7 +56,7 @@ export function ProjectCatalogCard({ project, onPress }: Props) {
   };
 
   return (
-    <Card style={styles.card} mode="elevated" onPress={onPress}>
+    <Card style={[styles.card, { backgroundColor: p.surface }]} mode="elevated">
       <View style={styles.imageWrap}>
         {gallery.length ? (
           <>
@@ -94,18 +97,23 @@ export function ProjectCatalogCard({ project, onPress }: Props) {
             ) : null}
           </>
         ) : (
-          <View style={[styles.placeholder, { width, height: width * 0.45 }]}>
-            <MaterialCommunityIcons name="image-off-outline" size={40} color={palette.textMuted} />
+          <View
+            style={[
+              styles.placeholder,
+              { width, height: width * 0.45, backgroundColor: p.surfaceMuted },
+            ]}
+          >
+            <MaterialCommunityIcons name="image-off-outline" size={40} color={p.textMuted} />
           </View>
         )}
         <View style={styles.badges}>
           {project.topInCatalog || project.topInHome ? (
-            <View style={[styles.badge, styles.badgePopular]}>
+            <View style={[styles.badge, { backgroundColor: p.popular }]}>
               <Text style={styles.badgeText}>{t("projectCard.popular")}</Text>
             </View>
           ) : null}
           {project.hasInstallment ? (
-            <View style={[styles.badge, styles.badgeInstallment]}>
+            <View style={[styles.badge, { backgroundColor: p.secondary }]}>
               <Text style={styles.badgeText}>{t("projectCard.installment")}</Text>
             </View>
           ) : null}
@@ -113,35 +121,55 @@ export function ProjectCatalogCard({ project, onPress }: Props) {
       </View>
 
       <Card.Content style={styles.content}>
-        <Text variant="titleMedium" style={styles.title}>
-          {project.name}
-        </Text>
-        <View style={styles.locRow}>
-          <MaterialCommunityIcons name="map-marker-outline" size={16} color={palette.secondary} />
-          <Text variant="bodySmall" style={styles.loc} numberOfLines={2}>
-            {place}
+        <Pressable
+          onPress={onPress}
+          style={({ pressed }) => [styles.infoPress, pressed && { opacity: 0.85 }]}
+        >
+          <Text variant="titleMedium" style={[styles.title, { color: p.primary }]}>
+            {project.name}
           </Text>
-        </View>
-        {minM2 > 0 ? (
-          <Text variant="titleSmall" style={styles.price}>
-            {t("projectCard.fromPerM2")}{" "}
-            <Text style={styles.priceNum}>
-              {formatUzs(minM2, loc)} {t("common.sum")}/{t("common.m2")}
+          <View style={styles.locRow}>
+            <MaterialCommunityIcons name="map-marker-outline" size={16} color={p.secondary} />
+            <Text variant="bodySmall" style={[styles.loc, { color: p.textMuted }]} numberOfLines={2}>
+              {place}
             </Text>
-          </Text>
-        ) : null}
-        <View style={styles.chips}>
-          {project.badgeVerified ? (
-            <Chip compact icon="shield-check" style={styles.chip}>
-              {t("projectCard.verifiedDeveloper")}
-            </Chip>
+          </View>
+          {minM2 > 0 ? (
+            <Text variant="titleSmall" style={[styles.price, { color: p.text }]}>
+              {t("projectCard.fromPerM2")}{" "}
+              <Text style={[styles.priceNum, { color: p.primary }]}>
+                {formatUzs(minM2, loc)} {t("common.sum")}/{t("common.m2")}
+              </Text>
+            </Text>
           ) : null}
-          {project.isPopular ? (
-            <Chip compact style={styles.chip}>
-              {t("catalog.popular")}
-            </Chip>
-          ) : null}
-        </View>
+          <View style={styles.chips}>
+            {project.badgeVerified ? (
+              <Chip
+                compact
+                icon="shield-check"
+                style={{ backgroundColor: p.surfaceMuted }}
+                textStyle={{ color: p.text }}
+              >
+                {t("projectCard.verifiedDeveloper")}
+              </Chip>
+            ) : null}
+            {project.isPopular ? (
+              <Chip compact style={{ backgroundColor: p.surfaceMuted }} textStyle={{ color: p.text }}>
+                {t("catalog.popular")}
+              </Chip>
+            ) : null}
+          </View>
+        </Pressable>
+        <Button
+          mode="contained"
+          buttonColor={p.secondary}
+          textColor="#FFFFFF"
+          style={styles.cta}
+          contentStyle={styles.ctaContent}
+          onPress={onLeaveRequest}
+        >
+          {t("projectDetails.leaveRequest")}
+        </Button>
       </Card.Content>
     </Card>
   );
@@ -157,7 +185,6 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   placeholder: {
-    backgroundColor: palette.surfaceMuted,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -194,12 +221,6 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 8,
   },
-  badgePopular: {
-    backgroundColor: palette.popular,
-  },
-  badgeInstallment: {
-    backgroundColor: palette.secondary,
-  },
   badgeText: {
     color: "#fff",
     fontSize: 10,
@@ -211,18 +232,25 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     gap: spacing.sm,
   },
+  infoPress: {
+    gap: spacing.sm,
+  },
   title: {
     fontWeight: "900",
-    color: palette.primary,
   },
   locRow: {
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 4,
   },
-  loc: { flex: 1, color: palette.textMuted },
-  price: { fontWeight: "700", color: palette.text },
-  priceNum: { color: palette.primary },
+  loc: { flex: 1 },
+  price: { fontWeight: "700" },
+  priceNum: {},
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
-  chip: { backgroundColor: palette.surfaceMuted },
+  cta: {
+    marginTop: spacing.xs,
+    borderRadius: radii.lg,
+    alignSelf: "stretch",
+  },
+  ctaContent: { paddingVertical: 6 },
 });

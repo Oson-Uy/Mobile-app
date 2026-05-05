@@ -10,6 +10,7 @@ export default ({ config }: any) => ({
   extra: {
     ...config.extra,
     apiUrl: process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3002",
+    heroVideoUrl: process.env.EXPO_PUBLIC_HERO_VIDEO_URL ?? "",
   },
 });
 

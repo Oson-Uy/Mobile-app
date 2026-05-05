@@ -12,6 +12,23 @@ export const palette = {
   popular: "#FB7185",
 } as const;
 
+/** Dark theme: same brand, surfaces tuned for night UI */
+export const darkPalette = {
+  primary: "#93C5FD",
+  secondary: "#FB923C",
+  background: "#0B1220",
+  surface: "#111C2F",
+  surfaceMuted: "#172554",
+  outline: "#334155",
+  text: "#F8FAFC",
+  textMuted: "#94A3B8",
+  success: "#34D399",
+  error: "#F87171",
+  popular: "#FB7185",
+} as const;
+
+export type AppPalette = typeof palette | typeof darkPalette;
+
 export const spacing = {
   xs: 4,
   sm: 8,

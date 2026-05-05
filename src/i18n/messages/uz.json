@@ -11,8 +11,37 @@
     "loadError": "Maʼlumot yuklanmadi",
     "back": "Orqaga"
   },
+  "onboarding": {
+    "title": "Siz kimsiz?",
+    "subtitle": "Interfeysni moslaymiz: xaridorlar uchun katalog yoki quruvchilar uchun kabinet.",
+    "buyerTitle": "Uy sotib olaman",
+    "buyerHint": "Loyiha katalogi, filtrlar va ariza",
+    "buyerCta": "Men xaridorman",
+    "developerTitle": "Quruvchi",
+    "developerHint": "Loyihalar, qavatlar, arizalar va obuna",
+    "developerCta": "Men quruvchiman"
+  },
+  "settings": {
+    "title": "Sozlamalar",
+    "language": "Til",
+    "theme": "Mavzu",
+    "themeLight": "Yorugʻ",
+    "themeDark": "Qorongʻi",
+    "role": "Profil turi",
+    "roleBuyer": "Xaridor",
+    "roleDeveloper": "Quruvchi",
+    "done": "Tayyor",
+    "langRu": "Rus",
+    "langUz": "Oʻzbek",
+    "langEn": "Ingliz"
+  },
   "catalog": {
     "title": "Loyiha katalogi",
+    "settings": "Sozlamalar",
+    "hero": {
+      "tagline": "Oʻzbekistonda yangi uylar: aniq narx va tekshirilgan quruvchilar",
+      "sub": "Oson Uy — ortiqcha shovqinsiz uy tanlang."
+    },
     "filters": "Filtrlar",
     "open": "Ochish",
     "noResults": "Bu filtrlar boʻyicha natija yoʻq",
@@ -22,6 +51,8 @@
     "locationPlaceholder": "Masalan, Toshkent",
     "districtLabel": "Tuman",
     "districtPlaceholder": "Masalan, Chilonzor",
+    "filtersAdvanced": "Qoʻshimcha filtrlar",
+    "filtersAdvancedHint": "Shahar, tuman, muddatli toʻlov",
     "drawer": {
       "title": "Qidiruv filtrlari",
       "description": "Qidiruvni sozlang",
@@ -35,7 +66,13 @@
       "area_to": "Maydon gacha",
       "pricePerM2Label": "m² narxi (soʻm)",
       "areaLabel": "Maydon (m²)",
-      "additionalLabel": "Qoʻshimcha"
+      "additionalLabel": "Qoʻshimcha",
+      "region": "Viloyat",
+      "district": "Tuman",
+      "selectRegion": "Viloyatni tanlang",
+      "selectDistrict": "Tumanni tanlang",
+      "anyRegion": "Barcha viloyatlar",
+      "anyDistrict": "Istalgan tuman"
     }
   },
   "projectCard": {
@@ -74,7 +111,13 @@
     "nearbyTitle": "Yaqin atrofdagi JK",
     "priceFromShort": "dan",
     "floorStackTitle": "Qavatlar va narxlar",
-    "floorNotPublished": "Bu loyiha boʻyicha qavatlar va narxlar hali eʼlon qilinmagan."
+    "floorNotPublished": "Bu loyiha boʻyicha qavatlar va narxlar hali eʼlon qilinmagan.",
+    "videoTitle": "Loyiha videosi",
+    "videoSubtitle": "Jonli koʻrinish",
+    "reviewsTitle": "Xaridorlar fikrlari",
+    "reviewsHint": "Murojaatlar boʻyicha baholar",
+    "noComment": "Izoh yoʻq",
+    "ratingCount": "{n} ta fikr"
   },
   "leadModal": {
     "title": "Bogʻlanish",
@@ -104,9 +147,13 @@
   "developer": {
     "title": "Kabinet",
     "login": "Kirish",
+    "loginSubtitle": "Quruvchi kabinetiga kiring",
     "email": "Email",
     "password": "Parol",
     "signIn": "Kirish",
+    "edit": "Tahrirlash",
+    "filterByProject": "Obyekt",
+    "noFloorsForProject": "Bu obyekt uchun qavatlar hali yoʻq",
     "signOut": "Chiqish",
     "projects": "Loyihalar",
     "floors": "Qavatlar",

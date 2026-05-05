@@ -1,17 +1,27 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import * as SecureStore from "expo-secure-store";
 
+import { STORAGE_KEYS } from "../preferences/storageKeys";
 import ru from "./messages/ru.json";
 import uz from "./messages/uz.json";
 import en from "./messages/en.json";
 
-type Locale = "ru" | "uz" | "en";
+export type Locale = "ru" | "uz" | "en";
 type Dict = Record<string, any>;
 
 const MESSAGES: Record<Locale, Dict> = { ru, uz, en };
 
 type I18nContextValue = {
+  hydrated: boolean;
   locale: Locale;
-  setLocale: (locale: Locale) => void;
+  setLocale: (locale: Locale) => Promise<void>;
   t: (key: string, vars?: Record<string, string | number>) => string;
 };
 
@@ -27,7 +37,26 @@ function formatTemplate(template: string, vars?: Record<string, string | number>
 }
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocale] = useState<Locale>("ru");
+  const [hydrated, setHydrated] = useState(false);
+  const [locale, setLocaleState] = useState<Locale>("ru");
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const raw = await SecureStore.getItemAsync(STORAGE_KEYS.locale);
+        if (raw === "ru" || raw === "uz" || raw === "en") {
+          setLocaleState(raw);
+        }
+      } finally {
+        setHydrated(true);
+      }
+    })();
+  }, []);
+
+  const setLocale = useCallback(async (next: Locale) => {
+    setLocaleState(next);
+    await SecureStore.setItemAsync(STORAGE_KEYS.locale, next);
+  }, []);
 
   const t = useCallback(
     (key: string, vars?: Record<string, string | number>) => {
@@ -40,8 +69,8 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   );
 
   const value = useMemo<I18nContextValue>(
-    () => ({ locale, setLocale, t }),
-    [locale, t],
+    () => ({ hydrated, locale, setLocale, t }),
+    [hydrated, locale, setLocale, t],
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;

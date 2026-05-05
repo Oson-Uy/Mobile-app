@@ -11,8 +11,37 @@
     "loadError": "Не удалось загрузить данные",
     "back": "Назад"
   },
+  "onboarding": {
+    "title": "Кто вы?",
+    "subtitle": "Так мы покажем нужный интерфейс: каталог для покупателей или кабинет для застройщиков.",
+    "buyerTitle": "Покупаю жильё",
+    "buyerHint": "Каталог проектов, фильтры и заявки",
+    "buyerCta": "Я покупатель",
+    "developerTitle": "Застройщик",
+    "developerHint": "Проекты, этажи, заявки и подписка",
+    "developerCta": "Я застройщик"
+  },
+  "settings": {
+    "title": "Настройки",
+    "language": "Язык",
+    "theme": "Тема",
+    "themeLight": "Светлая",
+    "themeDark": "Тёмная",
+    "role": "Тип профиля",
+    "roleBuyer": "Покупатель",
+    "roleDeveloper": "Застройщик",
+    "done": "Готово",
+    "langRu": "Русский",
+    "langUz": "Oʻzbekcha",
+    "langEn": "English"
+  },
   "catalog": {
     "title": "Каталог проектов",
+    "settings": "Настройки",
+    "hero": {
+      "tagline": "Новостройки Узбекистана: прозрачные цены и проверенные застройщики",
+      "sub": "Oson Uy — выбирайте дом без лишнего шума."
+    },
     "filters": "Фильтры",
     "open": "Открыть",
     "noResults": "Ничего не найдено с такими фильтрами",
@@ -22,6 +51,8 @@
     "locationPlaceholder": "Например, Ташкент",
     "districtLabel": "Район",
     "districtPlaceholder": "Например, Чиланзар",
+    "filtersAdvanced": "Расширенные фильтры",
+    "filtersAdvancedHint": "Город, район и рассрочка",
     "drawer": {
       "title": "Фильтры поиска",
       "description": "Настройте параметры поиска",
@@ -35,7 +66,13 @@
       "area_to": "Площадь до",
       "pricePerM2Label": "Цена за м² (сум)",
       "areaLabel": "Площадь (м²)",
-      "additionalLabel": "Дополнительно"
+      "additionalLabel": "Дополнительно",
+      "region": "Регион / область",
+      "district": "Район",
+      "selectRegion": "Выберите регион",
+      "selectDistrict": "Выберите район",
+      "anyRegion": "Все регионы",
+      "anyDistrict": "Любой район"
     }
   },
   "projectCard": {
@@ -74,7 +111,13 @@
     "nearbyTitle": "ЖК поблизости",
     "priceFromShort": "от",
     "floorStackTitle": "Этажи и цены",
-    "floorNotPublished": "По этому проекту этажи и цены ещё не опубликованы."
+    "floorNotPublished": "По этому проекту этажи и цены ещё не опубликованы.",
+    "videoTitle": "Видео о проекте",
+    "videoSubtitle": "Обзор и детали в динамике",
+    "reviewsTitle": "Отзывы покупателей",
+    "reviewsHint": "Оценки и комментарии после обращения по проекту",
+    "noComment": "Без комментария",
+    "ratingCount": "{n} отзывов"
   },
   "leadModal": {
     "title": "Свяжитесь с нами",
@@ -104,9 +147,13 @@
   "developer": {
     "title": "Кабинет",
     "login": "Вход",
+    "loginSubtitle": "Войдите в кабинет застройщика",
     "email": "Email",
     "password": "Пароль",
     "signIn": "Войти",
+    "edit": "Изменить",
+    "filterByProject": "Объект",
+    "noFloorsForProject": "Для этого объекта этажей пока нет",
     "signOut": "Выйти",
     "projects": "Проекты",
     "floors": "Этажи",

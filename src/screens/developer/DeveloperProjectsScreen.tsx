@@ -1,12 +1,15 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
+import { FlatList, Image, RefreshControl, StyleSheet, View } from "react-native";
 import { Card, FAB, IconButton, Text } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { apiFetch } from "../../api/client";
 import { useI18n } from "../../i18n/I18nProvider";
 import { Screen } from "../../ui/Screen";
-import { palette, radii, spacing } from "../../theme/tokens";
+import { useAppTheme } from "../../theme/AppThemeProvider";
+import { radii, spacing } from "../../theme/tokens";
+import type { ApiMedia } from "../../types/project";
 
 type ApiDeveloper = { id: number; name: string };
 type ApiProject = {
@@ -15,10 +18,21 @@ type ApiProject = {
   location: string;
   district?: string | null;
   developerId?: number;
+  imageUrl?: string | null;
+  media?: ApiMedia[];
 };
+
+const THUMB = 76;
+
+function projectThumbUrl(item: ApiProject): string | null {
+  if (item.imageUrl) return item.imageUrl;
+  const fromMedia = (item.media ?? []).map((m) => m.imageUrl).filter(Boolean);
+  return fromMedia[0] ?? null;
+}
 
 export function DeveloperProjectsScreen() {
   const { t } = useI18n();
+  const { palette: p } = useAppTheme();
   const navigation = useNavigation<any>();
   const [dev, setDev] = useState<ApiDeveloper | null>(null);
   const [items, setItems] = useState<ApiProject[]>([]);
@@ -30,7 +44,7 @@ export function DeveloperProjectsScreen() {
     const developer = await apiFetch<ApiDeveloper>("/developers");
     const projects = await apiFetch<ApiProject[]>("/projects");
     setDev(developer);
-    setItems(projects.filter((p) => p.developerId === developer.id));
+    setItems(projects.filter((proj) => proj.developerId === developer.id));
   };
 
   useEffect(() => {
@@ -69,38 +83,58 @@ export function DeveloperProjectsScreen() {
         ListHeaderComponent={
           dev ? (
             <View style={styles.header}>
-              <Text variant="titleMedium" style={styles.devName}>
+              <Text variant="titleMedium" style={[styles.devName, { color: p.primary }]}>
                 {dev.name}
               </Text>
-              <Text variant="bodySmall" style={styles.hint}>
+              <Text variant="bodySmall" style={[styles.hint, { color: p.textMuted }]}>
                 {countText}
               </Text>
             </View>
           ) : null
         }
-        renderItem={({ item }) => (
-          <Card mode="elevated" style={styles.card} elevation={2}>
-            <Card.Title
-              title={item.name}
-              titleStyle={styles.cardTitle}
-              subtitle={[item.district, item.location].filter(Boolean).join(", ")}
-              subtitleStyle={styles.sub}
-              right={() => (
+        renderItem={({ item }) => {
+          const uri = projectThumbUrl(item);
+          return (
+            <Card
+              mode="elevated"
+              style={[
+                styles.card,
+                { borderColor: p.outline, backgroundColor: p.surface },
+              ]}
+              elevation={2}
+            >
+              <View style={styles.cardRow}>
+                {uri ? (
+                  <Image source={{ uri }} style={styles.thumb} />
+                ) : (
+                  <View style={[styles.thumb, styles.thumbPh, { backgroundColor: p.surfaceMuted }]}>
+                    <MaterialCommunityIcons name="image-off-outline" size={28} color={p.textMuted} />
+                  </View>
+                )}
+                <View style={styles.cardText}>
+                  <Text variant="titleSmall" style={[styles.cardTitle, { color: p.text }]} numberOfLines={2}>
+                    {item.name}
+                  </Text>
+                  <Text variant="bodySmall" style={[styles.sub, { color: p.textMuted }]} numberOfLines={2}>
+                    {[item.district, item.location].filter(Boolean).join(", ")}
+                  </Text>
+                </View>
                 <IconButton
                   icon="pencil-outline"
+                  iconColor={p.primary}
                   onPress={() =>
                     navigation.navigate("DeveloperProjectEditor", {
                       projectId: item.id,
                     })
                   }
                 />
-              )}
-            />
-          </Card>
-        )}
+              </View>
+            </Card>
+          );
+        }}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text variant="bodyLarge" style={styles.emptyTitle}>
+            <Text variant="bodyLarge" style={[styles.emptyTitle, { color: p.textMuted }]}>
               {error ?? t("developer.emptyProjects")}
             </Text>
           </View>
@@ -108,7 +142,8 @@ export function DeveloperProjectsScreen() {
       />
       <FAB
         icon="plus"
-        style={styles.fab}
+        style={[styles.fab, { backgroundColor: p.secondary }]}
+        color="#FFFFFF"
         onPress={() => navigation.navigate("DeveloperProjectEditor", {})}
         label={t("developer.newProject")}
       />
@@ -119,24 +154,40 @@ export function DeveloperProjectsScreen() {
 const styles = StyleSheet.create({
   list: { padding: spacing.lg, paddingBottom: spacing.xxl * 2 },
   header: { marginBottom: spacing.lg },
-  devName: { fontWeight: "900", color: palette.primary },
-  hint: { opacity: 0.65, marginTop: 4 },
+  devName: { fontWeight: "900" },
+  hint: { marginTop: 4 },
   card: {
     marginBottom: spacing.md,
     borderRadius: radii.card,
-    backgroundColor: palette.surface,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: palette.outline,
+    overflow: "hidden",
   },
+  cardRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: spacing.sm,
+    paddingLeft: spacing.md,
+    paddingRight: spacing.xs,
+    gap: spacing.md,
+  },
+  thumb: {
+    width: THUMB,
+    height: THUMB,
+    borderRadius: radii.md,
+  },
+  thumbPh: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cardText: { flex: 1, minWidth: 0 },
   cardTitle: { fontWeight: "800" },
-  sub: { opacity: 0.75 },
+  sub: {},
   empty: { paddingVertical: spacing.xxl * 2, alignItems: "center" },
-  emptyTitle: { textAlign: "center", opacity: 0.8 },
+  emptyTitle: { textAlign: "center" },
   fab: {
     position: "absolute",
     right: spacing.lg,
     bottom: spacing.lg,
-    backgroundColor: palette.secondary,
     borderRadius: 18,
   },
 });

@@ -4,12 +4,13 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { useI18n } from "../i18n/I18nProvider";
+import { useAppPreferences } from "../preferences/AppPreferencesProvider";
 import { CatalogListScreen } from "../screens/catalog/CatalogListScreen";
 import { ProjectDetailsScreen } from "../screens/catalog/ProjectDetailsScreen";
 import { LeadFormScreen } from "../screens/catalog/LeadFormScreen";
 import { DeveloperLoginScreen } from "../screens/developer/DeveloperLoginScreen";
 import { DeveloperHomeScreen } from "../screens/developer/DeveloperHomeScreen";
-import { palette } from "../theme/tokens";
+import { useAppTheme } from "../theme/AppThemeProvider";
 
 export type CatalogStackParamList = {
   CatalogList: undefined;
@@ -29,13 +30,14 @@ const Tabs = createBottomTabNavigator();
 
 function CatalogStackNavigator() {
   const { t } = useI18n();
+  const { palette: p } = useAppTheme();
   return (
     <CatalogStack.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: palette.background },
-        headerTintColor: palette.primary,
+        headerStyle: { backgroundColor: p.background },
+        headerTintColor: p.primary,
         headerShadowVisible: false,
-        headerTitleStyle: { fontWeight: "800" },
+        headerTitleStyle: { fontWeight: "800", color: p.text },
       }}
     >
       <CatalogStack.Screen
@@ -76,18 +78,23 @@ function DeveloperStackNavigator() {
 
 export function RootNavigator() {
   const { t } = useI18n();
+  const { role } = useAppPreferences();
+  const { palette: p } = useAppTheme();
+  const showDeveloperTab = role === "developer";
+
   return (
     <Tabs.Navigator
+      key={showDeveloperTab ? "dev-on" : "dev-off"}
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: palette.primary,
-        tabBarInactiveTintColor: palette.textMuted,
+        tabBarActiveTintColor: p.primary,
+        tabBarInactiveTintColor: p.textMuted,
         tabBarStyle: {
-          borderTopColor: palette.outline,
+          borderTopColor: p.outline,
           paddingTop: 6,
           paddingBottom: 6,
           height: 58,
-          backgroundColor: palette.surface,
+          backgroundColor: p.surface,
         },
         tabBarLabelStyle: { fontSize: 11, fontWeight: "700" },
         tabBarIcon: ({ color, size }) => {
@@ -111,11 +118,13 @@ export function RootNavigator() {
         component={CatalogStackNavigator}
         options={{ title: t("tabs.catalog") }}
       />
-      <Tabs.Screen
-        name="DeveloperTab"
-        component={DeveloperStackNavigator}
-        options={{ title: t("tabs.developer") }}
-      />
+      {showDeveloperTab ? (
+        <Tabs.Screen
+          name="DeveloperTab"
+          component={DeveloperStackNavigator}
+          options={{ title: t("tabs.developer") }}
+        />
+      ) : null}
     </Tabs.Navigator>
   );
 }

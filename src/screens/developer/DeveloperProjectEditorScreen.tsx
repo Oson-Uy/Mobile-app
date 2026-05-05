@@ -22,7 +22,8 @@ import { Screen } from "../../ui/Screen";
 import { SectionCard } from "../../ui/SectionCard";
 import { SectionTitle } from "../../ui/SectionTitle";
 import { uploadImageAsset } from "../../dev/uploadImage";
-import { palette, radii, spacing } from "../../theme/tokens";
+import { useAppTheme } from "../../theme/AppThemeProvider";
+import { radii, spacing } from "../../theme/tokens";
 
 type ApiProject = any;
 
@@ -92,6 +93,7 @@ const splitCsv = (value: string) =>
 
 export function DeveloperProjectEditorScreen({ navigation }: any) {
   const { t } = useI18n();
+  const { palette: themePalette } = useAppTheme();
   const route = useRoute();
   const { projectId } = (route.params ?? {}) as RouteParams;
 
@@ -259,7 +261,9 @@ export function DeveloperProjectEditorScreen({ navigation }: any) {
         <SectionCard>
           <SectionTitle title={title} subtitle={t("developer.projectEditorSubtitle")} />
 
-          {err ? <Text style={styles.err}>{err}</Text> : null}
+          {err ? (
+            <Text style={[styles.err, { color: themePalette.error }]}>{err}</Text>
+          ) : null}
 
           <TextInput
             mode="outlined"
@@ -342,14 +346,31 @@ export function DeveloperProjectEditorScreen({ navigation }: any) {
           {form.imageUrl ? (
             <View style={styles.mainImgWrap}>
               <Text style={styles.smallMuted}>{t("developer.mainImage")}</Text>
-              <Image source={{ uri: form.imageUrl }} style={styles.mainImg} />
+              <Image
+                source={{ uri: form.imageUrl }}
+                style={[styles.mainImg, { backgroundColor: themePalette.surfaceMuted }]}
+              />
             </View>
           ) : null}
           {form.imageUrls.length ? (
             <View style={styles.gallery}>
               {form.imageUrls.slice(0, 8).map((u, idx) => (
-                <View key={`${idx}-${u.slice(-12)}`} style={styles.thumbWrap}>
-                  <Image source={{ uri: u }} style={styles.thumb} />
+                <View
+                  key={`${idx}-${u.slice(-12)}`}
+                  style={[
+                    styles.thumbWrap,
+                    { backgroundColor: themePalette.surfaceMuted },
+                  ]}
+                >
+                  <Image
+                    source={{ uri: u }}
+                    style={[
+                      styles.thumb,
+                      {
+                        backgroundColor: themePalette.outline,
+                      },
+                    ]}
+                  />
                   <Button
                     mode="text"
                     compact
@@ -365,7 +386,7 @@ export function DeveloperProjectEditorScreen({ navigation }: any) {
                   <Button
                     mode="text"
                     compact
-                    textColor={palette.error}
+                    textColor={themePalette.error}
                     onPress={() =>
                       setForm((f) => ({
                         ...f,
@@ -508,14 +529,14 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", gap: spacing.sm },
   flex: { flex: 1 },
   div: { marginVertical: spacing.md },
-  err: { color: palette.error, marginBottom: spacing.md, fontWeight: "700" },
+  err: { marginBottom: spacing.md, fontWeight: "700" },
   checkRow: { flexDirection: "row", alignItems: "center", marginLeft: -8, marginBottom: spacing.sm },
   smallMuted: { opacity: 0.7, fontSize: 12, marginBottom: 6 },
   mainImgWrap: { marginTop: spacing.md },
-  mainImg: { width: "100%", height: 200, borderRadius: radii.md, backgroundColor: palette.surfaceMuted },
+  mainImg: { width: "100%", height: 200, borderRadius: radii.md },
   gallery: { marginTop: spacing.md, gap: spacing.md },
-  thumbWrap: { backgroundColor: palette.surfaceMuted, borderRadius: radii.md, padding: spacing.md },
-  thumb: { width: "100%", height: 160, borderRadius: radii.md, backgroundColor: "#ddd" },
+  thumbWrap: { borderRadius: radii.md, padding: spacing.md },
+  thumb: { width: "100%", height: 160, borderRadius: radii.md },
   saveBtn: { marginTop: spacing.lg, borderRadius: radii.lg },
   saveBtnIn: { paddingVertical: 6 },
 });

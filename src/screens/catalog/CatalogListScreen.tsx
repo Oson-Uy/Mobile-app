@@ -2,11 +2,14 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } fro
 import {
   ActivityIndicator,
   FlatList,
+  Platform,
+  Pressable,
   RefreshControl,
   StyleSheet,
   View,
 } from "react-native";
-import { Button, IconButton, Text } from "react-native-paper";
+import { Button, Text, useTheme } from "react-native-paper";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { apiFetch } from "../../api/client";
@@ -20,14 +23,20 @@ import {
 } from "../../catalog/filterProjects";
 import type { ApiProjectListItem } from "../../types/project";
 import { CatalogFilterModal } from "./CatalogFilterModal";
+import { CatalogHero } from "./CatalogHero";
+import { CatalogSettingsModal } from "./CatalogSettingsModal";
 import { ProjectCatalogCard } from "./ProjectCatalogCard";
 import { Screen } from "../../ui/Screen";
 import { spacing } from "../../theme/tokens";
 
 type Props = NativeStackScreenProps<CatalogStackParamList, "CatalogList">;
 
+const HEADER_ACTION_SIZE = 40;
+const ICON_SIZE = 22;
+
 export function CatalogListScreen({ navigation }: Props) {
   const { t } = useI18n();
+  const theme = useTheme();
   const [raw, setRaw] = useState<ApiProjectListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,6 +48,7 @@ export function CatalogListScreen({ navigation }: Props) {
     defaultCatalogFilters,
   );
   const [filterOpen, setFilterOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
     if (filterOpen) {
@@ -75,17 +85,40 @@ export function CatalogListScreen({ navigation }: Props) {
   }, [load]);
 
   useLayoutEffect(() => {
+    const iconColor = theme.colors.primary;
     navigation.setOptions({
       title: t("catalog.title"),
       headerRight: () => (
-        <IconButton
-          icon="filter-variant"
-          onPress={() => setFilterOpen(true)}
-          accessibilityLabel={t("catalog.filters")}
-        />
+        <View style={styles.headerRow}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t("catalog.settings")}
+            onPress={() => setSettingsOpen(true)}
+            style={({ pressed }) => [
+              styles.headerHit,
+              pressed && { opacity: 0.65 },
+            ]}
+            hitSlop={6}
+          >
+            <MaterialCommunityIcons name="cog-outline" size={ICON_SIZE} color={iconColor} />
+          </Pressable>
+          <View style={[styles.headerIconDivider, { backgroundColor: theme.colors.outlineVariant }]} />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t("catalog.filters")}
+            onPress={() => setFilterOpen(true)}
+            style={({ pressed }) => [
+              styles.headerHit,
+              pressed && { opacity: 0.65 },
+            ]}
+            hitSlop={6}
+          >
+            <MaterialCommunityIcons name="filter-variant" size={ICON_SIZE} color={iconColor} />
+          </Pressable>
+        </View>
       ),
     });
-  }, [navigation, t]);
+  }, [navigation, t, theme.colors.primary, theme.colors.outlineVariant]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -126,6 +159,10 @@ export function CatalogListScreen({ navigation }: Props) {
 
   return (
     <Screen>
+      <CatalogSettingsModal
+        visible={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+      />
       <CatalogFilterModal
         visible={filterOpen}
         onClose={() => setFilterOpen(false)}
@@ -140,6 +177,7 @@ export function CatalogListScreen({ navigation }: Props) {
         }}
       />
       <FlatList
+        ListHeaderComponent={<CatalogHero />}
         contentContainerStyle={styles.list}
         data={items}
         keyExtractor={(i) => String(i.id)}
@@ -163,6 +201,12 @@ export function CatalogListScreen({ navigation }: Props) {
           <ProjectCatalogCard
             project={item}
             onPress={() => navigation.navigate("ProjectDetails", { id: item.id })}
+            onLeaveRequest={() =>
+              navigation.navigate("LeadForm", {
+                projectId: item.id,
+                projectName: item.name,
+              })
+            }
           />
         )}
       />
@@ -171,6 +215,25 @@ export function CatalogListScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    height: HEADER_ACTION_SIZE,
+    marginRight: Platform.OS === "ios" ? 6 : 10,
+    marginVertical: 2,
+  },
+  headerIconDivider: {
+    width: StyleSheet.hairlineWidth,
+    height: 18,
+    marginHorizontal: 2,
+  },
+  headerHit: {
+    width: HEADER_ACTION_SIZE,
+    height: HEADER_ACTION_SIZE,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   list: {
     padding: spacing.lg,
     paddingBottom: spacing.xxl * 2,

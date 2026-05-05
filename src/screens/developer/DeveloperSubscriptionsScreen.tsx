@@ -7,6 +7,7 @@ import {
   Portal,
   Snackbar,
   Text,
+  useTheme,
 } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -16,7 +17,8 @@ import { Screen } from "../../ui/Screen";
 import { SectionCard } from "../../ui/SectionCard";
 import { SectionTitle } from "../../ui/SectionTitle";
 import { formatUzs } from "../../lib/currency";
-import { palette, radii, spacing } from "../../theme/tokens";
+import { useAppTheme } from "../../theme/AppThemeProvider";
+import { radii, spacing } from "../../theme/tokens";
 
 type ApiDeveloper = { id: number };
 type ApiProject = {
@@ -33,14 +35,34 @@ type ActivePayment = {
   instructions: string;
 };
 
-const PLANS = [
-  { id: "START", price: 1000000, color: palette.primary, icon: "rocket-launch-outline" as const },
-  { id: "PRO", price: 3000000, color: palette.secondary, icon: "shield-check-outline" as const, popular: true },
-  { id: "ULTIMATE", price: 5000000, color: "#111827", icon: "star-outline" as const },
-];
+type PlanDef = {
+  id: string;
+  price: number;
+  color: string;
+  icon: "rocket-launch-outline" | "shield-check-outline" | "star-outline";
+  popular?: boolean;
+};
 
 export function DeveloperSubscriptionsScreen() {
   const { t } = useI18n();
+  const theme = useTheme();
+  const { palette: p } = useAppTheme();
+
+  const PLANS = useMemo<PlanDef[]>(
+    () => [
+      { id: "START", price: 1000000, color: p.primary, icon: "rocket-launch-outline" },
+      {
+        id: "PRO",
+        price: 3000000,
+        color: p.secondary,
+        icon: "shield-check-outline",
+        popular: true,
+      },
+      { id: "ULTIMATE", price: 5000000, color: p.text, icon: "star-outline" },
+    ],
+    [p.primary, p.secondary, p.text],
+  );
+
   const [projects, setProjects] = useState<ApiProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
@@ -54,7 +76,7 @@ export function DeveloperSubscriptionsScreen() {
       apiFetch<ApiDeveloper>("/developers"),
       apiFetch<ApiProject[]>("/projects"),
     ]);
-    const own = allProjects.filter((p) => p.developerId === developer.id);
+    const own = allProjects.filter((proj) => proj.developerId === developer.id);
     setProjects(own);
     if (selectedProjectId == null && own[0]?.id) setSelectedProjectId(own[0].id);
   };
@@ -74,7 +96,7 @@ export function DeveloperSubscriptionsScreen() {
   }, []);
 
   const selected = useMemo(
-    () => projects.find((p) => p.id === selectedProjectId) ?? null,
+    () => projects.find((proj) => proj.id === selectedProjectId) ?? null,
     [projects, selectedProjectId],
   );
 
@@ -110,7 +132,7 @@ export function DeveloperSubscriptionsScreen() {
   if (loading) {
     return (
       <Screen style={styles.centered}>
-        <Text>{t("common.loading")}</Text>
+        <Text style={{ color: p.text }}>{t("common.loading")}</Text>
       </Screen>
     );
   }
@@ -118,18 +140,31 @@ export function DeveloperSubscriptionsScreen() {
   return (
     <Screen>
       <Portal>
-        <Modal visible={active != null} onDismiss={() => setActive(null)} contentContainerStyle={styles.modal}>
+        <Modal
+          visible={active != null}
+          onDismiss={() => setActive(null)}
+          contentContainerStyle={[
+            styles.modal,
+            {
+              backgroundColor: theme.colors.surface,
+            },
+          ]}
+        >
           <SectionTitle title={t("developer.paymentTitle")} subtitle={`#${active?.externalRef ?? ""}`} />
           <SectionCard style={styles.payCard}>
-            <Text style={styles.payRow}>
-              {t("developer.plan")}: <Text style={styles.bold}>{active?.plan ?? ""}</Text>
+            <Text style={[styles.payRow, { color: p.text }]}>
+              {t("developer.plan")}:{" "}
+              <Text style={[styles.bold, { color: p.primary }]}>{active?.plan ?? ""}</Text>
             </Text>
-            <Text style={styles.payRow}>
-              {t("developer.amount")}: <Text style={styles.bold}>{formatUzs(active?.amountUzs ?? 0)}</Text>
+            <Text style={[styles.payRow, { color: p.text }]}>
+              {t("developer.amount")}:{" "}
+              <Text style={[styles.bold, { color: p.primary }]}>
+                {formatUzs(active?.amountUzs ?? 0)}
+              </Text>
             </Text>
             <Divider style={{ marginVertical: spacing.md }} />
-            <Text style={styles.payHint}>{t("developer.instructions")}</Text>
-            <Text style={styles.payText}>{active?.instructions ?? ""}</Text>
+            <Text style={[styles.payHint, { color: p.textMuted }]}>{t("developer.instructions")}</Text>
+            <Text style={[styles.payText, { color: p.text }]}>{active?.instructions ?? ""}</Text>
           </SectionCard>
           <View style={styles.row}>
             <Button mode="outlined" style={styles.flex} onPress={() => setActive(null)}>
@@ -152,22 +187,24 @@ export function DeveloperSubscriptionsScreen() {
       <ScrollView contentContainerStyle={styles.scroll}>
         <SectionCard>
           <SectionTitle title={t("developer.subscriptions")} subtitle={t("developer.subscriptionsSubtitle")} />
-          {err ? <Text style={styles.err}>{err}</Text> : null}
+          {err ? (
+            <Text style={[styles.err, { color: p.error }]}>{err}</Text>
+          ) : null}
 
-          <Text style={styles.small}>{t("developer.selectedProject")}</Text>
+          <Text style={[styles.small, { color: p.textMuted }]}>{t("developer.selectedProject")}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={styles.projectRow}>
-              {projects.map((p) => {
-                const activePlan = p.subscription?.plan;
-                const isSel = p.id === selectedProjectId;
+              {projects.map((proj) => {
+                const activePlan = proj.subscription?.plan;
+                const isSel = proj.id === selectedProjectId;
                 return (
                   <Button
-                    key={p.id}
+                    key={proj.id}
                     mode={isSel ? "contained" : "outlined"}
-                    onPress={() => setSelectedProjectId(p.id)}
+                    onPress={() => setSelectedProjectId(proj.id)}
                     style={styles.projectBtn}
                   >
-                    {p.name}
+                    {proj.name}
                     {activePlan ? ` · ${activePlan}` : ""}
                   </Button>
                 );
@@ -184,18 +221,18 @@ export function DeveloperSubscriptionsScreen() {
           return (
             <SectionCard key={plan.id} style={styles.planCard}>
               <View style={styles.planHead}>
-                <View style={[styles.planIcon, { backgroundColor: plan.color + "12" }]}>
+                <View style={[styles.planIcon, { backgroundColor: plan.color + "18" }]}>
                   <MaterialCommunityIcons name={plan.icon} size={26} color={plan.color} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.planTitle}>{plan.id}</Text>
-                  <Text style={styles.planPrice}>
+                  <Text style={[styles.planTitle, { color: p.primary }]}>{plan.id}</Text>
+                  <Text style={[styles.planPrice, { color: p.text }]}>
                     {formatUzs(plan.price)}{" "}
-                    <Text style={styles.planPer}>{t("developer.perMonth")}</Text>
+                    <Text style={[styles.planPer, { color: p.textMuted }]}>{t("developer.perMonth")}</Text>
                   </Text>
                 </View>
                 {plan.popular ? (
-                  <View style={styles.popular}>
+                  <View style={[styles.popular, { backgroundColor: p.secondary }]}>
                     <Text style={styles.popularTxt}>{t("developer.popular")}</Text>
                   </View>
                 ) : null}
@@ -224,13 +261,12 @@ export function DeveloperSubscriptionsScreen() {
 const styles = StyleSheet.create({
   centered: { flex: 1, alignItems: "center", justifyContent: "center" },
   scroll: { padding: spacing.lg, paddingBottom: spacing.xxl * 2, gap: spacing.lg },
-  err: { color: palette.error, marginBottom: spacing.sm, fontWeight: "700" },
+  err: { marginBottom: spacing.sm, fontWeight: "700" },
   small: {
     fontSize: 11,
     fontWeight: "800",
     letterSpacing: 0.6,
     textTransform: "uppercase",
-    color: palette.textMuted,
     marginBottom: 8,
   },
   projectRow: { flexDirection: "row", gap: spacing.sm },
@@ -238,13 +274,12 @@ const styles = StyleSheet.create({
   planCard: { borderRadius: radii.xl },
   planHead: { flexDirection: "row", alignItems: "center", gap: spacing.md },
   planIcon: { height: 56, width: 56, borderRadius: 18, alignItems: "center", justifyContent: "center" },
-  planTitle: { fontWeight: "900", fontSize: 18, color: palette.primary },
+  planTitle: { fontWeight: "900", fontSize: 18 },
   planPrice: { fontWeight: "900", fontSize: 16 },
-  planPer: { fontWeight: "700", opacity: 0.6 },
-  popular: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, backgroundColor: palette.secondary },
+  planPer: { fontWeight: "700" },
+  popular: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
   popularTxt: { color: "#fff", fontWeight: "900", fontSize: 10, letterSpacing: 0.6, textTransform: "uppercase" },
   modal: {
-    backgroundColor: "#fff",
     marginHorizontal: spacing.lg,
     marginVertical: 42,
     borderRadius: radii.xl,
@@ -252,10 +287,9 @@ const styles = StyleSheet.create({
   },
   payCard: { marginVertical: spacing.md },
   payRow: { marginBottom: 6 },
-  bold: { fontWeight: "900", color: palette.primary },
-  payHint: { fontWeight: "800", opacity: 0.7, marginBottom: 6 },
-  payText: { opacity: 0.85 },
+  bold: { fontWeight: "900" },
+  payHint: { fontWeight: "800", marginBottom: 6 },
+  payText: {},
   row: { flexDirection: "row", gap: spacing.sm },
   flex: { flex: 1 },
 });
-

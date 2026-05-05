@@ -54,10 +54,18 @@ export type ApiProjectListItem = ApiProjectPreview & {
   imageUrls?: string[];
 };
 
+export type ApiProjectReview = {
+  id: number;
+  rating: number;
+  comment?: string | null;
+};
+
 export type ApiProjectFull = ApiProjectListItem & {
   description?: string | null;
   advantages?: string[];
   deliveryDate: string;
+  videoUrl?: string | null;
+  reviews?: ApiProjectReview[];
   totalFloors?: number | null;
   totalUnits?: number | null;
   plan?: string | null;

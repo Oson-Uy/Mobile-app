@@ -1,20 +1,21 @@
-import React, { useMemo } from "react";
+import React, { useMemo, type ComponentProps } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { useI18n } from "../../i18n/I18nProvider";
-import { palette } from "../../theme/tokens";
+import { useAppTheme } from "../../theme/AppThemeProvider";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function DeveloperTabs() {
   const { t } = useI18n();
+  const { palette: p } = useAppTheme();
 
   const icons = useMemo(
     () => ({
-      Projects: "office-building-cog-outline",
+      Projects: "office-building-outline",
       Floors: "layers-outline",
       Leads: "clipboard-text-outline",
       Subscriptions: "credit-card-outline",
@@ -27,15 +28,15 @@ function DeveloperTabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: true,
-        headerStyle: { backgroundColor: palette.background },
-        headerTintColor: palette.primary,
+        headerStyle: { backgroundColor: p.background },
+        headerTintColor: p.primary,
         headerShadowVisible: false,
-        headerTitleStyle: { fontWeight: "900" },
-        tabBarActiveTintColor: palette.primary,
-        tabBarInactiveTintColor: palette.textMuted,
+        headerTitleStyle: { fontWeight: "900", color: p.text },
+        tabBarActiveTintColor: p.primary,
+        tabBarInactiveTintColor: p.textMuted,
         tabBarStyle: {
-          borderTopColor: palette.outline,
-          backgroundColor: palette.surface,
+          borderTopColor: p.outline,
+          backgroundColor: p.surface,
           height: 60,
           paddingTop: 6,
           paddingBottom: 8,
@@ -43,7 +44,11 @@ function DeveloperTabs() {
         tabBarLabelStyle: { fontSize: 11, fontWeight: "800" },
         tabBarIcon: ({ color, size }) => (
           <MaterialCommunityIcons
-            name={(icons as any)[route.name] ?? "account"}
+            name={
+              (icons as Record<string, ComponentProps<typeof MaterialCommunityIcons>["name"]>)[
+                route.name
+              ] ?? "account"
+            }
             color={color}
             size={size}
           />
@@ -89,13 +94,15 @@ function DeveloperTabs() {
 
 export function DeveloperHomeScreen() {
   const { t } = useI18n();
+  const { palette: p } = useAppTheme();
+
   return (
     <Stack.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: palette.background },
-        headerTintColor: palette.primary,
+        headerStyle: { backgroundColor: p.background },
+        headerTintColor: p.primary,
         headerShadowVisible: false,
-        headerTitleStyle: { fontWeight: "900" },
+        headerTitleStyle: { fontWeight: "900", color: p.text },
       }}
     >
       <Stack.Screen
@@ -110,7 +117,13 @@ export function DeveloperHomeScreen() {
         }
         options={{ title: t("developer.projectEditorTitle") }}
       />
+      <Stack.Screen
+        name="DeveloperFloorEditor"
+        getComponent={() =>
+          require("./DeveloperFloorEditorScreen").DeveloperFloorEditorScreen
+        }
+        options={{ title: t("developer.floors") }}
+      />
     </Stack.Navigator>
   );
 }
-

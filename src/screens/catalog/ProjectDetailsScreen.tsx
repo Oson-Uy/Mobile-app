@@ -22,6 +22,10 @@ import {
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Video, ResizeMode } from "expo-av";
+import WebView from "react-native-webview";
+
+import { getYoutubeEmbedUrl, normalizeVideoUrl } from "../../lib/video-url";
 
 import type { CatalogStackParamList } from "../../navigation/RootNavigator";
 import { apiFetch } from "../../api/client";
@@ -32,7 +36,9 @@ import { formatUzs } from "../../lib/currency";
 import { FloorLayoutsModal } from "./FloorLayoutsModal";
 import { SectionCard } from "../../ui/SectionCard";
 import { SectionTitle } from "../../ui/SectionTitle";
-import { palette, radii, spacing } from "../../theme/tokens";
+import { useAppTheme } from "../../theme/AppThemeProvider";
+import type { AppPalette } from "../../theme/tokens";
+import { radii, spacing } from "../../theme/tokens";
 
 type Props = NativeStackScreenProps<CatalogStackParamList, "ProjectDetails">;
 
@@ -45,43 +51,213 @@ type SpecRow = {
   value: string;
 };
 
+type DetailsStyles = ReturnType<typeof createDetailsStyles>;
+
+function createDetailsStyles(p: AppPalette) {
+  return StyleSheet.create({
+    centered: { flex: 1, justifyContent: "center", alignItems: "center", padding: spacing.lg },
+    mt: { marginTop: spacing.md },
+    err: { color: p.error, fontWeight: "700", textAlign: "center" },
+    heroWrap: { position: "relative", backgroundColor: "#000" },
+    heroPh: {
+      backgroundColor: p.surfaceMuted,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    thumbStrip: { maxHeight: 72, backgroundColor: "rgba(0,0,0,0.35)" },
+    thumbStripIn: { padding: spacing.sm, gap: spacing.sm },
+    thumb: {
+      width: 72,
+      height: 52,
+      borderRadius: radii.sm,
+      marginRight: spacing.sm,
+      borderWidth: 2,
+      borderColor: "transparent",
+    },
+    thumbOn: { borderColor: p.secondary },
+    heroBadges: { position: "absolute", top: spacing.md, left: spacing.md, gap: 6 },
+    hBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, alignSelf: "flex-start" },
+    hPop: { backgroundColor: p.popular },
+    hPlan: { backgroundColor: p.secondary },
+    hBadgeTxt: { color: "#fff", fontSize: 10, fontWeight: "900", letterSpacing: 0.5 },
+    body: { padding: spacing.lg, gap: spacing.md },
+    h1: { fontWeight: "900", color: p.primary, letterSpacing: 0.2 },
+    locRow: { flexDirection: "row", gap: 6, alignItems: "flex-start" },
+    loc: { flex: 1, fontWeight: "600", color: p.text },
+    priceHero: { fontWeight: "700", color: p.text },
+    priceHeroNum: { color: p.primary },
+    chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+    chip: { backgroundColor: p.surfaceMuted },
+    metrics: { flexDirection: "row", gap: spacing.sm },
+    metric: {
+      flex: 1,
+      backgroundColor: p.surfaceMuted,
+      borderRadius: radii.md,
+      padding: spacing.md,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: p.outline,
+    },
+    metricLbl: {
+      fontSize: 10,
+      fontWeight: "800",
+      color: p.textMuted,
+      textTransform: "uppercase",
+      marginBottom: 4,
+    },
+    metricVal: { fontWeight: "800", color: p.primary, fontSize: 13 },
+    accHead: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingVertical: spacing.sm,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: p.outline,
+      borderRadius: radii.md,
+      paddingHorizontal: spacing.md,
+      backgroundColor: p.surface,
+    },
+    accTitle: { fontWeight: "800", color: p.primary, fontSize: 12, letterSpacing: 0.5 },
+    accBody: {
+      marginTop: spacing.sm,
+      padding: spacing.md,
+      backgroundColor: p.surfaceMuted,
+      borderRadius: radii.md,
+      gap: spacing.sm,
+    },
+    desc: { lineHeight: 22, color: p.text },
+    advRow: { flexDirection: "row", gap: 8, alignItems: "flex-start" },
+    advTxt: { flex: 1, fontWeight: "600", fontSize: 12, color: p.text },
+    cta: { marginTop: spacing.sm, borderRadius: radii.lg },
+    ctaIn: { paddingVertical: 8 },
+    cta2: { marginHorizontal: spacing.lg, marginBottom: spacing.lg, borderRadius: radii.lg },
+    section: { marginTop: spacing.md },
+    specRow: {
+      flexDirection: "row",
+      gap: spacing.md,
+      paddingVertical: spacing.sm,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: p.outline,
+    },
+    specTxt: { flex: 1 },
+    specLbl: {
+      fontSize: 11,
+      fontWeight: "800",
+      color: p.textMuted,
+      textTransform: "uppercase",
+      marginBottom: 2,
+    },
+    specVal: { color: p.text },
+    logo: { width: 120, height: 48, marginBottom: spacing.sm },
+    devSub: { fontWeight: "800", marginBottom: 4, color: p.text },
+    devDesc: { opacity: 0.85, color: p.text },
+    divider: { marginVertical: spacing.md, backgroundColor: p.outline },
+    linkRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm, paddingVertical: 8 },
+    linkTxt: { color: p.primary, fontWeight: "600", flex: 1 },
+    addr: { marginTop: spacing.sm, opacity: 0.85, color: p.text },
+    addrLbl: { fontWeight: "800", color: p.text },
+    relatedBlock: { marginTop: spacing.lg },
+    relatedRow: { flexDirection: "row", gap: spacing.md, paddingVertical: spacing.sm },
+    relatedCard: {
+      width: 160,
+      backgroundColor: p.surface,
+      borderRadius: radii.md,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: p.outline,
+      overflow: "hidden",
+      paddingBottom: spacing.sm,
+    },
+    relatedImg: { width: "100%", height: 88, backgroundColor: p.surfaceMuted },
+    relatedPh: {},
+    relatedName: {
+      fontWeight: "800",
+      paddingHorizontal: spacing.sm,
+      marginTop: spacing.sm,
+      minHeight: 36,
+      color: p.text,
+    },
+    relatedPrice: { paddingHorizontal: spacing.sm, color: p.primary, fontWeight: "700" },
+    floorRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.sm,
+      marginBottom: spacing.sm,
+      backgroundColor: p.surfaceMuted,
+      borderRadius: radii.md,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: p.outline,
+    },
+    floorNum: { fontWeight: "900", fontSize: 16, color: p.text },
+    floorPrice: { opacity: 0.8, color: p.text },
+    muted: { opacity: 0.7, fontStyle: "italic", color: p.text },
+    ratingRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.xs,
+      flexWrap: "wrap",
+    },
+    videoHint: { color: p.textMuted, marginBottom: spacing.sm },
+    videoBox: {
+      width: "100%",
+      aspectRatio: 16 / 9,
+      borderRadius: radii.md,
+      backgroundColor: "#000",
+      overflow: "hidden",
+    },
+    reviewHint: { color: p.textMuted, marginBottom: spacing.sm },
+    reviewCard: {
+      padding: spacing.md,
+      borderRadius: radii.md,
+      backgroundColor: p.surfaceMuted,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: p.outline,
+      marginBottom: spacing.sm,
+    },
+    reviewStars: { flexDirection: "row", gap: 2, marginBottom: spacing.sm },
+    reviewQuote: { color: p.text, fontStyle: "italic", lineHeight: 20 },
+  });
+}
+
 function RelatedStrip({
   title,
   projects,
   onSelect,
   t,
   loc,
+  styles: themed,
 }: {
   title: string;
   projects: ApiProjectPreview[];
   onSelect: (id: number) => void;
   t: (k: string, v?: Record<string, string | number>) => string;
   loc: string;
+  styles: DetailsStyles;
 }) {
   if (!projects?.length) return null;
   return (
-    <View style={styles.relatedBlock}>
+    <View style={themed.relatedBlock}>
       <SectionTitle title={title} />
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View style={styles.relatedRow}>
-          {projects.map((p) => (
+        <View style={themed.relatedRow}>
+          {projects.map((proj) => (
             <Pressable
-              key={p.id}
-              style={styles.relatedCard}
-              onPress={() => onSelect(p.id)}
+              key={proj.id}
+              style={themed.relatedCard}
+              onPress={() => onSelect(proj.id)}
             >
-              {p.imageUrl ? (
-                <Image source={{ uri: p.imageUrl }} style={styles.relatedImg} />
+              {proj.imageUrl ? (
+                <Image source={{ uri: proj.imageUrl }} style={themed.relatedImg} />
               ) : (
-                <View style={[styles.relatedImg, styles.relatedPh]} />
+                <View style={[themed.relatedImg, themed.relatedPh]} />
               )}
-              <Text variant="labelLarge" numberOfLines={2} style={styles.relatedName}>
-                {p.name}
+              <Text variant="labelLarge" numberOfLines={2} style={themed.relatedName}>
+                {proj.name}
               </Text>
-              {p.priceFrom != null && p.priceFrom > 0 ? (
-                <Text variant="labelSmall" style={styles.relatedPrice}>
+              {proj.priceFrom != null && proj.priceFrom > 0 ? (
+                <Text variant="labelSmall" style={themed.relatedPrice}>
                   {t("projectDetails.priceFromShort")}{" "}
-                  {formatUzs(p.priceFrom, loc)} {t("common.sum")}/{t("common.m2")}
+                  {formatUzs(proj.priceFrom, loc)} {t("common.sum")}/{t("common.m2")}
                 </Text>
               ) : null}
             </Pressable>
@@ -95,6 +271,8 @@ function RelatedStrip({
 export function ProjectDetailsScreen({ route, navigation }: Props) {
   const { id } = route.params;
   const { t, locale } = useI18n();
+  const { palette: p } = useAppTheme();
+  const styles = useMemo(() => createDetailsStyles(p), [p]);
   const loc = localeFor(locale);
   const insets = useSafeAreaInsets();
   const slideW = Dimensions.get("window").width;
@@ -271,6 +449,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
 
   const place = [data.district, data.location].filter(Boolean).join(", ");
   const dev = data.developer;
+  const videoEmbed = data.videoUrl ? getYoutubeEmbedUrl(data.videoUrl) : null;
 
   return (
     <>
@@ -339,7 +518,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
             </>
           ) : (
             <View style={[styles.heroPh, { width: slideW, height: slideW * 0.4 }]}>
-              <MaterialCommunityIcons name="image-off-outline" size={48} color={palette.textMuted} />
+              <MaterialCommunityIcons name="image-off-outline" size={48} color={p.textMuted} />
             </View>
           )}
           <View style={styles.heroBadges}>
@@ -361,7 +540,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
             {data.name}
           </Text>
           <View style={styles.locRow}>
-            <MaterialCommunityIcons name="map-marker-outline" size={18} color={palette.secondary} />
+            <MaterialCommunityIcons name="map-marker-outline" size={18} color={p.secondary} />
             <Text variant="bodyLarge" style={styles.loc}>
               {place}
             </Text>
@@ -378,14 +557,37 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
 
           <View style={styles.chips}>
             {data.hasInstallment ? (
-              <Chip compact style={styles.chip}>{t("projectCard.installment")}</Chip>
+              <Chip compact style={styles.chip} textStyle={{ color: p.text }}>
+                {t("projectCard.installment")}
+              </Chip>
             ) : null}
             {data.badgeVerified ? (
-              <Chip compact icon="shield-check" style={styles.chip}>
+              <Chip compact icon="shield-check" style={styles.chip} textStyle={{ color: p.text }}>
                 {t("projectCard.verifiedDeveloper")}
               </Chip>
             ) : null}
           </View>
+
+          {(data.avgRating != null && data.avgRating > 0) || (data.reviewsCount ?? 0) > 0 ? (
+            <View style={styles.ratingRow}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <MaterialCommunityIcons
+                  key={star}
+                  name="star"
+                  size={18}
+                  color={
+                    star <= Math.round(Number(data.avgRating) || 0)
+                      ? p.secondary
+                      : p.outline
+                  }
+                />
+              ))}
+              <Text style={{ color: p.text, fontWeight: "700", flex: 1, flexWrap: "wrap" }}>
+                {data.avgRating != null ? String(data.avgRating) : "—"} ·{" "}
+                {t("projectDetails.ratingCount", { n: data.reviewsCount ?? 0 })}
+              </Text>
+            </View>
+          ) : null}
 
           <View style={styles.metrics}>
             <View style={styles.metric}>
@@ -417,7 +619,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
                 <MaterialCommunityIcons
                   name={descOpen ? "chevron-up" : "chevron-down"}
                   size={22}
-                  color={palette.primary}
+                  color={p.primary}
                 />
               </Pressable>
               {descOpen ? (
@@ -429,7 +631,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
                   ) : null}
                   {(data.advantages ?? []).map((adv, i) => (
                     <View key={i} style={styles.advRow}>
-                      <MaterialCommunityIcons name="check-circle-outline" size={18} color={palette.success} />
+                      <MaterialCommunityIcons name="check-circle-outline" size={18} color={p.success} />
                       <Text style={styles.advTxt}>{adv}</Text>
                     </View>
                   ))}
@@ -442,6 +644,8 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
             mode="contained"
             style={styles.cta}
             contentStyle={styles.ctaIn}
+            buttonColor={p.secondary}
+            textColor="#FFFFFF"
             onPress={() => goLead()}
           >
             {t("projectDetails.leaveRequest")}
@@ -451,10 +655,12 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
             <SectionTitle title={t("projectDetails.specsTitle")} />
             {specRows.map((row, i) => (
               <View key={`${row.label}-${i}`} style={styles.specRow}>
-                <MaterialCommunityIcons name={row.icon} size={22} color={palette.primary} />
+                <MaterialCommunityIcons name={row.icon} size={22} color={p.primary} />
                 <View style={styles.specTxt}>
                   <Text style={styles.specLbl}>{row.label}</Text>
-                  <Text variant="bodyMedium">{row.value}</Text>
+                  <Text variant="bodyMedium" style={styles.specVal}>
+                    {row.value}
+                  </Text>
                 </View>
               </View>
             ))}
@@ -477,7 +683,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
               <Divider style={styles.divider} />
               {dev.phone ? (
                 <Pressable style={styles.linkRow} onPress={() => void openLink(`tel:${dev.phone}`)}>
-                  <MaterialCommunityIcons name="phone-outline" size={20} color={palette.primary} />
+                  <MaterialCommunityIcons name="phone-outline" size={20} color={p.primary} />
                   <Text style={styles.linkTxt}>{dev.phone}</Text>
                 </Pressable>
               ) : null}
@@ -486,7 +692,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
                   style={styles.linkRow}
                   onPress={() => void openLink(`mailto:${dev.email}`)}
                 >
-                  <MaterialCommunityIcons name="email-outline" size={20} color={palette.primary} />
+                  <MaterialCommunityIcons name="email-outline" size={20} color={p.primary} />
                   <Text style={styles.linkTxt}>{dev.email}</Text>
                 </Pressable>
               ) : null}
@@ -498,7 +704,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
                     void openLink(w ?? "");
                   }}
                 >
-                  <MaterialCommunityIcons name="web" size={20} color={palette.primary} />
+                  <MaterialCommunityIcons name="web" size={20} color={p.primary} />
                   <Text style={styles.linkTxt}>{dev.website}</Text>
                 </Pressable>
               ) : null}
@@ -523,6 +729,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
             onSelect={(pid) => navigation.push("ProjectDetails", { id: pid })}
             t={t}
             loc={loc}
+            styles={styles}
           />
           <RelatedStrip
             title={t("projectDetails.nearbyTitle")}
@@ -530,7 +737,63 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
             onSelect={(pid) => navigation.push("ProjectDetails", { id: pid })}
             t={t}
             loc={loc}
+            styles={styles}
           />
+
+          {data.videoUrl ? (
+            <View style={styles.section}>
+              <SectionTitle title={t("projectDetails.videoTitle")} />
+              <Text variant="bodySmall" style={styles.videoHint}>
+                {t("projectDetails.videoSubtitle")}
+              </Text>
+              {videoEmbed ? (
+                <WebView
+                  source={{ uri: videoEmbed }}
+                  style={styles.videoBox}
+                  allowsFullscreenVideo
+                  allowsInlineMediaPlayback
+                  mediaPlaybackRequiresUserAction={false}
+                  javaScriptEnabled
+                  domStorageEnabled
+                  mixedContentMode="compatibility"
+                />
+              ) : (
+                <Video
+                  source={{ uri: normalizeVideoUrl(data.videoUrl) }}
+                  style={styles.videoBox}
+                  useNativeControls
+                  resizeMode={ResizeMode.CONTAIN}
+                  isLooping={false}
+                />
+              )}
+            </View>
+          ) : null}
+
+          {(data.reviews?.length ?? 0) > 0 ? (
+            <View style={styles.section}>
+              <SectionTitle title={t("projectDetails.reviewsTitle")} />
+              <Text variant="bodySmall" style={styles.reviewHint}>
+                {t("projectDetails.reviewsHint")}
+              </Text>
+              {(data.reviews ?? []).map((rev) => (
+                <View key={rev.id} style={styles.reviewCard}>
+                  <View style={styles.reviewStars}>
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <MaterialCommunityIcons
+                        key={s}
+                        name="star"
+                        size={16}
+                        color={s <= (rev.rating ?? 0) ? p.secondary : p.outline}
+                      />
+                    ))}
+                  </View>
+                  <Text style={styles.reviewQuote}>
+                    &quot;{rev.comment?.trim() ? rev.comment : t("projectDetails.noComment")}&quot;
+                  </Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
 
           <SectionCard style={styles.section}>
             <SectionTitle title={t("projectDetails.floorStackTitle")} />
@@ -549,7 +812,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
                       {formatUzs(f.pricePerM2, loc)} {t("common.sum")}/{t("common.m2")}
                     </Text>
                   </View>
-                  <MaterialCommunityIcons name="chevron-right" size={22} color={palette.textMuted} />
+                  <MaterialCommunityIcons name="chevron-right" size={22} color={p.textMuted} />
                 </Pressable>
               ))
             ) : (
@@ -558,8 +821,11 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
           </SectionCard>
 
           <Button
-            mode="contained-tonal"
+            mode="contained"
             style={styles.cta2}
+            contentStyle={styles.ctaIn}
+            buttonColor={p.secondary}
+            textColor="#FFFFFF"
             onPress={() => goLead()}
           >
             {t("projectDetails.leaveRequest")}
@@ -569,135 +835,3 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  centered: { flex: 1, justifyContent: "center", alignItems: "center", padding: spacing.lg },
-  mt: { marginTop: spacing.md },
-  err: { color: palette.error, fontWeight: "700", textAlign: "center" },
-  heroWrap: { position: "relative", backgroundColor: "#000" },
-  heroPh: {
-    backgroundColor: palette.surfaceMuted,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  thumbStrip: { maxHeight: 72, backgroundColor: "rgba(0,0,0,0.35)" },
-  thumbStripIn: { padding: spacing.sm, gap: spacing.sm },
-  thumb: {
-    width: 72,
-    height: 52,
-    borderRadius: radii.sm,
-    marginRight: spacing.sm,
-    borderWidth: 2,
-    borderColor: "transparent",
-  },
-  thumbOn: { borderColor: palette.secondary },
-  heroBadges: { position: "absolute", top: spacing.md, left: spacing.md, gap: 6 },
-  hBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, alignSelf: "flex-start" },
-  hPop: { backgroundColor: palette.popular },
-  hPlan: { backgroundColor: palette.secondary },
-  hBadgeTxt: { color: "#fff", fontSize: 10, fontWeight: "900", letterSpacing: 0.5 },
-  body: { padding: spacing.lg, gap: spacing.md },
-  h1: { fontWeight: "900", color: palette.primary, letterSpacing: 0.2 },
-  locRow: { flexDirection: "row", gap: 6, alignItems: "flex-start" },
-  loc: { flex: 1, fontWeight: "600" },
-  priceHero: { fontWeight: "700" },
-  priceHeroNum: { color: palette.primary },
-  chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  chip: { backgroundColor: palette.surfaceMuted },
-  metrics: { flexDirection: "row", gap: spacing.sm },
-  metric: {
-    flex: 1,
-    backgroundColor: palette.surfaceMuted,
-    borderRadius: radii.md,
-    padding: spacing.md,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: palette.outline,
-  },
-  metricLbl: {
-    fontSize: 10,
-    fontWeight: "800",
-    color: palette.textMuted,
-    textTransform: "uppercase",
-    marginBottom: 4,
-  },
-  metricVal: { fontWeight: "800", color: palette.primary, fontSize: 13 },
-  accHead: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: spacing.sm,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: palette.outline,
-    borderRadius: radii.md,
-    paddingHorizontal: spacing.md,
-    backgroundColor: palette.surface,
-  },
-  accTitle: { fontWeight: "800", color: palette.primary, fontSize: 12, letterSpacing: 0.5 },
-  accBody: {
-    marginTop: spacing.sm,
-    padding: spacing.md,
-    backgroundColor: palette.surfaceMuted,
-    borderRadius: radii.md,
-    gap: spacing.sm,
-  },
-  desc: { lineHeight: 22 },
-  advRow: { flexDirection: "row", gap: 8, alignItems: "flex-start" },
-  advTxt: { flex: 1, fontWeight: "600", fontSize: 12 },
-  cta: { marginTop: spacing.sm, borderRadius: radii.lg },
-  ctaIn: { paddingVertical: 8 },
-  cta2: { marginHorizontal: spacing.lg, marginBottom: spacing.lg, borderRadius: radii.lg },
-  section: { marginTop: spacing.md },
-  specRow: {
-    flexDirection: "row",
-    gap: spacing.md,
-    paddingVertical: spacing.sm,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: palette.outline,
-  },
-  specTxt: { flex: 1 },
-  specLbl: {
-    fontSize: 11,
-    fontWeight: "800",
-    color: palette.textMuted,
-    textTransform: "uppercase",
-    marginBottom: 2,
-  },
-  logo: { width: 120, height: 48, marginBottom: spacing.sm },
-  devSub: { fontWeight: "800", marginBottom: 4 },
-  devDesc: { opacity: 0.85 },
-  divider: { marginVertical: spacing.md },
-  linkRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm, paddingVertical: 8 },
-  linkTxt: { color: palette.primary, fontWeight: "600", flex: 1 },
-  addr: { marginTop: spacing.sm, opacity: 0.85 },
-  addrLbl: { fontWeight: "800" },
-  relatedBlock: { marginTop: spacing.lg },
-  relatedRow: { flexDirection: "row", gap: spacing.md, paddingVertical: spacing.sm },
-  relatedCard: {
-    width: 160,
-    backgroundColor: palette.surface,
-    borderRadius: radii.md,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: palette.outline,
-    overflow: "hidden",
-    paddingBottom: spacing.sm,
-  },
-  relatedImg: { width: "100%", height: 88, backgroundColor: palette.surfaceMuted },
-  relatedPh: {},
-  relatedName: { fontWeight: "800", paddingHorizontal: spacing.sm, marginTop: spacing.sm, minHeight: 36 },
-  relatedPrice: { paddingHorizontal: spacing.sm, color: palette.primary, fontWeight: "700" },
-  floorRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.sm,
-    marginBottom: spacing.sm,
-    backgroundColor: palette.surfaceMuted,
-    borderRadius: radii.md,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: palette.outline,
-  },
-  floorNum: { fontWeight: "900", fontSize: 16 },
-  floorPrice: { opacity: 0.8 },
-  muted: { opacity: 0.7, fontStyle: "italic" },
-});
