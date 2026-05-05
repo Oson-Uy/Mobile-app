@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
-  ActivityIndicator,
   Dimensions,
   FlatList,
   Image,
@@ -40,6 +39,7 @@ import type { ApiFloor, ApiProjectFull, ApiProjectPreview } from "../../types/pr
 import { minPricePerM2FromApiProject } from "../../lib/project-price";
 import { formatUzs } from "../../lib/currency";
 import { FloorLayoutsModal } from "./FloorLayoutsModal";
+import { FullScreenLoader } from "../../ui/FullScreenLoader";
 import { SectionCard } from "../../ui/SectionCard";
 import { SectionTitle } from "../../ui/SectionTitle";
 import { useAppTheme } from "../../theme/AppThemeProvider";
@@ -444,8 +444,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" />
-        <Text style={styles.mt}>{t("common.loading")}</Text>
+        <FullScreenLoader message={t("common.loading")} />
       </View>
     );
   }

@@ -20,6 +20,7 @@ import { formatMoneyInput, parseMoneyInput } from "../../lib/currency";
 import { uploadImageAsset } from "../../dev/uploadImage";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { radii, spacing } from "../../theme/tokens";
+import { FullScreenLoader } from "../../ui/FullScreenLoader";
 
 type ApiProject = { id: number; name: string; developerId: number };
 type ApiFloor = {
@@ -203,7 +204,7 @@ export function DeveloperFloorEditorScreen({ navigation }: any) {
     return (
       <Screen>
         <View style={styles.centered}>
-          <Text style={{ color: themePalette.text }}>{t("common.loading")}</Text>
+          <FullScreenLoader message={t("common.loading")} />
         </View>
       </Screen>
     );

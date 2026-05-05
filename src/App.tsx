@@ -1,16 +1,20 @@
-import React from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import React, { useEffect } from "react";
+import { StyleSheet, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { PaperProvider } from "react-native-paper";
 import { StatusBar } from "expo-status-bar";
+import * as SplashScreen from "expo-splash-screen";
 
 import { RootNavigator } from "./navigation/RootNavigator";
 import { I18nProvider, useI18n } from "./i18n/I18nProvider";
 import { AppPreferencesProvider, useAppPreferences } from "./preferences/AppPreferencesProvider";
 import { AppThemeProvider, useAppTheme } from "./theme/AppThemeProvider";
 import { OnboardingScreen } from "./screens/onboarding/OnboardingScreen";
+import { FullScreenLoader } from "./ui/FullScreenLoader";
+
+void SplashScreen.preventAutoHideAsync().catch(() => {});
 
 function AppShell() {
   const theme = useAppTheme();
@@ -19,11 +23,17 @@ function AppShell() {
 
   const booting = !theme.hydrated || !i18n.hydrated || !prefs.hydrated;
 
+  useEffect(() => {
+    if (!booting) {
+      void SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [booting]);
+
   if (booting) {
     return (
       <PaperProvider theme={theme.paperTheme}>
         <View style={[styles.boot, { backgroundColor: theme.palette.background }]}>
-          <ActivityIndicator color={theme.palette.primary} size="large" />
+          <FullScreenLoader />
         </View>
       </PaperProvider>
     );
@@ -64,9 +74,5 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  boot: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  boot: { flex: 1 },
 });

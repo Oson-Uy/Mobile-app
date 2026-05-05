@@ -9,6 +9,7 @@ import { useAppPreferences } from "../../preferences/AppPreferencesProvider";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { radii, spacing } from "../../theme/tokens";
 import type { UserRole } from "../../preferences/storageKeys";
+import { BrandLogo } from "../../ui/BrandLogo";
 
 export function OnboardingScreen() {
   const { t } = useI18n();
@@ -27,7 +28,13 @@ export function OnboardingScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.brandRow}>
-          <Text style={[styles.logo, { color: p.primary }]}>Oson Uy</Text>
+          <View style={styles.brandMark}>
+            <BrandLogo size={48} />
+            <Text style={styles.wordmark}>
+              <Text style={{ color: p.primary }}>Oson</Text>
+              <Text style={{ color: p.secondary }}>Uy</Text>
+            </Text>
+          </View>
           <View style={[styles.accentUnderLogo, { backgroundColor: p.secondary }]} />
         </View>
         <Text variant="headlineSmall" style={[styles.title, { color: p.text }]}>
@@ -106,10 +113,15 @@ const styles = StyleSheet.create({
   brandRow: {
     alignSelf: "flex-start",
   },
-  logo: {
+  brandMark: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  wordmark: {
     fontWeight: "900",
-    fontSize: 28,
-    letterSpacing: -0.5,
+    fontSize: 26,
+    letterSpacing: -0.6,
   },
   accentUnderLogo: {
     marginTop: spacing.sm,

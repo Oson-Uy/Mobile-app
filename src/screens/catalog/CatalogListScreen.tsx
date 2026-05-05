@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
   FlatList,
   Platform,
   Pressable,
@@ -23,6 +22,7 @@ import {
 } from "../../catalog/filterProjects";
 import type { ApiProjectListItem } from "../../types/project";
 import { CatalogFilterModal } from "./CatalogFilterModal";
+import { FullScreenLoader } from "../../ui/FullScreenLoader";
 import { CatalogHero } from "./CatalogHero";
 import { CatalogSettingsModal } from "./CatalogSettingsModal";
 import { ProjectCatalogCard } from "./ProjectCatalogCard";
@@ -140,8 +140,7 @@ export function CatalogListScreen({ navigation }: Props) {
   if (loading) {
     return (
       <Screen style={styles.centered}>
-        <ActivityIndicator size="large" />
-        <Text style={styles.mt}>{t("common.loading")}</Text>
+        <FullScreenLoader message={t("common.loading")} />
       </Screen>
     );
   }

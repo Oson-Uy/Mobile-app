@@ -22,6 +22,7 @@ import { Screen } from "../../ui/Screen";
 import { SectionCard } from "../../ui/SectionCard";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { spacing } from "../../theme/tokens";
+import { FullScreenLoader } from "../../ui/FullScreenLoader";
 
 type ApiProject = { id: number; name: string; developerId: number };
 type ApiDeveloper = { id: number };
@@ -232,7 +233,7 @@ export function DeveloperFloorsScreen() {
         ListEmptyComponent={
           loading ? (
             <View style={styles.empty}>
-              <Text style={{ color: p.text }}>{t("common.loading")}</Text>
+              <FullScreenLoader compact message={t("common.loading")} />
             </View>
           ) : projects.length === 0 ? (
             <View style={styles.empty}>

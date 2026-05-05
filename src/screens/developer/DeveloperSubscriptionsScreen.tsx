@@ -19,6 +19,7 @@ import { SectionTitle } from "../../ui/SectionTitle";
 import { formatUzs } from "../../lib/currency";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { radii, spacing } from "../../theme/tokens";
+import { FullScreenLoader } from "../../ui/FullScreenLoader";
 
 type ApiDeveloper = { id: number };
 type ApiProject = {
@@ -132,7 +133,7 @@ export function DeveloperSubscriptionsScreen() {
   if (loading) {
     return (
       <Screen style={styles.centered}>
-        <Text style={{ color: p.text }}>{t("common.loading")}</Text>
+        <FullScreenLoader message={t("common.loading")} />
       </Screen>
     );
   }

@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
 import { View } from "react-native";
-import { ActivityIndicator } from "react-native-paper";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import type { DeveloperStackParamList } from "../../navigation/RootNavigator";
 import { getToken } from "../../auth/token";
+import { FullScreenLoader } from "../../ui/FullScreenLoader";
 
 type Props = NativeStackScreenProps<DeveloperStackParamList, "DeveloperGate">;
 
@@ -18,8 +18,8 @@ export function DeveloperGateScreen({ navigation }: Props) {
   }, [navigation]);
 
   return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <ActivityIndicator />
+    <View style={{ flex: 1 }}>
+      <FullScreenLoader />
     </View>
   );
 }
