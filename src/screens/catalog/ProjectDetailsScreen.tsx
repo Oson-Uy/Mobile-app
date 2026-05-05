@@ -12,6 +12,8 @@ import {
   ScrollView,
   StyleSheet,
   View,
+  type StyleProp,
+  type ViewStyle,
 } from "react-native";
 import {
   Button,
@@ -25,7 +27,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Video, ResizeMode } from "expo-av";
 import WebView from "react-native-webview";
 
-import { getYoutubeEmbedUrl, normalizeVideoUrl } from "../../lib/video-url";
+import {
+  getVideoWebEmbed,
+  INSTAGRAM_EMBED_INJECTED_JS,
+  normalizeVideoUrl,
+} from "../../lib/video-url";
 
 import type { CatalogStackParamList } from "../../navigation/RootNavigator";
 import { apiFetch } from "../../api/client";
@@ -198,10 +204,18 @@ function createDetailsStyles(p: AppPalette) {
       flexWrap: "wrap",
     },
     videoHint: { color: p.textMuted, marginBottom: spacing.sm },
+    /** Горизонтальное видео (YouTube и т.п.) */
     videoBox: {
       width: "100%",
       aspectRatio: 16 / 9,
       borderRadius: radii.md,
+      backgroundColor: "#000",
+      overflow: "hidden",
+    },
+    /** Базовые стили вертикального блока; width/height задаются в экране под 9:16 */
+    videoBoxReelOuter: {
+      alignSelf: "center",
+      borderRadius: radii.lg,
       backgroundColor: "#000",
       overflow: "hidden",
     },
@@ -449,7 +463,23 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
 
   const place = [data.district, data.location].filter(Boolean).join(", ");
   const dev = data.developer;
-  const videoEmbed = data.videoUrl ? getYoutubeEmbedUrl(data.videoUrl) : null;
+  const videoWeb = data.videoUrl ? getVideoWebEmbed(data.videoUrl) : null;
+  const videoContentW = slideW - spacing.lg * 2;
+  const reelFrameH = Math.min(
+    (videoContentW * 16) / 9,
+    Dimensions.get("window").height * 0.72,
+  );
+  /** Zoom + обрезка: боковые поля; смещение вверх — дополнительно убирает нижнюю панель (лайки, «ещё в Instagram»). */
+  const IG_EMBED_ZOOM = 1.17;
+  /** Доля высоты кадра: насколько сдвинуть embed вверх относительно центрированного crop (0 = симметрично). */
+  const IG_EMBED_CROP_BOTTOM_BIAS = 0.07;
+  const videoPlayerStyle: StyleProp<ViewStyle> = (() => {
+    if (!data.videoUrl) return styles.videoBox;
+    if (videoWeb?.vertical) {
+      return [styles.videoBoxReelOuter, { width: videoContentW, height: reelFrameH }];
+    }
+    return styles.videoBox;
+  })();
 
   return (
     <>
@@ -744,23 +774,66 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
             <View style={styles.section}>
               <SectionTitle title={t("projectDetails.videoTitle")} />
               <Text variant="bodySmall" style={styles.videoHint}>
-                {t("projectDetails.videoSubtitle")}
+                {videoWeb?.vertical
+                  ? t("projectDetails.videoSubtitleReels")
+                  : t("projectDetails.videoSubtitle")}
               </Text>
-              {videoEmbed ? (
-                <WebView
-                  source={{ uri: videoEmbed }}
-                  style={styles.videoBox}
-                  allowsFullscreenVideo
-                  allowsInlineMediaPlayback
-                  mediaPlaybackRequiresUserAction={false}
-                  javaScriptEnabled
-                  domStorageEnabled
-                  mixedContentMode="compatibility"
-                />
+              {videoWeb ? (
+                videoWeb.provider === "instagram" ? (
+                  <View
+                    style={[
+                      styles.videoBoxReelOuter,
+                      {
+                        width: videoContentW,
+                        height: reelFrameH,
+                        overflow: "hidden",
+                        backgroundColor: "#000",
+                      },
+                    ]}
+                  >
+                    <WebView
+                      source={{ uri: videoWeb.uri }}
+                      userAgent={videoWeb.userAgent}
+                      style={{
+                        width: videoContentW * IG_EMBED_ZOOM,
+                        height: reelFrameH * IG_EMBED_ZOOM,
+                        marginLeft: -(videoContentW * (IG_EMBED_ZOOM - 1)) / 2,
+                        marginTop:
+                          -(reelFrameH * (IG_EMBED_ZOOM - 1)) / 2 +
+                          reelFrameH * IG_EMBED_CROP_BOTTOM_BIAS,
+                        backgroundColor: "transparent",
+                      }}
+                      scrollEnabled={false}
+                      bounces={false}
+                      allowsFullscreenVideo
+                      allowsInlineMediaPlayback
+                      mediaPlaybackRequiresUserAction={false}
+                      javaScriptEnabled
+                      domStorageEnabled
+                      mixedContentMode="compatibility"
+                      sharedCookiesEnabled
+                      thirdPartyCookiesEnabled
+                      injectedJavaScript={INSTAGRAM_EMBED_INJECTED_JS}
+                    />
+                  </View>
+                ) : (
+                  <WebView
+                    source={{ uri: videoWeb.uri }}
+                    style={videoPlayerStyle}
+                    allowsFullscreenVideo
+                    allowsInlineMediaPlayback
+                    mediaPlaybackRequiresUserAction={false}
+                    javaScriptEnabled
+                    domStorageEnabled
+                    mixedContentMode="compatibility"
+                    sharedCookiesEnabled
+                    thirdPartyCookiesEnabled
+                  />
+                )
               ) : (
                 <Video
                   source={{ uri: normalizeVideoUrl(data.videoUrl) }}
-                  style={styles.videoBox}
+                  style={videoPlayerStyle}
                   useNativeControls
                   resizeMode={ResizeMode.CONTAIN}
                   isLooping={false}
