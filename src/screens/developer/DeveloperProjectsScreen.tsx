@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
-import { Card, Text } from "react-native-paper";
+import { Card, FAB, IconButton, Text } from "react-native-paper";
+import { useNavigation } from "@react-navigation/native";
 
 import { apiFetch } from "../../api/client";
 import { useI18n } from "../../i18n/I18nProvider";
@@ -18,6 +19,7 @@ type ApiProject = {
 
 export function DeveloperProjectsScreen() {
   const { t } = useI18n();
+  const navigation = useNavigation<any>();
   const [dev, setDev] = useState<ApiDeveloper | null>(null);
   const [items, setItems] = useState<ApiProject[]>([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -40,6 +42,11 @@ export function DeveloperProjectsScreen() {
       }
     })();
   }, [t]);
+
+  const countText = useMemo(() => {
+    const n = items.length;
+    return n ? t("developer.projectsCount", { n }) : t("developer.emptyProjects");
+  }, [items.length, t]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -66,7 +73,7 @@ export function DeveloperProjectsScreen() {
                 {dev.name}
               </Text>
               <Text variant="bodySmall" style={styles.hint}>
-                {t("developer.projects")}
+                {countText}
               </Text>
             </View>
           ) : null
@@ -78,6 +85,16 @@ export function DeveloperProjectsScreen() {
               titleStyle={styles.cardTitle}
               subtitle={[item.district, item.location].filter(Boolean).join(", ")}
               subtitleStyle={styles.sub}
+              right={() => (
+                <IconButton
+                  icon="pencil-outline"
+                  onPress={() =>
+                    navigation.navigate("DeveloperProjectEditor", {
+                      projectId: item.id,
+                    })
+                  }
+                />
+              )}
             />
           </Card>
         )}
@@ -88,6 +105,12 @@ export function DeveloperProjectsScreen() {
             </Text>
           </View>
         }
+      />
+      <FAB
+        icon="plus"
+        style={styles.fab}
+        onPress={() => navigation.navigate("DeveloperProjectEditor", {})}
+        label={t("developer.newProject")}
       />
     </Screen>
   );
@@ -109,4 +132,11 @@ const styles = StyleSheet.create({
   sub: { opacity: 0.75 },
   empty: { paddingVertical: spacing.xxl * 2, alignItems: "center" },
   emptyTitle: { textAlign: "center", opacity: 0.8 },
+  fab: {
+    position: "absolute",
+    right: spacing.lg,
+    bottom: spacing.lg,
+    backgroundColor: palette.secondary,
+    borderRadius: 18,
+  },
 });
