@@ -5,8 +5,11 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { useI18n } from "../i18n/I18nProvider";
 import { CatalogListScreen } from "../screens/catalog/CatalogListScreen";
+import { ProjectDetailsScreen } from "../screens/catalog/ProjectDetailsScreen";
+import { LeadFormScreen } from "../screens/catalog/LeadFormScreen";
 import { DeveloperLoginScreen } from "../screens/developer/DeveloperLoginScreen";
 import { DeveloperHomeScreen } from "../screens/developer/DeveloperHomeScreen";
+import { palette } from "../theme/tokens";
 
 export type CatalogStackParamList = {
   CatalogList: undefined;
@@ -27,26 +30,21 @@ const Tabs = createBottomTabNavigator();
 function CatalogStackNavigator() {
   const { t } = useI18n();
   return (
-    <CatalogStack.Navigator>
+    <CatalogStack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: palette.background },
+        headerTintColor: palette.primary,
+        headerShadowVisible: false,
+        headerTitleStyle: { fontWeight: "800" },
+      }}
+    >
       <CatalogStack.Screen
         name="CatalogList"
         component={CatalogListScreen}
         options={{ title: t("catalog.title") }}
       />
-      <CatalogStack.Screen
-        name="ProjectDetails"
-        getComponent={() =>
-          require("../screens/catalog/ProjectDetailsScreen").ProjectDetailsScreen
-        }
-        options={{ title: "" }}
-      />
-      <CatalogStack.Screen
-        name="LeadForm"
-        getComponent={() =>
-          require("../screens/catalog/LeadFormScreen").LeadFormScreen
-        }
-        options={{ title: "" }}
-      />
+      <CatalogStack.Screen name="ProjectDetails" component={ProjectDetailsScreen} />
+      <CatalogStack.Screen name="LeadForm" component={LeadFormScreen} />
     </CatalogStack.Navigator>
   );
 }
@@ -82,6 +80,16 @@ export function RootNavigator() {
     <Tabs.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
+        tabBarActiveTintColor: palette.primary,
+        tabBarInactiveTintColor: palette.textMuted,
+        tabBarStyle: {
+          borderTopColor: palette.outline,
+          paddingTop: 6,
+          paddingBottom: 6,
+          height: 58,
+          backgroundColor: palette.surface,
+        },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: "700" },
         tabBarIcon: ({ color, size }) => {
           if (route.name === "CatalogTab") {
             return (

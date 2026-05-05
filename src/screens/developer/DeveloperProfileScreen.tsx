@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Alert, View } from "react-native";
-import { Button, Card, Text, TextInput } from "react-native-paper";
+import { ScrollView, StyleSheet } from "react-native";
+import { Button, Snackbar, Text, TextInput } from "react-native-paper";
 
 import { apiFetch } from "../../api/client";
 import { clearToken } from "../../auth/token";
 import { registerForPushAndSyncToken } from "../../push/register";
+import { useI18n } from "../../i18n/I18nProvider";
+import { Screen } from "../../ui/Screen";
+import { SectionCard } from "../../ui/SectionCard";
+import { spacing } from "../../theme/tokens";
+import { palette } from "../../theme/tokens";
 
 type ApiDeveloper = {
   id: number;
@@ -18,8 +23,10 @@ type ApiDeveloper = {
 };
 
 export function DeveloperProfileScreen() {
+  const { t } = useI18n();
   const [dev, setDev] = useState<ApiDeveloper | null>(null);
   const [busy, setBusy] = useState(false);
+  const [snack, setSnack] = useState<string | null>(null);
 
   const load = async () => {
     const data = await apiFetch<ApiDeveloper>("/developers");
@@ -44,9 +51,9 @@ export function DeveloperProfileScreen() {
           description: dev.description || undefined,
         }),
       });
-      Alert.alert("Saved");
+      setSnack(t("developer.saved"));
     } catch (e) {
-      Alert.alert("Error", e instanceof Error ? e.message : "Save failed");
+      setSnack(e instanceof Error ? e.message : t("developer.loadError"));
     } finally {
       setBusy(false);
     }
@@ -54,59 +61,99 @@ export function DeveloperProfileScreen() {
 
   const signOut = async () => {
     await clearToken();
-    Alert.alert("Signed out");
+    setSnack(t("developer.signedOut"));
   };
 
   return (
-    <View style={{ flex: 1, padding: 16, gap: 12 }}>
-      <Card>
-        <Card.Title title="Profile" subtitle={dev?.name ?? ""} />
-        <Card.Content style={{ gap: 10 }}>
-          <Text variant="bodySmall">{dev?.email ?? ""}</Text>
+    <Screen>
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+      >
+        <SectionCard>
+          <Text variant="titleMedium" style={styles.title}>
+            {t("developer.profile")}
+          </Text>
+          <Text variant="bodySmall" style={styles.email}>
+            {dev?.email ?? ""}
+          </Text>
+          <Text variant="titleSmall" style={styles.name}>
+            {dev?.name ?? ""}
+          </Text>
           <TextInput
-            label="Phone"
+            mode="outlined"
+            label={t("developer.phone")}
             value={dev?.phone ?? ""}
             onChangeText={(v) => setDev((d) => (d ? { ...d, phone: v } : d))}
+            style={styles.field}
           />
           <TextInput
-            label="Website"
+            mode="outlined"
+            label={t("developer.website")}
             value={dev?.website ?? ""}
             onChangeText={(v) => setDev((d) => (d ? { ...d, website: v } : d))}
+            style={styles.field}
           />
           <TextInput
-            label="Legal address"
+            mode="outlined"
+            label={t("developer.legalAddress")}
             value={dev?.legalAddress ?? ""}
             onChangeText={(v) =>
               setDev((d) => (d ? { ...d, legalAddress: v } : d))
             }
+            style={styles.field}
           />
           <TextInput
-            label="Office address"
+            mode="outlined"
+            label={t("developer.officeAddress")}
             value={dev?.officeAddress ?? ""}
             onChangeText={(v) =>
               setDev((d) => (d ? { ...d, officeAddress: v } : d))
             }
+            style={styles.field}
           />
           <TextInput
-            label="Description"
+            mode="outlined"
+            label={t("developer.description")}
             value={dev?.description ?? ""}
             multiline
             onChangeText={(v) =>
               setDev((d) => (d ? { ...d, description: v } : d))
             }
+            style={styles.field}
           />
-          <Button mode="contained" loading={busy} onPress={() => void save()}>
-            Save
+          <Button
+            mode="contained"
+            loading={busy}
+            onPress={() => void save()}
+            style={styles.btn}
+          >
+            {t("developer.save")}
           </Button>
-          <Button mode="contained-tonal" onPress={() => void registerForPushAndSyncToken()}>
-            Sync push token
+          <Button
+            mode="contained-tonal"
+            onPress={() => void registerForPushAndSyncToken()}
+            style={styles.btn}
+          >
+            {t("developer.syncPush")}
           </Button>
-          <Button mode="outlined" onPress={() => void signOut()}>
-            Sign out
+          <Button mode="outlined" onPress={() => void signOut()} style={styles.btn}>
+            {t("developer.signOut")}
           </Button>
-        </Card.Content>
-      </Card>
-    </View>
+        </SectionCard>
+      </ScrollView>
+      <Snackbar visible={snack != null} onDismiss={() => setSnack(null)} duration={2500}>
+        {snack ?? ""}
+      </Snackbar>
+    </Screen>
   );
 }
 
+const styles = StyleSheet.create({
+  scroll: { padding: spacing.lg, paddingBottom: spacing.xxl * 2 },
+  title: { fontWeight: "900", color: palette.primary, marginBottom: 4 },
+  email: { opacity: 0.65, marginBottom: spacing.sm },
+  name: { fontWeight: "800", marginBottom: spacing.md },
+  field: { marginBottom: spacing.md },
+  btn: { marginTop: spacing.sm, borderRadius: 12 },
+});
