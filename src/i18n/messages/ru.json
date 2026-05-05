@@ -1,0 +1,26 @@
+{
+  "tabs": {
+    "catalog": "Каталог",
+    "developer": "Кабинет"
+  },
+  "common": {
+    "retry": "Повторить",
+    "loading": "Загрузка…"
+  },
+  "catalog": {
+    "title": "Каталог",
+    "open": "Открыть"
+  },
+  "developer": {
+    "title": "Кабинет",
+    "login": "Вход",
+    "email": "Email",
+    "password": "Пароль",
+    "signIn": "Войти",
+    "signOut": "Выйти",
+    "projects": "Проекты",
+    "leads": "Заявки",
+    "profile": "Профиль"
+  }
+}
+

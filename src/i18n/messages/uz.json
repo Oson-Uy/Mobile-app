@@ -1,0 +1,26 @@
+{
+  "tabs": {
+    "catalog": "Katalog",
+    "developer": "Kabinet"
+  },
+  "common": {
+    "retry": "Qayta urinish",
+    "loading": "Yuklanmoqda…"
+  },
+  "catalog": {
+    "title": "Katalog",
+    "open": "Ochish"
+  },
+  "developer": {
+    "title": "Kabinet",
+    "login": "Kirish",
+    "email": "Email",
+    "password": "Parol",
+    "signIn": "Kirish",
+    "signOut": "Chiqish",
+    "projects": "Loyihalar",
+    "leads": "Murojaatlar",
+    "profile": "Profil"
+  }
+}
+

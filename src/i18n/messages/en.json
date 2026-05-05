@@ -1,0 +1,26 @@
+{
+  "tabs": {
+    "catalog": "Catalog",
+    "developer": "Dashboard"
+  },
+  "common": {
+    "retry": "Retry",
+    "loading": "Loading…"
+  },
+  "catalog": {
+    "title": "Catalog",
+    "open": "Open"
+  },
+  "developer": {
+    "title": "Dashboard",
+    "login": "Sign in",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "projects": "Projects",
+    "leads": "Leads",
+    "profile": "Profile"
+  }
+}
+
