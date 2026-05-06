@@ -5,13 +5,17 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "osonuy",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "userInterfaceStyle": "automatic",
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#F8FAFC"
+      "backgroundColor": "#F8FAFC",
+      "dark": {
+        "image": "./assets/splash.png",
+        "backgroundColor": "#F8FAFC"
+      }
     },
     "ios": {
       "supportsTablet": true,

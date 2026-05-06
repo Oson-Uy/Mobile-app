@@ -11,13 +11,18 @@ export default ({ config }: any) => ({
   version: "1.0.0",
   orientation: "portrait",
   scheme: "osonuy",
-  newArchEnabled: true,
+  /** На части Android-устройств New Arch + Fabric давали «вечный» нативный splash без первого кадра RN. */
+  newArchEnabled: false,
   userInterfaceStyle: "automatic",
   icon: "./assets/icon.png",
   splash: {
     image: "./assets/splash.png",
     resizeMode: "contain",
     backgroundColor: SPLASH_BG,
+    dark: {
+      image: "./assets/splash.png",
+      backgroundColor: SPLASH_BG,
+    },
   },
   ios: {
     supportsTablet: true,
@@ -52,6 +57,10 @@ export default ({ config }: any) => ({
           image: "./assets/splash.png",
           resizeMode: "contain",
           backgroundColor: SPLASH_BG,
+          dark: {
+            image: "./assets/splash.png",
+            backgroundColor: SPLASH_BG,
+          },
         },
       ],
     ]),
