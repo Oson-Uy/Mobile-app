@@ -1,6 +1,9 @@
 import { getApiUrl } from "./config";
 import { getToken } from "../auth/token";
 
+/** Без таймаута fetch на Android может «висеть» минутами (неверный хост, сеть, TLS). */
+const FETCH_TIMEOUT_MS = 25_000;
+
 export class ApiAuthError extends Error {
   constructor(message = "Unauthorized") {
     super(message);
@@ -20,10 +23,24 @@ export async function apiFetch<T>(
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
   const base = getApiUrl().replace(/\/$/, "");
-  const response = await fetch(`${base}${path}`, {
-    ...init,
-    headers,
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+  let response: Response;
+  try {
+    response = await fetch(`${base}${path}`, {
+      ...init,
+      headers,
+      signal: controller.signal,
+    });
+  } catch (e) {
+    if (e instanceof Error && e.name === "AbortError") {
+      throw new Error(`Request timed out (${FETCH_TIMEOUT_MS / 1000}s)`);
+    }
+    throw e;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   if (response.status === 401 || response.status === 403) {
     throw new ApiAuthError();

@@ -49,7 +49,10 @@ export default ({ config }: any) => ({
   ],
   extra: {
     ...config.extra,
-    apiUrl: process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3002",
+    // Release APK из Android Studio часто собирается без .env — localhost на устройстве даёт «вечную» загрузку.
+    apiUrl:
+      process.env.EXPO_PUBLIC_API_URL?.trim() ||
+      "https://api.oson-uy.uz",
     heroVideoUrl: process.env.EXPO_PUBLIC_HERO_VIDEO_URL ?? "",
   },
 });
