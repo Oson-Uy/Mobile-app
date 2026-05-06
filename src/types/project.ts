@@ -60,12 +60,27 @@ export type ApiProjectReview = {
   comment?: string | null;
 };
 
+export type ApiProjectProgressMilestone = {
+  id: number;
+  title: string;
+  done: boolean;
+  sortOrder: number;
+};
+
+export type ApiProjectProgress = {
+  total: number;
+  done: number;
+  percent: number | null;
+  milestones: ApiProjectProgressMilestone[];
+};
+
 export type ApiProjectFull = ApiProjectListItem & {
   description?: string | null;
   advantages?: string[];
   deliveryDate: string;
   videoUrl?: string | null;
   reviews?: ApiProjectReview[];
+  progress?: ApiProjectProgress;
   totalFloors?: number | null;
   totalUnits?: number | null;
   plan?: string | null;

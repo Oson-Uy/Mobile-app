@@ -153,6 +153,22 @@ function createDetailsStyles(p: AppPalette) {
       marginBottom: 2,
     },
     specVal: { color: p.text },
+    progressHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+    progressPct: { fontWeight: "900" },
+    progressTrack: {
+      height: 10,
+      borderRadius: 999,
+      overflow: "hidden",
+      marginTop: spacing.sm,
+    },
+    progressFill: {
+      height: "100%",
+      borderRadius: 999,
+    },
+    progressList: { marginTop: spacing.md, gap: 10 },
+    progressRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+    progressTxt: { flex: 1, fontWeight: "700" },
+    progressHint: { marginTop: spacing.md },
     logo: { width: 120, height: 48, marginBottom: spacing.sm },
     devSub: { fontWeight: "800", marginBottom: 4, color: p.text },
     devDesc: { opacity: 0.85, color: p.text },
@@ -749,6 +765,49 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
                   {dev.officeAddress}
                 </Text>
               ) : null}
+            </SectionCard>
+          ) : null}
+
+          {data.progress?.milestones?.length ? (
+            <SectionCard style={styles.section}>
+              <View style={styles.progressHead}>
+                <SectionTitle title={t("projectDetails.progressTitle")} />
+                <Text style={[styles.progressPct, { color: p.text }]}>
+                  {data.progress.percent != null ? `${data.progress.percent}%` : "—"}
+                </Text>
+              </View>
+              <View style={[styles.progressTrack, { backgroundColor: p.outline }]}>
+                <View
+                  style={[
+                    styles.progressFill,
+                    {
+                      backgroundColor: p.primary,
+                      width: `${Math.max(0, Math.min(100, data.progress.percent ?? 0))}%`,
+                    },
+                  ]}
+                />
+              </View>
+              <View style={styles.progressList}>
+                {data.progress.milestones
+                  .slice()
+                  .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+                  .map((m) => (
+                    <View key={m.id} style={styles.progressRow}>
+                      <MaterialCommunityIcons
+                        name={m.done ? "check-circle" : "checkbox-blank-circle-outline"}
+                        size={18}
+                        color={m.done ? p.success : p.textMuted}
+                      />
+                      <Text style={[styles.progressTxt, { color: p.text }]}>{m.title}</Text>
+                    </View>
+                  ))}
+              </View>
+              <Text variant="bodySmall" style={[styles.progressHint, { color: p.textMuted }]}>
+                {t("projectDetails.progressDone", {
+                  done: data.progress.done ?? 0,
+                  total: data.progress.total ?? data.progress.milestones.length,
+                })}
+              </Text>
             </SectionCard>
           ) : null}
 

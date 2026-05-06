@@ -124,6 +124,13 @@ export function DeveloperHomeScreen() {
         }
         options={{ title: t("developer.floors") }}
       />
+      <Stack.Screen
+        name="DeveloperProjectProgress"
+        getComponent={() =>
+          require("./DeveloperProjectProgressScreen").DeveloperProjectProgressScreen
+        }
+        options={{ title: t("developer.progressTitle") }}
+      />
     </Stack.Navigator>
   );
 }

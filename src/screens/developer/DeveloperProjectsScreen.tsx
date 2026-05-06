@@ -128,6 +128,15 @@ export function DeveloperProjectsScreen() {
                     })
                   }
                 />
+                <IconButton
+                  icon="progress-check"
+                  iconColor={p.secondary}
+                  onPress={() =>
+                    navigation.navigate("DeveloperProjectProgress", {
+                      projectId: item.id,
+                    })
+                  }
+                />
               </View>
             </Card>
           );
