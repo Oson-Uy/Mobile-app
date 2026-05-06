@@ -14,10 +14,15 @@
     "back": "Back"
   },
   "onboarding": {
+    "welcomeTitle": "Welcome",
+    "welcomeSubtitle": "Browse new builds, filters, and submit inquiries in one app.",
+    "buyerTitle": "Buyer catalog",
+    "buyerHint": "Explore projects, compare prices, and request a call.",
+    "continue": "Continue",
+    "developerOnlyWebHint": "Developer sign-up is only on oson-uy.uz. In the app you can log in to an account you already created (Settings → Developer login).",
+    "openDeveloperDashboard": "Open web dashboard",
     "title": "Who are you?",
     "subtitle": "We’ll tailor the app: catalog for buyers or a dashboard for developers.",
-    "buyerTitle": "I’m buying a home",
-    "buyerHint": "Project catalog, filters, and lead forms",
     "buyerCta": "I’m a buyer",
     "developerTitle": "Developer",
     "developerHint": "Projects, floors, leads, and subscription",
@@ -32,6 +37,10 @@
     "role": "Profile type",
     "roleBuyer": "Buyer",
     "roleDeveloper": "Developer",
+    "developerSection": "Developer",
+    "developerSectionHint": "No account yet? Register in the web dashboard at oson-uy.uz, then sign in here.",
+    "developerLogin": "Developer login",
+    "exitDeveloper": "Sign out of dashboard",
     "done": "Done",
     "langRu": "Russian",
     "langUz": "Uzbek",
@@ -81,7 +90,8 @@
     "popular": "Popular",
     "installment": "Installment",
     "fromPerM2": "from",
-    "verifiedDeveloper": "Verified developer"
+    "verifiedDeveloper": "Verified developer",
+    "moreDetails": "Details"
   },
   "projectDetails": {
     "notFound": "Project not found",
@@ -152,7 +162,9 @@
   "developer": {
     "title": "Dashboard",
     "login": "Sign in",
-    "loginSubtitle": "Sign in to your developer dashboard",
+    "loginSubtitle": "Sign in with the account you created in the web dashboard",
+    "registerOnWebHint": "Registration is on the website only — create your account in the developer dashboard.",
+    "openDashboardWeb": "Open oson-uy.uz/dashboard",
     "email": "Email",
     "password": "Password",
     "signIn": "Sign in",

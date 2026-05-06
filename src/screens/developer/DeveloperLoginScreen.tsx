@@ -1,31 +1,37 @@
 import React, { useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from "react-native";
 import { Button, Surface, Text, TextInput } from "react-native-paper";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { apiFetch } from "../../api/client";
 import { setToken } from "../../auth/token";
 import { useI18n } from "../../i18n/I18nProvider";
-import type { DeveloperStackParamList } from "../../navigation/RootNavigator";
+import type { DeveloperStackParamList, RootStackParamList } from "../../navigation/RootNavigator";
 import { registerForPushAndSyncToken } from "../../push/register";
+import { useAppPreferences } from "../../preferences/AppPreferencesProvider";
 import { Screen } from "../../ui/Screen";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { radii, spacing } from "../../theme/tokens";
 
-type Props = NativeStackScreenProps<DeveloperStackParamList, "DeveloperLogin">;
+type Props =
+  | NativeStackScreenProps<DeveloperStackParamList, "DeveloperLogin">
+  | NativeStackScreenProps<RootStackParamList, "DeveloperLogin">;
 
 type LoginResponse = {
   token: string;
   developer: { id: number; name: string; email: string };
 };
 
-export function DeveloperLoginScreen({ navigation }: Props) {
+export function DeveloperLoginScreen({ navigation, route }: Props) {
   const { t } = useI18n();
   const { palette: p } = useAppTheme();
+  const { setRole } = useAppPreferences();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [secure, setSecure] = useState(true);
   const [busy, setBusy] = useState(false);
+
+  const finishMode = route.params?.finishMode ?? "replaceHome";
 
   const onSubmit = async () => {
     setBusy(true);
@@ -36,7 +42,13 @@ export function DeveloperLoginScreen({ navigation }: Props) {
       });
       await setToken(res.token);
       void registerForPushAndSyncToken();
-      navigation.replace("DeveloperHome");
+      await setRole("developer");
+      if (finishMode === "goBackMain") {
+        if (navigation.canGoBack()) navigation.goBack();
+        else (navigation as { navigate: (n: string) => void }).navigate("Main");
+      } else {
+        (navigation as { replace: (n: string) => void }).replace("DeveloperHome");
+      }
     } catch (e) {
       Alert.alert("Error", e instanceof Error ? e.message : "Login failed");
     } finally {
@@ -70,6 +82,9 @@ export function DeveloperLoginScreen({ navigation }: Props) {
             </Text>
             <Text style={[styles.subtitle, { color: p.textMuted }]}>
               {t("developer.loginSubtitle")}
+            </Text>
+            <Text style={[styles.registerHint, { color: p.textMuted }]}>
+              {t("developer.registerOnWebHint")}
             </Text>
 
             <TextInput
@@ -132,7 +147,8 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   title: { fontWeight: "800" },
-  subtitle: { marginTop: spacing.sm, marginBottom: spacing.lg, lineHeight: 20 },
+  subtitle: { marginTop: spacing.sm, marginBottom: spacing.sm, lineHeight: 20 },
+  registerHint: { marginBottom: spacing.lg, lineHeight: 20, fontSize: 13 },
   field: { marginBottom: spacing.md },
   submit: { marginTop: spacing.md, borderRadius: radii.lg },
   submitInner: { paddingVertical: 8, minHeight: 48 },

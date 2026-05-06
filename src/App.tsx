@@ -8,6 +8,7 @@ import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 
 import { RootNavigator } from "./navigation/RootNavigator";
+import { navigationRef } from "./navigation/navigationRef";
 import { I18nProvider, useI18n } from "./i18n/I18nProvider";
 import { AppPreferencesProvider, useAppPreferences } from "./preferences/AppPreferencesProvider";
 import { AppThemeProvider, useAppTheme } from "./theme/AppThemeProvider";
@@ -49,7 +50,7 @@ function AppShell() {
 
   return (
     <PaperProvider theme={theme.paperTheme}>
-      <NavigationContainer theme={theme.navTheme}>
+      <NavigationContainer ref={navigationRef} theme={theme.navTheme}>
         <RootNavigator />
         <StatusBar style={theme.mode === "dark" ? "light" : "dark"} />
       </NavigationContainer>

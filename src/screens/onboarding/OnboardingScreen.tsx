@@ -1,5 +1,5 @@
 import React from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Linking, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Text } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -8,17 +8,14 @@ import { useI18n } from "../../i18n/I18nProvider";
 import { useAppPreferences } from "../../preferences/AppPreferencesProvider";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { radii, spacing } from "../../theme/tokens";
-import type { UserRole } from "../../preferences/storageKeys";
 import { BrandLogo } from "../../ui/BrandLogo";
+
+const DASHBOARD_URL = "https://oson-uy.uz/dashboard";
 
 export function OnboardingScreen() {
   const { t } = useI18n();
   const { completeOnboarding } = useAppPreferences();
   const { palette: p } = useAppTheme();
-
-  const onPick = (role: UserRole) => {
-    void completeOnboarding(role);
-  };
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: p.background }]} edges={["top", "left", "right"]}>
@@ -38,65 +35,43 @@ export function OnboardingScreen() {
           <View style={[styles.accentUnderLogo, { backgroundColor: p.secondary }]} />
         </View>
         <Text variant="headlineSmall" style={[styles.title, { color: p.text }]}>
-          {t("onboarding.title")}
+          {t("onboarding.welcomeTitle")}
         </Text>
         <Text style={[styles.subtitle, { color: p.textMuted }]}>
-          {t("onboarding.subtitle")}
+          {t("onboarding.welcomeSubtitle")}
         </Text>
 
-        <View style={styles.cards}>
-          <View
-            style={[
-              styles.card,
-              { backgroundColor: p.surface, borderColor: p.outline },
-            ]}
-          >
-            <View style={[styles.iconWrap, { backgroundColor: `${p.primary}18` }]}>
-              <MaterialCommunityIcons name="home-search" size={28} color={p.primary} />
-            </View>
-            <Text style={[styles.cardTitle, { color: p.text }]}>
-              {t("onboarding.buyerTitle")}
-            </Text>
-            <Text style={[styles.cardHint, { color: p.textMuted }]}>
-              {t("onboarding.buyerHint")}
-            </Text>
-            <Button
-              mode="contained"
-              onPress={() => onPick("buyer")}
-              buttonColor={p.primary}
-              style={styles.cardBtn}
-              contentStyle={styles.cardBtnInner}
-            >
-              {t("onboarding.buyerCta")}
-            </Button>
+        <View
+          style={[
+            styles.card,
+            { backgroundColor: p.surface, borderColor: p.outline },
+          ]}
+        >
+          <View style={[styles.iconWrap, { backgroundColor: `${p.primary}18` }]}>
+            <MaterialCommunityIcons name="home-search" size={28} color={p.primary} />
           </View>
-
-          <View
-            style={[
-              styles.card,
-              { backgroundColor: p.surface, borderColor: p.outline },
-            ]}
+          <Text style={[styles.cardTitle, { color: p.text }]}>{t("onboarding.buyerTitle")}</Text>
+          <Text style={[styles.cardHint, { color: p.textMuted }]}>{t("onboarding.buyerHint")}</Text>
+          <Button
+            mode="contained"
+            onPress={() => void completeOnboarding("buyer")}
+            buttonColor={p.primary}
+            style={styles.cardBtn}
+            contentStyle={styles.cardBtnInner}
           >
-            <View style={[styles.iconWrap, { backgroundColor: `${p.secondary}22` }]}>
-              <MaterialCommunityIcons name="domain" size={28} color={p.secondary} />
-            </View>
-            <Text style={[styles.cardTitle, { color: p.text }]}>
-              {t("onboarding.developerTitle")}
-            </Text>
-            <Text style={[styles.cardHint, { color: p.textMuted }]}>
-              {t("onboarding.developerHint")}
-            </Text>
-            <Button
-              mode="contained"
-              onPress={() => onPick("developer")}
-              buttonColor={p.secondary}
-              style={styles.cardBtn}
-              contentStyle={styles.cardBtnInner}
-            >
-              {t("onboarding.developerCta")}
-            </Button>
-          </View>
+            {t("onboarding.continue")}
+          </Button>
         </View>
+
+        <Text style={[styles.devHint, { color: p.textMuted }]}>{t("onboarding.developerOnlyWebHint")}</Text>
+        <Button
+          mode="outlined"
+          onPress={() => void Linking.openURL(DASHBOARD_URL)}
+          style={styles.outlineBtn}
+          textColor={p.primary}
+        >
+          {t("onboarding.openDeveloperDashboard")}
+        </Button>
       </ScrollView>
     </SafeAreaView>
   );
@@ -137,11 +112,8 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
     lineHeight: 22,
   },
-  cards: {
-    marginTop: spacing.xxl,
-    gap: spacing.md,
-  },
   card: {
+    marginTop: spacing.xxl,
     borderRadius: radii.xl,
     borderWidth: StyleSheet.hairlineWidth,
     padding: spacing.lg,
@@ -165,4 +137,11 @@ const styles = StyleSheet.create({
   },
   cardBtn: { borderRadius: radii.lg },
   cardBtnInner: { paddingVertical: 8, minHeight: 48 },
+  devHint: {
+    marginTop: spacing.xl,
+    lineHeight: 20,
+    fontSize: 13,
+    textAlign: "center",
+  },
+  outlineBtn: { marginTop: spacing.md, borderRadius: radii.lg },
 });

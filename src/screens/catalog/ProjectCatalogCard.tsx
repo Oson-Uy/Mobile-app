@@ -160,16 +160,27 @@ export function ProjectCatalogCard({ project, onPress, onLeaveRequest }: Props) 
             ) : null}
           </View>
         </Pressable>
-        <Button
-          mode="contained"
-          buttonColor={p.secondary}
-          textColor="#FFFFFF"
-          style={styles.cta}
-          contentStyle={styles.ctaContent}
-          onPress={onLeaveRequest}
-        >
-          {t("projectDetails.leaveRequest")}
-        </Button>
+        <View style={styles.actionsRow}>
+          <Button
+            mode="outlined"
+            onPress={onPress}
+            style={styles.actionHalf}
+            contentStyle={styles.ctaContent}
+            textColor={p.primary}
+          >
+            {t("projectCard.moreDetails")}
+          </Button>
+          <Button
+            mode="contained"
+            buttonColor={p.secondary}
+            textColor="#FFFFFF"
+            style={styles.actionHalf}
+            contentStyle={styles.ctaContent}
+            onPress={onLeaveRequest}
+          >
+            {t("projectDetails.leaveRequest")}
+          </Button>
+        </View>
       </Card.Content>
     </Card>
   );
@@ -247,10 +258,15 @@ const styles = StyleSheet.create({
   price: { fontWeight: "700" },
   priceNum: {},
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
-  cta: {
+  actionsRow: {
+    flexDirection: "row",
+    gap: spacing.sm,
     marginTop: spacing.xs,
-    borderRadius: radii.lg,
     alignSelf: "stretch",
+  },
+  actionHalf: {
+    flex: 1,
+    borderRadius: radii.lg,
   },
   ctaContent: { paddingVertical: 6 },
 });

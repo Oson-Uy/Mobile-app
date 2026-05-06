@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Button, IconButton, RadioButton, Text } from "react-native-paper";
 
+import { getToken, clearToken } from "../../auth/token";
 import { useI18n, type Locale } from "../../i18n/I18nProvider";
+import { navigateToDeveloperLoginFromSettings } from "../../navigation/navigationRef";
 import { useAppPreferences } from "../../preferences/AppPreferencesProvider";
-import type { UserRole } from "../../preferences/storageKeys";
 import { useAppTheme, type ThemeMode } from "../../theme/AppThemeProvider";
 import { radii, spacing } from "../../theme/tokens";
 
@@ -24,6 +25,28 @@ export function CatalogSettingsModal({ visible, onClose }: Props) {
   const { mode, setMode, palette: p } = useAppTheme();
   const doneLabelColor = mode === "dark" ? "#0F172A" : "#FFFFFF";
   const { role, setRole } = useAppPreferences();
+  const [hasDevSession, setHasDevSession] = useState(false);
+
+  const refreshSession = useCallback(async () => {
+    const tok = await getToken();
+    setHasDevSession(Boolean(tok));
+  }, []);
+
+  useEffect(() => {
+    if (visible) void refreshSession();
+  }, [visible, refreshSession]);
+
+  const onDeveloperLogin = () => {
+    onClose();
+    navigateToDeveloperLoginFromSettings();
+  };
+
+  const onExitDeveloper = async () => {
+    await clearToken();
+    await setRole("buyer");
+    setHasDevSession(false);
+    onClose();
+  };
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
@@ -74,23 +97,20 @@ export function CatalogSettingsModal({ visible, onClose }: Props) {
             </RadioButton.Group>
 
             <Text style={[styles.section, styles.sectionSpaced, { color: p.textMuted }]}>
-              {t("settings.role")}
+              {t("settings.developerSection")}
             </Text>
-            <RadioButton.Group
-              value={role}
-              onValueChange={(v) => void setRole(v as UserRole)}
-            >
-              <RadioButton.Item
-                label={t("settings.roleBuyer")}
-                value="buyer"
-                labelStyle={{ color: p.text }}
-              />
-              <RadioButton.Item
-                label={t("settings.roleDeveloper")}
-                value="developer"
-                labelStyle={{ color: p.text }}
-              />
-            </RadioButton.Group>
+            <Text variant="bodySmall" style={{ color: p.textMuted, marginBottom: spacing.sm }}>
+              {t("settings.developerSectionHint")}
+            </Text>
+            {role === "developer" && hasDevSession ? (
+              <Button mode="outlined" onPress={() => void onExitDeveloper()} style={styles.devBtn}>
+                {t("settings.exitDeveloper")}
+              </Button>
+            ) : (
+              <Button mode="contained" onPress={onDeveloperLogin} buttonColor={p.secondary} textColor="#FFFFFF" style={styles.devBtn}>
+                {t("settings.developerLogin")}
+              </Button>
+            )}
 
             <Button
               mode="contained"
@@ -129,19 +149,31 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingLeft: spacing.lg,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
   },
-  body: { paddingHorizontal: spacing.md, paddingBottom: spacing.xxl },
+  body: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xxl,
+  },
   section: {
-    fontSize: 11,
     fontWeight: "800",
-    letterSpacing: 1.2,
-    textTransform: "uppercase",
     marginTop: spacing.sm,
-    marginLeft: spacing.sm,
+    marginBottom: spacing.xs,
+    fontSize: 12,
+    letterSpacing: 0.3,
   },
-  sectionSpaced: { marginTop: spacing.lg },
-  done: { marginTop: spacing.xl, borderRadius: 16 },
-  doneContent: { minHeight: 54, paddingVertical: 8 },
-  doneLabel: { fontSize: 16, fontWeight: "600" },
+  sectionSpaced: {
+    marginTop: spacing.lg,
+  },
+  devBtn: {
+    borderRadius: radii.lg,
+    marginBottom: spacing.sm,
+  },
+  done: {
+    marginTop: spacing.lg,
+    borderRadius: radii.lg,
+  },
+  doneContent: { paddingVertical: 8, minHeight: 48 },
+  doneLabel: { fontWeight: "800", fontSize: 16 },
 });

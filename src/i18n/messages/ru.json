@@ -14,10 +14,15 @@
     "back": "Назад"
   },
   "onboarding": {
+    "welcomeTitle": "Добро пожаловать",
+    "welcomeSubtitle": "Каталог новостроек, фильтры и заявки — в одном приложении.",
+    "buyerTitle": "Каталог для покупателей",
+    "buyerHint": "Смотрите проекты, сравнивайте цены и оставляйте заявки.",
+    "continue": "Продолжить",
+    "developerOnlyWebHint": "Регистрация застройщика — только на сайте oson-uy.uz. В приложении можно войти в уже созданный аккаунт (Настройки → Вход для застройщика).",
+    "openDeveloperDashboard": "Открыть кабинет на сайте",
     "title": "Кто вы?",
     "subtitle": "Так мы покажем нужный интерфейс: каталог для покупателей или кабинет для застройщиков.",
-    "buyerTitle": "Покупаю жильё",
-    "buyerHint": "Каталог проектов, фильтры и заявки",
     "buyerCta": "Я покупатель",
     "developerTitle": "Застройщик",
     "developerHint": "Проекты, этажи, заявки и подписка",
@@ -32,6 +37,10 @@
     "role": "Тип профиля",
     "roleBuyer": "Покупатель",
     "roleDeveloper": "Застройщик",
+    "developerSection": "Застройщик",
+    "developerSectionHint": "Нет аккаунта? Зарегистрируйтесь в веб-кабинете на oson-uy.uz, затем войдите здесь.",
+    "developerLogin": "Вход для застройщика",
+    "exitDeveloper": "Выйти из кабинета",
     "done": "Готово",
     "langRu": "Русский",
     "langUz": "Oʻzbekcha",
@@ -81,7 +90,8 @@
     "popular": "Популярно",
     "installment": "Рассрочка",
     "fromPerM2": "от",
-    "verifiedDeveloper": "Проверенный застройщик"
+    "verifiedDeveloper": "Проверенный застройщик",
+    "moreDetails": "Подробнее"
   },
   "projectDetails": {
     "notFound": "Проект не найден",
@@ -152,7 +162,9 @@
   "developer": {
     "title": "Кабинет",
     "login": "Вход",
-    "loginSubtitle": "Войдите в кабинет застройщика",
+    "loginSubtitle": "Войдите аккаунтом, созданным в веб-кабинете",
+    "registerOnWebHint": "Регистрация только на сайте — создайте аккаунт в кабинете застройщика.",
+    "openDashboardWeb": "Открыть oson-uy.uz/dashboard",
     "email": "Email",
     "password": "Пароль",
     "signIn": "Войти",

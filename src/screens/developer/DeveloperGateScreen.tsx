@@ -13,7 +13,7 @@ export function DeveloperGateScreen({ navigation }: Props) {
     void (async () => {
       const token = await getToken();
       if (token) navigation.replace("DeveloperHome");
-      else navigation.replace("DeveloperLogin");
+      else navigation.replace("DeveloperLogin", { finishMode: "replaceHome" });
     })();
   }, [navigation]);
 

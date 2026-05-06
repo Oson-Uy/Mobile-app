@@ -14,10 +14,15 @@
     "back": "Orqaga"
   },
   "onboarding": {
+    "welcomeTitle": "Xush kelibsiz",
+    "welcomeSubtitle": "Yangi uylar katalogi, filtrlar va arizalar — bitta ilovada.",
+    "buyerTitle": "Xaridorlar katalogi",
+    "buyerHint": "Loyihalarni ko‘ring, narxlarni solishtiring va ariza qoldiring.",
+    "continue": "Davom etish",
+    "developerOnlyWebHint": "Quruvchini ro‘yxatdan o‘tkazish faqat oson-uy.uz saytida. Ilovada esa allaqachon yaratilgan akkaunt bilan kirishingiz mumkin (Sozlamalar → Quruvchi kirishi).",
+    "openDeveloperDashboard": "Saytdagi kabinetni ochish",
     "title": "Siz kimsiz?",
     "subtitle": "Interfeysni moslaymiz: xaridorlar uchun katalog yoki quruvchilar uchun kabinet.",
-    "buyerTitle": "Uy sotib olaman",
-    "buyerHint": "Loyiha katalogi, filtrlar va ariza",
     "buyerCta": "Men xaridorman",
     "developerTitle": "Quruvchi",
     "developerHint": "Loyihalar, qavatlar, arizalar va obuna",
@@ -32,6 +37,10 @@
     "role": "Profil turi",
     "roleBuyer": "Xaridor",
     "roleDeveloper": "Quruvchi",
+    "developerSection": "Quruvchi",
+    "developerSectionHint": "Akkaunt yo‘qmi? Avval oson-uy.uz veb-kabinetida ro‘yxatdan o‘ting, keyin bu yerda kiring.",
+    "developerLogin": "Quruvchi kirishi",
+    "exitDeveloper": "Kabinetdan chiqish",
     "done": "Tayyor",
     "langRu": "Rus",
     "langUz": "Oʻzbek",
@@ -81,7 +90,8 @@
     "popular": "Mashhur",
     "installment": "Muddatli toʻlov",
     "fromPerM2": "dan",
-    "verifiedDeveloper": "Tasdiqlangan quruvchi"
+    "verifiedDeveloper": "Tasdiqlangan quruvchi",
+    "moreDetails": "Batafsil"
   },
   "projectDetails": {
     "notFound": "Loyiha topilmadi",
@@ -152,7 +162,9 @@
   "developer": {
     "title": "Kabinet",
     "login": "Kirish",
-    "loginSubtitle": "Quruvchi kabinetiga kiring",
+    "loginSubtitle": "Veb-kabinetda yaratilgan akkaunt bilan kiring",
+    "registerOnWebHint": "Ro‘yxatdan o‘tish faqat saytda — quruvchi kabinetida akkaunt yarating.",
+    "openDashboardWeb": "oson-uy.uz/dashboard ochish",
     "email": "Email",
     "password": "Parol",
     "signIn": "Kirish",
