@@ -14,6 +14,7 @@ import {
 import { MD3DarkTheme, MD3LightTheme, type MD3Theme } from "react-native-paper";
 import * as SecureStore from "expo-secure-store";
 
+import { getSecureItemWithTimeout } from "../lib/secureRead";
 import { STORAGE_KEYS } from "../preferences/storageKeys";
 import { darkPalette, palette, type AppPalette } from "./tokens";
 
@@ -98,7 +99,7 @@ export function AppThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     void (async () => {
       try {
-        const raw = await SecureStore.getItemAsync(STORAGE_KEYS.theme);
+        const raw = await getSecureItemWithTimeout(STORAGE_KEYS.theme);
         if (raw === "dark" || raw === "light") setModeState(raw);
       } finally {
         setHydrated(true);

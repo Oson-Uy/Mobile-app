@@ -11,6 +11,8 @@ SITE_LOGO = (
 )
 OUT_DIR = ROOT / "assets"
 BRAND_BLUE = (0x1E, 0x3A, 0x8A, 255)
+# Светлый фон splash: тёмно-синие буквы «Oson» на фирменном синем сливались.
+SPLASH_BG = (0xF8, 0xFA, 0xFC, 255)
 
 
 def _paste_logo_center(canvas: Image.Image, logo: Image.Image, max_frac: float) -> None:
@@ -33,8 +35,8 @@ def make_square_icon(size: int) -> Image.Image:
 
 def make_splash(w: int, h: int) -> Image.Image:
     logo = Image.open(SITE_LOGO).convert("RGBA")
-    canvas = Image.new("RGBA", (w, h), BRAND_BLUE)
-    _paste_logo_center(canvas, logo, 0.42)
+    canvas = Image.new("RGBA", (w, h), SPLASH_BG)
+    _paste_logo_center(canvas, logo, 0.56)
     return canvas
 
 

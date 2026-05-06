@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import * as SecureStore from "expo-secure-store";
 
+import { getSecureItemWithTimeout } from "../lib/secureRead";
 import { STORAGE_KEYS, type UserRole } from "./storageKeys";
 
 type AppPreferencesContextValue = {
@@ -35,8 +36,8 @@ export function AppPreferencesProvider({
     void (async () => {
       try {
         const [ob, r] = await Promise.all([
-          SecureStore.getItemAsync(STORAGE_KEYS.onboarding),
-          SecureStore.getItemAsync(STORAGE_KEYS.role),
+          getSecureItemWithTimeout(STORAGE_KEYS.onboarding),
+          getSecureItemWithTimeout(STORAGE_KEYS.role),
         ]);
         setOnboardingDone(ob === "1");
         setRoleState(r === "developer" ? "developer" : "buyer");

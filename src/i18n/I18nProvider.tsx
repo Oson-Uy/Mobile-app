@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import * as SecureStore from "expo-secure-store";
 
+import { getSecureItemWithTimeout } from "../lib/secureRead";
 import { STORAGE_KEYS } from "../preferences/storageKeys";
 import ru from "./messages/ru.json";
 import uz from "./messages/uz.json";
@@ -43,7 +44,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     void (async () => {
       try {
-        const raw = await SecureStore.getItemAsync(STORAGE_KEYS.locale);
+        const raw = await getSecureItemWithTimeout(STORAGE_KEYS.locale);
         if (raw === "ru" || raw === "uz" || raw === "en") {
           setLocaleState(raw);
         }

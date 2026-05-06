@@ -17,6 +17,9 @@ import { FullScreenLoader } from "./ui/FullScreenLoader";
 
 void SplashScreen.preventAutoHideAsync().catch(() => {});
 
+/** Если что-то зависло до hideAsync, не держим нативный splash бесконечно. */
+const SPLASH_FORCE_HIDE_MS = 10_000;
+
 function AppShell() {
   const theme = useAppTheme();
   const i18n = useI18n();
@@ -29,6 +32,13 @@ function AppShell() {
       void SplashScreen.hideAsync().catch(() => {});
     }
   }, [booting]);
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      void SplashScreen.hideAsync().catch(() => {});
+    }, SPLASH_FORCE_HIDE_MS);
+    return () => clearTimeout(id);
+  }, []);
 
   if (booting) {
     return (

@@ -1,6 +1,8 @@
 import "dotenv/config";
 
 const BRAND_BLUE = "#1E3A8A";
+/** Splash: светлый фон, чтобы лого с тёмно-синим текстом не сливалось с экраном. */
+const SPLASH_BG = "#F8FAFC";
 
 export default ({ config }: any) => ({
   ...config,
@@ -15,7 +17,7 @@ export default ({ config }: any) => ({
   splash: {
     image: "./assets/splash.png",
     resizeMode: "contain",
-    backgroundColor: BRAND_BLUE,
+    backgroundColor: SPLASH_BG,
   },
   ios: {
     supportsTablet: true,
@@ -44,7 +46,14 @@ export default ({ config }: any) => ({
       ...(config.plugins ?? []),
       "expo-secure-store",
       "expo-font",
-      "expo-splash-screen",
+      [
+        "expo-splash-screen",
+        {
+          image: "./assets/splash.png",
+          resizeMode: "contain",
+          backgroundColor: SPLASH_BG,
+        },
+      ],
     ]),
   ],
   extra: {

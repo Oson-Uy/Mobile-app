@@ -1,9 +1,11 @@
 import * as SecureStore from "expo-secure-store";
 
+import { getSecureItemWithTimeout } from "../lib/secureRead";
+
 const TOKEN_KEY = "oson_uy_token";
 
 export async function getToken(): Promise<string | null> {
-  return await SecureStore.getItemAsync(TOKEN_KEY);
+  return getSecureItemWithTimeout(TOKEN_KEY);
 }
 
 export async function setToken(token: string): Promise<void> {
