@@ -166,8 +166,16 @@ function createDetailsStyles(p: AppPalette) {
       borderRadius: 999,
     },
     progressList: { marginTop: spacing.md, gap: 10 },
+    progressItem: { gap: 8 },
     progressRow: { flexDirection: "row", alignItems: "center", gap: 10 },
     progressTxt: { flex: 1, fontWeight: "700" },
+    progressPhotos: { paddingLeft: 28, gap: 10 },
+    progressPhoto: {
+      width: 74,
+      height: 54,
+      borderRadius: 12,
+      borderWidth: StyleSheet.hairlineWidth,
+    },
     progressHint: { marginTop: spacing.md },
     logo: { width: 120, height: 48, marginBottom: spacing.sm },
     devSub: { fontWeight: "800", marginBottom: 4, color: p.text },
@@ -792,13 +800,36 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
                   .slice()
                   .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
                   .map((m) => (
-                    <View key={m.id} style={styles.progressRow}>
-                      <MaterialCommunityIcons
-                        name={m.done ? "check-circle" : "checkbox-blank-circle-outline"}
-                        size={18}
-                        color={m.done ? p.success : p.textMuted}
-                      />
-                      <Text style={[styles.progressTxt, { color: p.text }]}>{m.title}</Text>
+                    <View key={m.id} style={styles.progressItem}>
+                      <View style={styles.progressRow}>
+                        <MaterialCommunityIcons
+                          name={m.done ? "check-circle" : "checkbox-blank-circle-outline"}
+                          size={18}
+                          color={m.done ? p.success : p.textMuted}
+                        />
+                        <Text style={[styles.progressTxt, { color: p.text }]}>{m.title}</Text>
+                      </View>
+                      {m.photoUrls?.length ? (
+                        <FlatList
+                          data={m.photoUrls.slice(0, 8)}
+                          keyExtractor={(u, idx) => `${m.id}-${idx}-${u.slice(-18)}`}
+                          horizontal
+                          showsHorizontalScrollIndicator={false}
+                          contentContainerStyle={styles.progressPhotos}
+                          renderItem={({ item }) => (
+                            <Image
+                              source={{ uri: item }}
+                              style={[
+                                styles.progressPhoto,
+                                {
+                                  borderColor: p.outline,
+                                  backgroundColor: p.surfaceMuted,
+                                },
+                              ]}
+                            />
+                          )}
+                        />
+                      ) : null}
                     </View>
                   ))}
               </View>

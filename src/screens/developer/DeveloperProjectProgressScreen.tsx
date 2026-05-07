@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import { Alert, FlatList, Image, ScrollView, StyleSheet, View } from "react-native";
 import { Button, Divider, IconButton, Snackbar, Text, TextInput } from "react-native-paper";
 import { useRoute } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 
 import { apiFetch } from "../../api/client";
+import { uploadImageAsset } from "../../dev/uploadImage";
 import { useI18n } from "../../i18n/I18nProvider";
 import { Screen } from "../../ui/Screen";
 import { SectionCard } from "../../ui/SectionCard";
@@ -20,6 +22,7 @@ type ApiMilestone = {
   title: string;
   done: boolean;
   sortOrder: number;
+  photoUrls?: string[];
 };
 
 type ApiProgress = {
@@ -33,6 +36,7 @@ const emptyRow = (sortOrder: number): ApiMilestone => ({
   title: "",
   done: false,
   sortOrder,
+  photoUrls: [],
 });
 
 export function DeveloperProjectProgressScreen({ navigation }: any) {
@@ -81,7 +85,45 @@ export function DeveloperProjectProgressScreen({ navigation }: any) {
       .slice()
       .map((x) => ({ ...x, title: x.title.trim() }))
       .filter((x) => Boolean(x.title))
-      .map((x, idx) => ({ ...x, sortOrder: idx }));
+      .map((x, idx) => ({
+        ...x,
+        sortOrder: idx,
+        photoUrls: (x.photoUrls ?? []).map((u) => String(u).trim()).filter(Boolean).slice(0, 12),
+      }));
+
+  const addPhoto = async (idx: number) => {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      setSnack(t("developer.uploadError"));
+      return;
+    }
+    const res = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.9,
+      allowsMultipleSelection: false,
+    });
+    if (res.canceled || !res.assets?.[0]) return;
+    try {
+      setSnack(null);
+      const url = await uploadImageAsset(res.assets[0]);
+      setRows((prev) =>
+        prev.map((m, i) =>
+          i === idx ? { ...m, photoUrls: [...(m.photoUrls ?? []), url].slice(0, 12) } : m,
+        ),
+      );
+      setSnack(t("developer.photoAdded"));
+    } catch (e) {
+      setSnack(e instanceof Error ? e.message : t("developer.uploadError"));
+    }
+  };
+
+  const removePhoto = (idx: number, url: string) => {
+    setRows((prev) =>
+      prev.map((m, i) =>
+        i === idx ? { ...m, photoUrls: (m.photoUrls ?? []).filter((u) => u !== url) } : m,
+      ),
+    );
+  };
 
   const onSave = async () => {
     const milestones = normalize(rows);
@@ -150,24 +192,53 @@ export function DeveloperProjectProgressScreen({ navigation }: any) {
           <Divider style={[styles.div, { backgroundColor: p.outline }]} />
 
           {rows.map((r, idx) => (
-            <View key={idx} style={styles.row}>
-              <IconButton
-                icon={r.done ? "check-circle" : "checkbox-blank-circle-outline"}
-                iconColor={r.done ? p.success : p.textMuted}
-                onPress={() => setRows((prev) => prev.map((x, i) => (i === idx ? { ...x, done: !x.done } : x)))}
-              />
-              <TextInput
-                mode="outlined"
-                value={r.title}
-                onChangeText={(v) => setRows((prev) => prev.map((x, i) => (i === idx ? { ...x, title: v } : x)))}
-                placeholder={t("developer.progressPointPlaceholder")}
-                style={styles.field}
-              />
-              <View style={styles.actions}>
-                <IconButton icon="chevron-up" iconColor={p.primary} onPress={() => move(idx, -1)} />
-                <IconButton icon="chevron-down" iconColor={p.primary} onPress={() => move(idx, 1)} />
-                <IconButton icon="trash-can-outline" iconColor={p.error} onPress={() => removeRow(idx)} />
+            <View key={idx}>
+              <View style={styles.row}>
+                <IconButton
+                  icon={r.done ? "check-circle" : "checkbox-blank-circle-outline"}
+                  iconColor={r.done ? p.success : p.textMuted}
+                  onPress={() =>
+                    setRows((prev) => prev.map((x, i) => (i === idx ? { ...x, done: !x.done } : x)))
+                  }
+                />
+                <TextInput
+                  mode="outlined"
+                  value={r.title}
+                  onChangeText={(v) => setRows((prev) => prev.map((x, i) => (i === idx ? { ...x, title: v } : x)))}
+                  placeholder={t("developer.progressPointPlaceholder")}
+                  style={styles.field}
+                />
+                <View style={styles.actions}>
+                  <IconButton icon="chevron-up" iconColor={p.primary} onPress={() => move(idx, -1)} />
+                  <IconButton icon="chevron-down" iconColor={p.primary} onPress={() => move(idx, 1)} />
+                  <IconButton icon="camera-plus-outline" iconColor={p.primary} onPress={() => void addPhoto(idx)} />
+                  <IconButton icon="trash-can-outline" iconColor={p.error} onPress={() => removeRow(idx)} />
+                </View>
               </View>
+              {r.photoUrls?.length ? (
+                <FlatList
+                  data={r.photoUrls}
+                  keyExtractor={(u, i) => `${idx}-${i}-${u.slice(-18)}`}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.photoRow}
+                  renderItem={({ item }) => (
+                    <View style={styles.photoWrap}>
+                      <Image
+                        source={{ uri: item }}
+                        style={[styles.photo, { borderColor: p.outline, backgroundColor: p.surfaceMuted }]}
+                      />
+                      <IconButton
+                        icon="close-circle"
+                        size={18}
+                        iconColor={p.error}
+                        style={styles.photoRemove}
+                        onPress={() => removePhoto(idx, item)}
+                      />
+                    </View>
+                  )}
+                />
+              ) : null}
             </View>
           ))}
 
@@ -217,6 +288,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing.sm,
     marginBottom: spacing.sm,
+  },
+  photoRow: { paddingLeft: 56, paddingBottom: spacing.md, gap: 10 },
+  photoWrap: { position: "relative" },
+  photo: {
+    width: 88,
+    height: 64,
+    borderRadius: radii.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  photoRemove: {
+    position: "absolute",
+    top: -10,
+    right: -10,
+    margin: 0,
   },
   field: { flex: 1, backgroundColor: "transparent" },
   actions: { flexDirection: "row", alignItems: "center" },

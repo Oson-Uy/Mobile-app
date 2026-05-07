@@ -65,6 +65,7 @@ export type ApiProjectProgressMilestone = {
   title: string;
   done: boolean;
   sortOrder: number;
+  photoUrls?: string[];
 };
 
 export type ApiProjectProgress = {
