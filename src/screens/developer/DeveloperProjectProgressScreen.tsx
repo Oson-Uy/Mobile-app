@@ -25,6 +25,9 @@ type ApiMilestone = {
   photoUrls?: string[];
 };
 
+/** Тело PATCH: без id — иначе 400 если API ещё не обновили. */
+type MilestoneSaveBody = Pick<ApiMilestone, "title" | "done" | "sortOrder" | "photoUrls">;
+
 type ApiProgress = {
   percent: number | null;
   total: number;
@@ -80,13 +83,14 @@ export function DeveloperProjectProgressScreen({ navigation }: any) {
     return total ? Math.floor((done / total) * 100) : null;
   }, [rows]);
 
-  const normalize = (r: ApiMilestone[]) =>
+  const normalize = (r: ApiMilestone[]): MilestoneSaveBody[] =>
     r
       .slice()
       .map((x) => ({ ...x, title: x.title.trim() }))
       .filter((x) => Boolean(x.title))
       .map((x, idx) => ({
-        ...x,
+        title: x.title,
+        done: x.done,
         sortOrder: idx,
         photoUrls: (x.photoUrls ?? []).map((u) => String(u).trim()).filter(Boolean).slice(0, 12),
       }));
