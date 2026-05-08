@@ -20,13 +20,21 @@ export function CatalogHero() {
 
   return (
     <View style={styles.wrap}>
-      <View style={[styles.card, { backgroundColor: p.primary }]}>
-        <BrandWordmark onDark size={26} textStyle={styles.brand} />
+      <View
+        style={[
+          styles.card,
+          {
+            backgroundColor: p.surface,
+            borderColor: p.outline,
+          },
+        ]}
+      >
+        <BrandWordmark size={26} textStyle={styles.brand} />
         <View style={styles.brandAccentRow}>
           <View style={[styles.accentRule, { backgroundColor: p.secondary }]} />
         </View>
-        <Text style={styles.tagline}>{t("catalog.hero.tagline")}</Text>
-        <Text style={styles.sub}>{t("catalog.hero.sub")}</Text>
+        <Text style={[styles.tagline, { color: p.text }]}>{t("catalog.hero.tagline")}</Text>
+        <Text style={[styles.sub, { color: p.textMuted }]}>{t("catalog.hero.sub")}</Text>
       </View>
 
       {uri && !videoErr ? (
@@ -52,6 +60,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.xl,
     padding: spacing.lg,
     overflow: "hidden",
+    borderWidth: StyleSheet.hairlineWidth,
   },
   brand: {
     fontWeight: "900",
@@ -69,14 +78,12 @@ const styles = StyleSheet.create({
   },
   tagline: {
     marginTop: spacing.md,
-    color: "rgba(255,255,255,0.95)",
     fontWeight: "800",
     fontSize: 16,
     lineHeight: 22,
   },
   sub: {
     marginTop: spacing.xs,
-    color: "rgba(255,255,255,0.75)",
     fontSize: 13,
     lineHeight: 18,
   },

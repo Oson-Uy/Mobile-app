@@ -32,6 +32,7 @@ export function BrandWordmark({
   return (
     <Text accessibilityLabel="Oson Uy" style={[styles.wordmark, { fontSize: size }, textStyle]}>
       <Text style={{ color: p.primary }}>Oson</Text>
+      <Text>{" "}</Text>
       <Text style={{ color: p.secondary }}>Uy</Text>
     </Text>
   );

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   Dimensions,
   FlatList,
@@ -8,6 +8,7 @@ import {
   NativeScrollEvent,
   NativeSyntheticEvent,
   Pressable,
+  Platform,
   TouchableOpacity,
   RefreshControl,
   ScrollView,
@@ -270,10 +271,12 @@ function createDetailsStyles(p: AppPalette) {
     },
     reviewStars: { flexDirection: "row", gap: 2, marginBottom: spacing.sm },
     reviewQuote: { color: p.text, fontStyle: "italic", lineHeight: 20 },
+    videoCta: { borderRadius: radii.lg, alignSelf: "flex-start" },
+    videoCtaIn: { paddingVertical: 6, paddingHorizontal: 6 },
   });
 }
 
-function RelatedStrip({
+const RelatedStrip = memo(function RelatedStrip({
   title,
   projects,
   onSelect,
@@ -320,7 +323,9 @@ function RelatedStrip({
       </ScrollView>
     </View>
   );
-}
+});
+
+RelatedStrip.displayName = "RelatedStrip";
 
 export function ProjectDetailsScreen({ route, navigation }: Props) {
   const { id } = route.params;
@@ -339,6 +344,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
   const [descOpen, setDescOpen] = useState(false);
   const [floorModal, setFloorModal] = useState<ApiFloor | null>(null);
   const [progressPhoto, setProgressPhoto] = useState<string | null>(null);
+  const [showVideo, setShowVideo] = useState(false);
   const galleryRef = useRef<FlatList<string>>(null);
 
   const load = useCallback(async () => {
@@ -449,23 +455,29 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
 
   const minM2 = data ? minPricePerM2FromApiProject(data) : 0;
 
-  const onGalleryScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const x = e.nativeEvent.contentOffset.x;
-    setActiveImg(Math.round(x / slideW));
-  };
+  const onGalleryScroll = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const x = e.nativeEvent.contentOffset.x;
+      setActiveImg(Math.round(x / slideW));
+    },
+    [slideW],
+  );
 
-  const scrollGalleryTo = (idx: number) => {
-    galleryRef.current?.scrollToIndex({ index: idx, animated: true });
-    setActiveImg(idx);
-  };
+  const scrollGalleryTo = useCallback(
+    (idx: number) => {
+      galleryRef.current?.scrollToIndex({ index: idx, animated: true });
+      setActiveImg(idx);
+    },
+    [],
+  );
 
-  const openLink = async (url: string) => {
+  const openLink = useCallback(async (url: string) => {
     try {
       await Linking.openURL(url);
     } catch {
       /* ignore */
     }
-  };
+  }, []);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -552,6 +564,9 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
                 showsHorizontalScrollIndicator={false}
                 keyExtractor={(u, idx) => `${idx}-${u.slice(-24)}`}
                 onMomentumScrollEnd={onGalleryScroll}
+                removeClippedSubviews={Platform.OS === "android"}
+                initialNumToRender={1}
+                windowSize={3}
                 getItemLayout={(_, index) => ({
                   length: slideW,
                   offset: slideW * index,
@@ -890,7 +905,18 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
                   ? t("projectDetails.videoSubtitleReels")
                   : t("projectDetails.videoSubtitle")}
               </Text>
-              {videoWeb ? (
+              {!showVideo ? (
+                <Button
+                  mode="contained"
+                  buttonColor={p.primary}
+                  textColor="#FFFFFF"
+                  style={styles.videoCta}
+                  contentStyle={styles.videoCtaIn}
+                  onPress={() => setShowVideo(true)}
+                >
+                  {t("common.open")}
+                </Button>
+              ) : videoWeb ? (
                 videoWeb.provider === "instagram" ? (
                   <View
                     style={[
