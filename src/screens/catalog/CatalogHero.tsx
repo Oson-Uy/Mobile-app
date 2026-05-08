@@ -7,6 +7,7 @@ import Constants from "expo-constants";
 import { useI18n } from "../../i18n/I18nProvider";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { radii, spacing } from "../../theme/tokens";
+import { BrandWordmark } from "../../ui/BrandWordmark";
 
 export function CatalogHero() {
   const { t } = useI18n();
@@ -20,7 +21,7 @@ export function CatalogHero() {
   return (
     <View style={styles.wrap}>
       <View style={[styles.card, { backgroundColor: p.primary }]}>
-        <Text style={styles.brand}>Oson Uy</Text>
+        <BrandWordmark onDark size={26} textStyle={styles.brand} />
         <View style={styles.brandAccentRow}>
           <View style={[styles.accentRule, { backgroundColor: p.secondary }]} />
         </View>
@@ -53,7 +54,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   brand: {
-    color: "#FFFFFF",
     fontWeight: "900",
     fontSize: 26,
     letterSpacing: -0.5,

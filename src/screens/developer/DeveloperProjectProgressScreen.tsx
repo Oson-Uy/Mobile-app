@@ -198,22 +198,29 @@ export function DeveloperProjectProgressScreen({ navigation }: any) {
 
           {rows.map((r, idx) => (
             <View key={idx}>
-              <View style={styles.row}>
-                <IconButton
-                  icon={r.done ? "check-circle" : "checkbox-blank-circle-outline"}
-                  iconColor={r.done ? p.success : p.textMuted}
-                  onPress={() =>
-                    setRows((prev) => prev.map((x, i) => (i === idx ? { ...x, done: !x.done } : x)))
-                  }
-                />
-                <TextInput
-                  mode="outlined"
-                  value={r.title}
-                  onChangeText={(v) => setRows((prev) => prev.map((x, i) => (i === idx ? { ...x, title: v } : x)))}
-                  placeholder={t("developer.progressPointPlaceholder")}
-                  style={styles.field}
-                />
-                <View style={styles.actions}>
+              <View style={styles.item}>
+                <View style={styles.rowTop}>
+                  <IconButton
+                    icon={r.done ? "check-circle" : "checkbox-blank-circle-outline"}
+                    iconColor={r.done ? p.success : p.textMuted}
+                    onPress={() =>
+                      setRows((prev) => prev.map((x, i) => (i === idx ? { ...x, done: !x.done } : x)))
+                    }
+                  />
+                  <TextInput
+                    mode="outlined"
+                    value={r.title}
+                    onChangeText={(v) =>
+                      setRows((prev) => prev.map((x, i) => (i === idx ? { ...x, title: v } : x)))
+                    }
+                    placeholder={t("developer.progressPointPlaceholder")}
+                    dense={false}
+                    contentStyle={styles.fieldContent}
+                    style={styles.field}
+                  />
+                </View>
+
+                <View style={styles.rowActions}>
                   <IconButton icon="chevron-up" iconColor={p.primary} onPress={() => move(idx, -1)} />
                   <IconButton icon="chevron-down" iconColor={p.primary} onPress={() => move(idx, 1)} />
                   <IconButton icon="camera-plus-outline" iconColor={p.primary} onPress={() => void addPhoto(idx)} />
@@ -303,11 +310,14 @@ const styles = StyleSheet.create({
   pctTxt: { fontWeight: "900" },
   err: { marginTop: spacing.sm, fontWeight: "700" },
   div: { marginVertical: spacing.md },
-  row: {
+  item: { marginBottom: spacing.sm },
+  rowTop: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
+  rowActions: {
     flexDirection: "row",
     alignItems: "center",
-    gap: spacing.sm,
-    marginBottom: spacing.sm,
+    justifyContent: "flex-end",
+    marginTop: 2,
+    paddingLeft: 56,
   },
   photoRow: { paddingLeft: 56, paddingBottom: spacing.md, gap: 10 },
   photoWrap: { position: "relative" },
@@ -338,7 +348,7 @@ const styles = StyleSheet.create({
   },
   viewerImg: { width: "100%", height: "100%" },
   field: { flex: 1, backgroundColor: "transparent" },
-  actions: { flexDirection: "row", alignItems: "center" },
+  fieldContent: { minHeight: 48 },
   addBtn: { marginTop: spacing.sm, borderRadius: radii.lg },
   saveBtn: { marginTop: spacing.lg, borderRadius: radii.lg },
 });
