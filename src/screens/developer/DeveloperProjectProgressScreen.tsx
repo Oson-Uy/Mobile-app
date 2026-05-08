@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Alert, FlatList, Image, ScrollView, StyleSheet, View } from "react-native";
+import { Alert, FlatList, Image, Modal, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Button, Divider, IconButton, Snackbar, Text, TextInput } from "react-native-paper";
 import { useRoute } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -53,6 +53,7 @@ export function DeveloperProjectProgressScreen({ navigation }: any) {
   const [snack, setSnack] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [rows, setRows] = useState<ApiMilestone[]>([emptyRow(0)]);
+  const [preview, setPreview] = useState<string | null>(null);
 
   useEffect(() => {
     navigation.setOptions({ title: t("developer.progressTitle") });
@@ -228,10 +229,12 @@ export function DeveloperProjectProgressScreen({ navigation }: any) {
                   contentContainerStyle={styles.photoRow}
                   renderItem={({ item }) => (
                     <View style={styles.photoWrap}>
-                      <Image
-                        source={{ uri: item }}
-                        style={[styles.photo, { borderColor: p.outline, backgroundColor: p.surfaceMuted }]}
-                      />
+                      <TouchableOpacity activeOpacity={0.85} onPress={() => setPreview(item)} hitSlop={8}>
+                        <Image
+                          source={{ uri: item }}
+                          style={[styles.photo, { borderColor: p.outline, backgroundColor: p.surfaceMuted }]}
+                        />
+                      </TouchableOpacity>
                       <IconButton
                         icon="close-circle"
                         size={18}
@@ -266,6 +269,19 @@ export function DeveloperProjectProgressScreen({ navigation }: any) {
       <Snackbar visible={snack != null} onDismiss={() => setSnack(null)} duration={2500}>
         {snack}
       </Snackbar>
+
+      <Modal
+        visible={preview != null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPreview(null)}
+      >
+        <Pressable style={styles.viewerBg} onPress={() => setPreview(null)}>
+          <Pressable style={styles.viewerCard} onPress={() => {}}>
+            {preview ? <Image source={{ uri: preview }} style={styles.viewerImg} resizeMode="contain" /> : null}
+          </Pressable>
+        </Pressable>
+      </Modal>
     </Screen>
   );
 }
@@ -307,6 +323,20 @@ const styles = StyleSheet.create({
     right: -10,
     margin: 0,
   },
+  viewerBg: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.85)",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: spacing.lg,
+  },
+  viewerCard: {
+    width: "100%",
+    height: "80%",
+    borderRadius: radii.xl,
+    overflow: "hidden",
+  },
+  viewerImg: { width: "100%", height: "100%" },
   field: { flex: 1, backgroundColor: "transparent" },
   actions: { flexDirection: "row", alignItems: "center" },
   addBtn: { marginTop: spacing.sm, borderRadius: radii.lg },

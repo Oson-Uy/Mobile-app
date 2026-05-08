@@ -4,9 +4,11 @@ import {
   FlatList,
   Image,
   Linking,
+  Modal,
   NativeScrollEvent,
   NativeSyntheticEvent,
   Pressable,
+  TouchableOpacity,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -176,6 +178,20 @@ function createDetailsStyles(p: AppPalette) {
       borderRadius: 12,
       borderWidth: StyleSheet.hairlineWidth,
     },
+    viewerBg: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.85)",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: spacing.lg,
+    },
+    viewerCard: {
+      width: "100%",
+      height: "80%",
+      borderRadius: radii.xl,
+      overflow: "hidden",
+    },
+    viewerImg: { width: "100%", height: "100%" },
     progressHint: { marginTop: spacing.md },
     logo: { width: 120, height: 48, marginBottom: spacing.sm },
     devSub: { fontWeight: "800", marginBottom: 4, color: p.text },
@@ -322,6 +338,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
   const [activeImg, setActiveImg] = useState(0);
   const [descOpen, setDescOpen] = useState(false);
   const [floorModal, setFloorModal] = useState<ApiFloor | null>(null);
+  const [progressPhoto, setProgressPhoto] = useState<string | null>(null);
   const galleryRef = useRef<FlatList<string>>(null);
 
   const load = useCallback(async () => {
@@ -817,16 +834,22 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
                           showsHorizontalScrollIndicator={false}
                           contentContainerStyle={styles.progressPhotos}
                           renderItem={({ item }) => (
-                            <Image
-                              source={{ uri: item }}
-                              style={[
-                                styles.progressPhoto,
-                                {
-                                  borderColor: p.outline,
-                                  backgroundColor: p.surfaceMuted,
-                                },
-                              ]}
-                            />
+                            <TouchableOpacity
+                              activeOpacity={0.85}
+                              onPress={() => setProgressPhoto(item)}
+                              hitSlop={8}
+                            >
+                              <Image
+                                source={{ uri: item }}
+                                style={[
+                                  styles.progressPhoto,
+                                  {
+                                    borderColor: p.outline,
+                                    backgroundColor: p.surfaceMuted,
+                                  },
+                                ]}
+                              />
+                            </TouchableOpacity>
                           )}
                         />
                       ) : null}
@@ -994,6 +1017,21 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
           </Button>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={progressPhoto != null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setProgressPhoto(null)}
+      >
+        <Pressable style={styles.viewerBg} onPress={() => setProgressPhoto(null)}>
+          <Pressable style={styles.viewerCard} onPress={() => {}}>
+            {progressPhoto ? (
+              <Image source={{ uri: progressPhoto }} style={styles.viewerImg} resizeMode="contain" />
+            ) : null}
+          </Pressable>
+        </Pressable>
+      </Modal>
     </>
   );
 }
