@@ -4,10 +4,13 @@ import { useTheme } from "react-native-paper";
 
 export function Screen({ style, children, ...rest }: ViewProps) {
   const theme = useTheme();
+  const { color: _ignoreColor, ...safeRest } = rest as ViewProps & {
+    color?: unknown;
+  };
   return (
     <View
       style={[styles.root, { backgroundColor: theme.colors.background }, style]}
-      {...rest}
+      {...safeRest}
     >
       {children}
     </View>

@@ -42,7 +42,8 @@ function CatalogStackNavigator() {
         headerStyle: { backgroundColor: p.background },
         headerTintColor: p.primary,
         headerShadowVisible: false,
-        headerTitleStyle: { fontWeight: "800", color: p.text },
+        // Без color здесь: иначе Fabric iOS может вызывать -[RCTView setColor:].
+        headerTitleStyle: { fontWeight: "800" },
       }}
     >
       <CatalogStack.Screen
@@ -95,7 +96,7 @@ export function RootNavigator() {
         headerStyle: { backgroundColor: p.background },
         headerTintColor: p.primary,
         headerShadowVisible: false,
-        headerTitleStyle: { fontWeight: "800", color: p.text },
+        headerTitleStyle: { fontWeight: "800" },
       }}
     >
       <RootStack.Screen

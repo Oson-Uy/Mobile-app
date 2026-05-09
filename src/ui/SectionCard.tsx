@@ -8,6 +8,9 @@ type Props = ViewProps & { padded?: boolean };
 
 export function SectionCard({ style, children, padded = true, ...rest }: Props) {
   const theme = useTheme();
+  const { color: _ignoreColor, ...safeRest } = rest as Props & {
+    color?: unknown;
+  };
   return (
     <View
       style={[
@@ -19,7 +22,7 @@ export function SectionCard({ style, children, padded = true, ...rest }: Props) 
         padded && styles.padded,
         style,
       ]}
-      {...rest}
+      {...safeRest}
     >
       {children}
     </View>

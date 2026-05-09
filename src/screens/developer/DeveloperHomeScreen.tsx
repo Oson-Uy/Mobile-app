@@ -38,7 +38,7 @@ function DeveloperTabs() {
         headerStyle: { backgroundColor: p.background },
         headerTintColor: p.primary,
         headerShadowVisible: false,
-        headerTitleStyle: { fontWeight: "900", color: p.text },
+        headerTitleStyle: { fontWeight: "900" },
         headerLeft: () => <HeaderCatalogButton />,
         headerRight: () => (
           <Pressable
@@ -136,7 +136,7 @@ export function DeveloperHomeScreen() {
         headerStyle: { backgroundColor: p.background },
         headerTintColor: p.primary,
         headerShadowVisible: false,
-        headerTitleStyle: { fontWeight: "900", color: p.text },
+        headerTitleStyle: { fontWeight: "900" },
       }}
     >
       <Stack.Screen

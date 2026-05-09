@@ -1,6 +1,12 @@
 import React, { useEffect, useRef } from "react";
-import { ActivityIndicator, Animated, Easing, StyleSheet, View } from "react-native";
-import { Text } from "react-native-paper";
+import {
+  ActivityIndicator,
+  Animated,
+  Easing,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 import { useAppTheme } from "../theme/AppThemeProvider";
 import { brandLogoBackdrop } from "../theme/tokens";
@@ -45,9 +51,7 @@ export function FullScreenLoader({ message, compact }: Props) {
         </Animated.View>
         <ActivityIndicator color={p.primary} style={styles.compactSpinner} />
         {message ? (
-          <Text variant="bodyMedium" style={{ color: p.textMuted }}>
-            {message}
-          </Text>
+          <Text style={[styles.msgText, { color: p.textMuted }]}>{message}</Text>
         ) : null}
       </View>
     );
@@ -63,9 +67,7 @@ export function FullScreenLoader({ message, compact }: Props) {
       </Animated.View>
       <ActivityIndicator color={p.primary} size="large" style={styles.spinner} />
       {message ? (
-        <Text variant="bodyMedium" style={[styles.msg, { color: p.textMuted }]}>
-          {message}
-        </Text>
+        <Text style={[styles.msg, styles.msgText, { color: p.textMuted }]}>{message}</Text>
       ) : null}
     </View>
   );
@@ -79,6 +81,7 @@ const styles = StyleSheet.create({
   },
   spinner: { marginTop: 20 },
   msg: { marginTop: 16, textAlign: "center" },
+  msgText: { fontSize: 16, lineHeight: 22 },
   compact: {
     paddingVertical: 24,
     alignItems: "center",
