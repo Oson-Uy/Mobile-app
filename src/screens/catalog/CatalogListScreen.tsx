@@ -1,13 +1,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
-import {
-  FlatList,
-  Platform,
-  Pressable,
-  RefreshControl,
-  StyleSheet,
-  View,
-} from "react-native";
+import { FlatList, Platform, RefreshControl, StyleSheet, View } from "react-native";
 import { Button, Text, useTheme } from "react-native-paper";
+import { HeaderButton } from "@react-navigation/elements";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
@@ -31,7 +25,6 @@ import { spacing } from "../../theme/tokens";
 
 type Props = NativeStackScreenProps<CatalogStackParamList, "CatalogList">;
 
-const HEADER_ACTION_SIZE = 40;
 const ICON_SIZE = 22;
 
 export function CatalogListScreen({ navigation }: Props) {
@@ -105,33 +98,20 @@ export function CatalogListScreen({ navigation }: Props) {
     navigation.setOptions({
       title: t("catalog.title"),
       headerRight: () => (
-        <View style={styles.headerRow}>
-          <Pressable
-            accessibilityRole="button"
+        <>
+          <HeaderButton
             accessibilityLabel={t("catalog.settings")}
             onPress={() => setSettingsOpen(true)}
-            style={({ pressed }) => [
-              styles.headerHit,
-              pressed && { opacity: 0.65 },
-            ]}
-            hitSlop={6}
           >
             <MaterialCommunityIcons name="cog-outline" size={ICON_SIZE} color={iconColor} />
-          </Pressable>
-          <View style={[styles.headerIconDivider, { backgroundColor: theme.colors.outlineVariant }]} />
-          <Pressable
-            accessibilityRole="button"
+          </HeaderButton>
+          <HeaderButton
             accessibilityLabel={t("catalog.filters")}
             onPress={() => setFilterOpen(true)}
-            style={({ pressed }) => [
-              styles.headerHit,
-              pressed && { opacity: 0.65 },
-            ]}
-            hitSlop={6}
           >
             <MaterialCommunityIcons name="filter-variant" size={ICON_SIZE} color={iconColor} />
-          </Pressable>
-        </View>
+          </HeaderButton>
+        </>
       ),
     });
   }, [navigation, t, theme.colors.primary, theme.colors.outlineVariant]);
@@ -230,25 +210,6 @@ export function CatalogListScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    height: HEADER_ACTION_SIZE,
-    marginRight: Platform.OS === "ios" ? 6 : 10,
-    marginVertical: 2,
-  },
-  headerIconDivider: {
-    width: StyleSheet.hairlineWidth,
-    height: 18,
-    marginHorizontal: 2,
-  },
-  headerHit: {
-    width: HEADER_ACTION_SIZE,
-    height: HEADER_ACTION_SIZE,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   list: {
     padding: spacing.lg,
     paddingBottom: spacing.xxl * 2,

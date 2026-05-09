@@ -1,5 +1,6 @@
 import React, { useMemo, useState, type ComponentProps } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
+import { HeaderButton } from "@react-navigation/elements";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -41,15 +42,12 @@ function DeveloperTabs() {
         headerTitleStyle: { fontWeight: "900" },
         headerLeft: () => <HeaderCatalogButton />,
         headerRight: () => (
-          <Pressable
-            accessibilityRole="button"
+          <HeaderButton
             accessibilityLabel={t("catalog.settings")}
             onPress={() => setSettingsOpen(true)}
-            hitSlop={8}
-            style={{ paddingHorizontal: 10, paddingVertical: 6, marginRight: 4 }}
           >
             <MaterialCommunityIcons name="cog-outline" size={22} color={p.primary} />
-          </Pressable>
+          </HeaderButton>
         ),
         tabBarActiveTintColor: p.primary,
         tabBarInactiveTintColor: p.textMuted,

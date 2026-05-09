@@ -78,7 +78,11 @@ function AppShell() {
         ref={navigationRef}
         theme={theme.navTheme}
         onReady={() => {
-          if (consumePendingDeveloperWorkspace()) navigateToDeveloperWorkspace();
+          if (!consumePendingDeveloperWorkspace()) return;
+          /* Отложить push до конца первого кадра навигации — меньше гонок с нативной шапкой на iOS. */
+          requestAnimationFrame(() => {
+            setTimeout(() => navigateToDeveloperWorkspace(), 50);
+          });
         }}
       >
         <RootNavigator />

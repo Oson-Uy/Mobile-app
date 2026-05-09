@@ -83,7 +83,9 @@ export function OnboardingScreen() {
             mode="contained"
             onPress={() => {
               setPendingDeveloperWorkspace();
-              void completeOnboarding("developer");
+              void (async () => {
+                await completeOnboarding("developer");
+              })();
             }}
             buttonColor={p.secondary}
             textColor="#FFFFFF"
