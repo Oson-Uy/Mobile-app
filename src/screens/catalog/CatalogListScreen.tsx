@@ -72,17 +72,33 @@ export function CatalogListScreen({ navigation }: Props) {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
     void (async () => {
       try {
         setError(null);
         await load();
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Error");
+        if (!cancelled) {
+          setError(e instanceof Error ? e.message : "Error");
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     })();
+    return () => {
+      cancelled = true;
+    };
   }, [load]);
+
+  /** Страховка: если запрос не завершился (редкий зависание сокета) — уходим с ошибкой. */
+  useEffect(() => {
+    if (!loading) return;
+    const id = setTimeout(() => {
+      setLoading(false);
+      setError((prev) => prev ?? t("common.loadError"));
+    }, 22_000);
+    return () => clearTimeout(id);
+  }, [loading, t]);
 
   useLayoutEffect(() => {
     const iconColor = theme.colors.primary;

@@ -2,7 +2,7 @@ import { getApiUrl } from "./config";
 import { getToken } from "../auth/token";
 
 /** Без таймаута fetch на Android может «висеть» минутами (неверный хост, сеть, TLS). */
-const FETCH_TIMEOUT_MS = 25_000;
+const FETCH_TIMEOUT_MS = 18_000;
 
 export class ApiAuthError extends Error {
   constructor(message = "Unauthorized") {
@@ -48,6 +48,10 @@ export async function apiFetch<T>(
   if (!response.ok) {
     throw new Error(`Request failed (${response.status})`);
   }
-  return (await response.json()) as T;
+  try {
+    return (await response.json()) as T;
+  } catch {
+    throw new Error("Invalid response from server");
+  }
 }
 

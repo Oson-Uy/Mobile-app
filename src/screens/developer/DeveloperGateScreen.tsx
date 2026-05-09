@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { View } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
@@ -8,13 +8,38 @@ import { FullScreenLoader } from "../../ui/FullScreenLoader";
 
 type Props = NativeStackScreenProps<DeveloperStackParamList, "DeveloperGate">;
 
+const GATE_MS = 8000;
+
 export function DeveloperGateScreen({ navigation }: Props) {
+  const doneRef = useRef(false);
+
   useEffect(() => {
+    const goLogin = () => {
+      if (doneRef.current) return;
+      doneRef.current = true;
+      navigation.replace("DeveloperLogin", { finishMode: "replaceHome" });
+    };
+    const goHome = () => {
+      if (doneRef.current) return;
+      doneRef.current = true;
+      navigation.replace("DeveloperHome");
+    };
+
+    const watchdog = setTimeout(goLogin, GATE_MS);
+
     void (async () => {
-      const token = await getToken();
-      if (token) navigation.replace("DeveloperHome");
-      else navigation.replace("DeveloperLogin", { finishMode: "replaceHome" });
+      try {
+        const token = await getToken();
+        clearTimeout(watchdog);
+        if (token) goHome();
+        else goLogin();
+      } catch {
+        clearTimeout(watchdog);
+        goLogin();
+      }
     })();
+
+    return () => clearTimeout(watchdog);
   }, [navigation]);
 
   return (
