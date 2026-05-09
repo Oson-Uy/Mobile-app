@@ -1,8 +1,9 @@
 import "dotenv/config";
 
-const BRAND_BLUE = "#1E3A8A";
-/** Splash: светлый фон, чтобы лого с тёмно-синим текстом не сливалось с экраном. */
-const SPLASH_BG = "#F8FAFC";
+/** Android adaptive icon: белый фон под foreground (лого). */
+const ADAPTIVE_ICON_BG = "#FFFFFF";
+/** Splash: белый фон — тёмно-синее лого не теряется на синей подложке. */
+const SPLASH_BG = "#FFFFFF";
 
 export default ({ config }: any) => ({
   ...config,
@@ -37,7 +38,7 @@ export default ({ config }: any) => ({
     versionCode: 1,
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",
-      backgroundColor: BRAND_BLUE,
+      backgroundColor: ADAPTIVE_ICON_BG,
     },
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,

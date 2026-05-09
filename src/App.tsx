@@ -8,10 +8,12 @@ import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 
 import { RootNavigator } from "./navigation/RootNavigator";
-import { navigationRef } from "./navigation/navigationRef";
+import { navigationRef, navigateToDeveloperWorkspace } from "./navigation/navigationRef";
+import { consumePendingDeveloperWorkspace } from "./onboarding/pendingDeveloperLogin";
 import { I18nProvider, useI18n } from "./i18n/I18nProvider";
 import { AppPreferencesProvider, useAppPreferences } from "./preferences/AppPreferencesProvider";
 import { AppThemeProvider, useAppTheme } from "./theme/AppThemeProvider";
+import { brandLogoBackdrop } from "./theme/tokens";
 import { OnboardingScreen } from "./screens/onboarding/OnboardingScreen";
 import { FullScreenLoader } from "./ui/FullScreenLoader";
 
@@ -43,7 +45,7 @@ function AppShell() {
   if (booting) {
     return (
       <PaperProvider theme={theme.paperTheme}>
-        <View style={[styles.boot, { backgroundColor: theme.palette.background }]}>
+        <View style={[styles.boot, { backgroundColor: brandLogoBackdrop }]}>
           <FullScreenLoader />
         </View>
       </PaperProvider>
@@ -60,7 +62,13 @@ function AppShell() {
 
   return (
     <PaperProvider theme={theme.paperTheme}>
-      <NavigationContainer ref={navigationRef} theme={theme.navTheme}>
+      <NavigationContainer
+        ref={navigationRef}
+        theme={theme.navTheme}
+        onReady={() => {
+          if (consumePendingDeveloperWorkspace()) navigateToDeveloperWorkspace();
+        }}
+      >
         <RootNavigator />
         <StatusBar style={theme.mode === "dark" ? "light" : "dark"} />
       </NavigationContainer>

@@ -1,16 +1,17 @@
 import React from "react";
-import { Linking, ScrollView, StyleSheet, View } from "react-native";
+import { Linking, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Text } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { useI18n } from "../../i18n/I18nProvider";
+import { setPendingDeveloperWorkspace } from "../../onboarding/pendingDeveloperLogin";
 import { useAppPreferences } from "../../preferences/AppPreferencesProvider";
 import { useAppTheme } from "../../theme/AppThemeProvider";
-import { radii, spacing } from "../../theme/tokens";
+import { brandLogoBackdrop, radii, spacing } from "../../theme/tokens";
 import { BrandLogo } from "../../ui/BrandLogo";
 
-const DASHBOARD_URL = "https://oson-uy.uz/dashboard";
+const SITE_URL = "https://oson-uy.uz";
 
 export function OnboardingScreen() {
   const { t } = useI18n();
@@ -18,7 +19,10 @@ export function OnboardingScreen() {
   const { palette: p } = useAppTheme();
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: p.background }]} edges={["top", "left", "right"]}>
+    <SafeAreaView
+      style={[styles.safe, { backgroundColor: brandLogoBackdrop }]}
+      edges={["top", "left", "right"]}
+    >
       <ScrollView
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
@@ -63,15 +67,40 @@ export function OnboardingScreen() {
           </Button>
         </View>
 
-        <Text style={[styles.devHint, { color: p.textMuted }]}>{t("onboarding.developerOnlyWebHint")}</Text>
-        <Button
-          mode="outlined"
-          onPress={() => void Linking.openURL(DASHBOARD_URL)}
-          style={styles.outlineBtn}
-          textColor={p.primary}
+        <View
+          style={[
+            styles.card,
+            styles.devCard,
+            { backgroundColor: p.surface, borderColor: p.outline },
+          ]}
         >
-          {t("onboarding.openDeveloperDashboard")}
-        </Button>
+          <View style={[styles.iconWrap, { backgroundColor: `${p.secondary}18` }]}>
+            <MaterialCommunityIcons name="office-building-outline" size={28} color={p.secondary} />
+          </View>
+          <Text style={[styles.cardTitle, { color: p.text }]}>{t("onboarding.developerTitle")}</Text>
+          <Text style={[styles.cardHint, { color: p.textMuted }]}>{t("onboarding.developerHint")}</Text>
+          <Button
+            mode="contained"
+            onPress={() => {
+              setPendingDeveloperWorkspace();
+              void completeOnboarding("developer");
+            }}
+            buttonColor={p.secondary}
+            textColor="#FFFFFF"
+            style={styles.cardBtn}
+            contentStyle={styles.cardBtnInner}
+          >
+            {t("onboarding.developerLoginCta")}
+          </Button>
+        </View>
+
+        <Text style={[styles.devHint, { color: p.textMuted }]}>{t("onboarding.partnerHint")}</Text>
+        <Pressable
+          onPress={() => void Linking.openURL(SITE_URL)}
+          style={({ pressed }) => [styles.siteLinkWrap, pressed && { opacity: 0.7 }]}
+        >
+          <Text style={[styles.siteLink, { color: p.primary }]}>{t("onboarding.partnerSite")}</Text>
+        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
@@ -118,6 +147,9 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     padding: spacing.lg,
   },
+  devCard: {
+    marginTop: spacing.lg,
+  },
   iconWrap: {
     width: 48,
     height: 48,
@@ -142,6 +174,16 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     fontSize: 13,
     textAlign: "center",
+    paddingHorizontal: spacing.sm,
   },
-  outlineBtn: { marginTop: spacing.md, borderRadius: radii.lg },
+  siteLinkWrap: {
+    marginTop: spacing.sm,
+    alignSelf: "center",
+    paddingVertical: spacing.xs,
+  },
+  siteLink: {
+    fontSize: 16,
+    fontWeight: "800",
+    textDecorationLine: "underline",
+  },
 });

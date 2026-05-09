@@ -1,7 +1,11 @@
+/** Подложка под фирменное лого (splash, лоадеры): белый — синее лого читается. */
+export const brandLogoBackdrop = "#FFFFFF";
+
 export const palette = {
   primary: "#1E3A8A",
   secondary: "#F97316",
-  background: "#F1F5F9",
+  /** Светлый фон приложения — белый, без «синего» оттенка за логотипом. */
+  background: brandLogoBackdrop,
   surface: "#FFFFFF",
   surfaceMuted: "#F8FAFC",
   outline: "#E2E8F0",

@@ -12,15 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import {
-  Button,
-  Checkbox,
-  Divider,
-  Switch,
-  Text,
-  TextInput,
-  useTheme,
-} from "react-native-paper";
+import { Button, Divider, Switch, Text, TextInput, useTheme } from "react-native-paper";
 
 import type { CatalogFilterState } from "../../catalog/filterProjects";
 import { formatMoneyInput } from "../../lib/currency";
@@ -37,6 +29,44 @@ type Props = {
   onApply: () => void;
   onReset: () => void;
 };
+
+function FilterCheckRow({
+  checked,
+  onToggle,
+  label,
+  outline,
+  primary,
+  textColor,
+}: {
+  checked: boolean;
+  onToggle: () => void;
+  label: string;
+  outline: string;
+  primary: string;
+  textColor: string;
+}) {
+  return (
+    <Pressable
+      onPress={onToggle}
+      style={({ pressed }) => [styles.checkRow, pressed && { opacity: 0.88 }]}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked }}
+    >
+      <View
+        style={[
+          styles.checkBox,
+          {
+            borderColor: checked ? primary : outline,
+            backgroundColor: checked ? primary : "transparent",
+          },
+        ]}
+      >
+        {checked ? <MaterialCommunityIcons name="check" size={15} color="#FFFFFF" /> : null}
+      </View>
+      <Text style={[styles.checkLabel, { color: textColor }]}>{label}</Text>
+    </Pressable>
+  );
+}
 
 export function CatalogFilterModal({
   visible,
@@ -191,34 +221,22 @@ export function CatalogFilterModal({
               <Text style={[styles.label, styles.mt, { color: p.textMuted }]}>
                 {t("catalog.drawer.additionalLabel")}
               </Text>
-              <View style={styles.checkRow}>
-                <Checkbox
-                  status={filters.verified ? "checked" : "unchecked"}
-                  onPress={() =>
-                    onChange({ ...filters, verified: !filters.verified })
-                  }
-                />
-                <Text
-                  style={{ color: p.text }}
-                  onPress={() => onChange({ ...filters, verified: !filters.verified })}
-                >
-                  {t("catalog.drawer.verified")}
-                </Text>
-              </View>
-              <View style={styles.checkRow}>
-                <Checkbox
-                  status={filters.popular ? "checked" : "unchecked"}
-                  onPress={() =>
-                    onChange({ ...filters, popular: !filters.popular })
-                  }
-                />
-                <Text
-                  style={{ color: p.text }}
-                  onPress={() => onChange({ ...filters, popular: !filters.popular })}
-                >
-                  {t("catalog.popular")}
-                </Text>
-              </View>
+              <FilterCheckRow
+                checked={filters.verified}
+                onToggle={() => onChange({ ...filters, verified: !filters.verified })}
+                label={t("catalog.drawer.verified")}
+                outline={p.outline}
+                primary={p.primary}
+                textColor={p.text}
+              />
+              <FilterCheckRow
+                checked={filters.popular}
+                onToggle={() => onChange({ ...filters, popular: !filters.popular })}
+                label={t("catalog.popular")}
+                outline={p.outline}
+                primary={p.primary}
+                textColor={p.text}
+              />
 
               <View style={[styles.advancedToggle, { borderColor: p.outline }]}>
                 <View style={{ flex: 1 }}>
@@ -283,27 +301,20 @@ export function CatalogFilterModal({
                     <MaterialCommunityIcons name="chevron-down" size={22} color={p.textMuted} />
                   </Pressable>
 
-                  <View style={[styles.checkRow, styles.mt]}>
-                    <Checkbox
-                      status={filters.hasInstallment ? "checked" : "unchecked"}
-                      onPress={() =>
+                  <View style={styles.mt}>
+                    <FilterCheckRow
+                      checked={filters.hasInstallment}
+                      onToggle={() =>
                         onChange({
                           ...filters,
                           hasInstallment: !filters.hasInstallment,
                         })
                       }
+                      label={t("projectCard.installment")}
+                      outline={p.outline}
+                      primary={p.primary}
+                      textColor={p.text}
                     />
-                    <Text
-                      style={{ color: p.text }}
-                      onPress={() =>
-                        onChange({
-                          ...filters,
-                          hasInstallment: !filters.hasInstallment,
-                        })
-                      }
-                    >
-                      {t("projectCard.installment")}
-                    </Text>
                   </View>
                 </>
               ) : null}
@@ -467,8 +478,18 @@ const styles = StyleSheet.create({
   checkRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginLeft: -8,
+    gap: 12,
+    paddingVertical: 10,
   },
+  checkBox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkLabel: { flex: 1, fontSize: 15, fontWeight: "600" },
   advancedToggle: {
     flexDirection: "row",
     alignItems: "center",

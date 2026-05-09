@@ -7,6 +7,7 @@ import {
   Portal,
   Snackbar,
   Text,
+  TextInput,
   useTheme,
 } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -71,6 +72,7 @@ export function DeveloperSubscriptionsScreen() {
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
   const [active, setActive] = useState<ActivePayment | null>(null);
   const [busyKey, setBusyKey] = useState<string | null>(null);
+  const [promoCode, setPromoCode] = useState("");
 
   const load = async () => {
     const [developer, allProjects] = await Promise.all([
@@ -109,13 +111,19 @@ export function DeveloperSubscriptionsScreen() {
     try {
       setBusyKey(`${selectedProjectId}-${plan}`);
       setErr(null);
+      const payload: Record<string, unknown> = {
+        projectId: selectedProjectId,
+        plan,
+        paymentMethod: "CARD_TRANSFER",
+      };
+      const trimmedPromo = promoCode.trim();
+      if (trimmedPromo) {
+        // TODO(api): Align field name and validation with Swagger for POST /billing/checkout.
+        payload.promoCode = trimmedPromo;
+      }
       const data = await apiFetch<any>("/billing/checkout", {
         method: "POST",
-        body: JSON.stringify({
-          projectId: selectedProjectId,
-          plan,
-          paymentMethod: "CARD_TRANSFER",
-        }),
+        body: JSON.stringify(payload),
       });
       setActive({
         plan,
@@ -204,6 +212,8 @@ export function DeveloperSubscriptionsScreen() {
                     mode={isSel ? "contained" : "outlined"}
                     onPress={() => setSelectedProjectId(proj.id)}
                     style={styles.projectBtn}
+                    contentStyle={styles.projectBtnContent}
+                    labelStyle={styles.projectBtnLabel}
                   >
                     {proj.name}
                     {activePlan ? ` · ${activePlan}` : ""}
@@ -212,6 +222,18 @@ export function DeveloperSubscriptionsScreen() {
               })}
             </View>
           </ScrollView>
+
+          <TextInput
+            mode="outlined"
+            label={t("developer.promoCode")}
+            value={promoCode}
+            onChangeText={setPromoCode}
+            autoCapitalize="characters"
+            style={styles.promoField}
+          />
+          <Text variant="bodySmall" style={[styles.promoHint, { color: p.textMuted }]}>
+            {t("developer.promoHint")}
+          </Text>
         </SectionCard>
 
         <View style={{ height: spacing.lg }} />
@@ -270,8 +292,12 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     marginBottom: 8,
   },
-  projectRow: { flexDirection: "row", gap: spacing.sm },
-  projectBtn: { borderRadius: 14 },
+  projectRow: { flexDirection: "row", gap: spacing.sm, paddingVertical: 2 },
+  projectBtn: { borderRadius: 14, minWidth: 112, maxWidth: 280 },
+  projectBtnContent: { paddingHorizontal: 12, flexWrap: "wrap", justifyContent: "center" },
+  projectBtnLabel: { fontSize: 13, fontWeight: "700", textAlign: "center" },
+  promoField: { marginTop: spacing.md },
+  promoHint: { marginTop: 6, lineHeight: 18 },
   planCard: { borderRadius: radii.xl },
   planHead: { flexDirection: "row", alignItems: "center", gap: spacing.md },
   planIcon: { height: 56, width: 56, borderRadius: 18, alignItems: "center", justifyContent: "center" },

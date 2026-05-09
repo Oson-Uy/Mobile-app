@@ -3,6 +3,7 @@ import { ActivityIndicator, Animated, Easing, StyleSheet, View } from "react-nat
 import { Text } from "react-native-paper";
 
 import { useAppTheme } from "../theme/AppThemeProvider";
+import { brandLogoBackdrop } from "../theme/tokens";
 import { BrandLogo } from "./BrandLogo";
 
 type Props = {
@@ -53,7 +54,10 @@ export function FullScreenLoader({ message, compact }: Props) {
   }
 
   return (
-    <View style={[styles.full, { backgroundColor: p.background }]} accessibilityRole="progressbar">
+    <View
+      style={[styles.full, { backgroundColor: brandLogoBackdrop }]}
+      accessibilityRole="progressbar"
+    >
       <Animated.View style={{ transform: [{ scale: pulse }] }}>
         <BrandLogo size={88} />
       </Animated.View>

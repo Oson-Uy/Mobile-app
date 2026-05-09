@@ -10,9 +10,10 @@ SITE_LOGO = (
     ROOT.parent / "frontend" / "public" / "osonuy-logo-removebg-preview.png"
 )
 OUT_DIR = ROOT / "assets"
-BRAND_BLUE = (0x1E, 0x3A, 0x8A, 255)
-# Светлый фон splash: тёмно-синие буквы «Oson» на фирменном синем сливались.
-SPLASH_BG = (0xF8, 0xFA, 0xFC, 255)
+# Иконка приложения: лого на белом фоне (production / store).
+ICON_BG = (255, 255, 255, 255)
+# Splash на белом: синее лого не теряется на синей подложке.
+SPLASH_BG = (255, 255, 255, 255)
 
 
 def _paste_logo_center(canvas: Image.Image, logo: Image.Image, max_frac: float) -> None:
@@ -28,7 +29,7 @@ def _paste_logo_center(canvas: Image.Image, logo: Image.Image, max_frac: float) 
 
 def make_square_icon(size: int) -> Image.Image:
     logo = Image.open(SITE_LOGO).convert("RGBA")
-    canvas = Image.new("RGBA", (size, size), BRAND_BLUE)
+    canvas = Image.new("RGBA", (size, size), ICON_BG)
     _paste_logo_center(canvas, logo, 0.62)
     return canvas
 

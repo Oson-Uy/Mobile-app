@@ -1,8 +1,13 @@
 import React, { useCallback, useMemo, useState } from "react";
 import {
+  ActionSheetIOS,
   Alert,
   FlatList,
+  Modal,
+  Platform,
+  Pressable,
   RefreshControl,
+  ScrollView,
   StyleSheet,
   View,
 } from "react-native";
@@ -10,7 +15,6 @@ import {
   Button,
   Divider,
   FAB,
-  Menu,
   Snackbar,
   Text,
 } from "react-native-paper";
@@ -21,7 +25,7 @@ import { useI18n } from "../../i18n/I18nProvider";
 import { Screen } from "../../ui/Screen";
 import { SectionCard } from "../../ui/SectionCard";
 import { useAppTheme } from "../../theme/AppThemeProvider";
-import { spacing } from "../../theme/tokens";
+import { radii, spacing } from "../../theme/tokens";
 import { FullScreenLoader } from "../../ui/FullScreenLoader";
 
 type ApiProject = { id: number; name: string; developerId: number };
@@ -38,7 +42,7 @@ type ApiFloor = {
 
 export function DeveloperFloorsScreen() {
   const { t } = useI18n();
-  const { palette: p } = useAppTheme();
+  const { palette: p, mode } = useAppTheme();
   const navigation = useNavigation<any>();
   const [projects, setProjects] = useState<ApiProject[]>([]);
   const [floors, setFloors] = useState<ApiFloor[]>([]);
@@ -47,7 +51,7 @@ export function DeveloperFloorsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [snack, setSnack] = useState<string | null>(null);
-  const [filterMenuOpen, setFilterMenuOpen] = useState(false);
+  const [projectPickerOpen, setProjectPickerOpen] = useState(false);
 
   const load = useCallback(async () => {
     setError(null);
@@ -151,8 +155,69 @@ export function DeveloperFloorsScreen() {
   const selectedProjectName =
     projects.find((x) => x.id === selectedProjectId)?.name ?? t("developer.chooseProject");
 
+  const openProjectPicker = () => {
+    if (!projects.length) return;
+    if (Platform.OS === "ios") {
+      const labels = projects.map((x) => x.name);
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: [t("developer.cancel"), ...labels],
+          cancelButtonIndex: 0,
+          title: t("developer.pickProjectTitle"),
+          userInterfaceStyle: mode === "dark" ? "dark" : "light",
+        },
+        (idx) => {
+          if (idx != null && idx > 0) setSelectedProjectId(projects[idx - 1]!.id);
+        },
+      );
+    } else {
+      setProjectPickerOpen(true);
+    }
+  };
+
   return (
     <Screen>
+      <Modal
+        visible={projectPickerOpen}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setProjectPickerOpen(false)}
+      >
+        <View style={styles.pickerRoot}>
+          <Pressable style={styles.pickerBackdrop} onPress={() => setProjectPickerOpen(false)} />
+          <View style={[styles.pickerSheet, { backgroundColor: p.surface }]}>
+            <Text variant="titleLarge" style={[styles.pickerTitle, { color: p.text }]}>
+              {t("developer.pickProjectTitle")}
+            </Text>
+            <ScrollView
+              style={styles.pickerList}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
+              {projects.map((proj) => {
+                const sel = proj.id === selectedProjectId;
+                return (
+                  <Pressable
+                    key={proj.id}
+                    onPress={() => {
+                      setSelectedProjectId(proj.id);
+                      setProjectPickerOpen(false);
+                    }}
+                    style={[
+                      styles.pickerRow,
+                      { borderBottomColor: p.outline },
+                      sel && { backgroundColor: p.surfaceMuted },
+                    ]}
+                  >
+                    <Text style={[styles.pickerRowLabel, { color: p.text }]}>{proj.name}</Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
       <FlatList
         contentContainerStyle={styles.list}
         data={floorsView}
@@ -164,31 +229,15 @@ export function DeveloperFloorsScreen() {
               {t("developer.floors")}
             </Text>
             {projects.length > 0 ? (
-              <Menu
-                visible={filterMenuOpen}
-                onDismiss={() => setFilterMenuOpen(false)}
-                anchor={
-                  <Button
-                    mode="outlined"
-                    icon="chevron-down"
-                    onPress={() => setFilterMenuOpen(true)}
-                    style={styles.filterBtn}
-                  >
-                    {t("developer.filterByProject")}: {selectedProjectName}
-                  </Button>
-                }
+              <Button
+                mode="outlined"
+                icon="chevron-down"
+                onPress={openProjectPicker}
+                style={styles.filterBtn}
+                contentStyle={styles.filterBtnContent}
               >
-                {projects.map((proj) => (
-                  <Menu.Item
-                    key={proj.id}
-                    onPress={() => {
-                      setSelectedProjectId(proj.id);
-                      setFilterMenuOpen(false);
-                    }}
-                    title={proj.name}
-                  />
-                ))}
-              </Menu>
+                {t("developer.filterByProject")}: {selectedProjectName}
+              </Button>
             ) : null}
             {error ? <Text style={[styles.err, { color: p.error }]}>{error}</Text> : null}
           </View>
@@ -264,9 +313,29 @@ export function DeveloperFloorsScreen() {
 }
 
 const styles = StyleSheet.create({
+  pickerRoot: { flex: 1, justifyContent: "flex-end" },
+  pickerBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(15,23,42,0.45)",
+  },
+  pickerSheet: {
+    borderTopLeftRadius: radii.xl,
+    borderTopRightRadius: radii.xl,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.lg,
+    maxHeight: "72%",
+  },
+  pickerTitle: { fontWeight: "800", paddingHorizontal: spacing.lg, marginBottom: spacing.sm },
+  pickerList: { maxHeight: 420 },
+  pickerRow: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    paddingVertical: 4,
+  },
+  pickerRowLabel: { fontSize: 17, paddingVertical: 12, paddingHorizontal: spacing.lg },
   list: { padding: spacing.lg, paddingBottom: spacing.xxl * 3 },
   head: { fontWeight: "900" },
   filterBtn: { marginTop: spacing.sm, alignSelf: "stretch" },
+  filterBtnContent: { flexWrap: "wrap", justifyContent: "flex-start" },
   err: { marginTop: 6 },
   empty: { paddingVertical: spacing.xxl * 2, alignItems: "center" },
   fab: {

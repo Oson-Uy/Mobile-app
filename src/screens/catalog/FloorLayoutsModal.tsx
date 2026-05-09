@@ -6,6 +6,7 @@ import {
   Modal,
   NativeScrollEvent,
   NativeSyntheticEvent,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -39,10 +40,17 @@ export function FloorLayoutsModal({
   const { t, locale } = useI18n();
   const { palette: p } = useAppTheme();
   const loc = localeFor(locale);
-  const width = Dimensions.get("window").width - spacing.lg * 2;
+  /** Ширина контента карусели = экран − padding модалки (`modalRoot`) − padding листа (`sheet`). */
+  const slideWidth = Math.max(
+    200,
+    Dimensions.get("window").width - spacing.md * 2 - spacing.lg * 2,
+  );
   const layouts = floor?.layouts?.filter((l) => l.imageUrl) ?? [];
   const [active, setActive] = useState(0);
+  const [carouselW, setCarouselW] = useState(slideWidth);
   const listRef = useRef<FlatList<(typeof layouts)[0]>>(null);
+
+  const pageW = carouselW > 0 ? carouselW : slideWidth;
 
   useEffect(() => {
     if (visible) setActive(0);
@@ -50,11 +58,11 @@ export function FloorLayoutsModal({
 
   const onScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const x = e.nativeEvent.contentOffset.x;
-    setActive(Math.round(x / width));
+    setActive(Math.round(x / pageW));
   };
 
   const scrollTo = (i: number) => {
-    listRef.current?.scrollToIndex({ index: i, animated: true });
+    listRef.current?.scrollToOffset({ offset: i * pageW, animated: true });
     setActive(i);
   };
 
@@ -108,29 +116,38 @@ export function FloorLayoutsModal({
 
           {layouts.length ? (
             <>
-              <FlatList
-                ref={listRef}
-                data={layouts}
-                horizontal
-                pagingEnabled
-                showsHorizontalScrollIndicator={false}
-                keyExtractor={(item, idx) => String(item.id ?? idx)}
-                onMomentumScrollEnd={onScrollEnd}
-                getItemLayout={(_, index) => ({
-                  length: width,
-                  offset: width * index,
-                  index,
-                })}
-                renderItem={({ item }) => (
-                  <View style={{ width }}>
-                    <Image
-                      source={{ uri: item.imageUrl }}
-                      style={[
-                        styles.layoutImg,
-                        { width, backgroundColor: p.surfaceMuted },
-                      ]}
-                      resizeMode="contain"
-                    />
+              <View
+                onLayout={(e) => {
+                  const w = Math.round(e.nativeEvent.layout.width);
+                  if (w > 0 && w !== carouselW) setCarouselW(w);
+                }}
+              >
+                <FlatList
+                  ref={listRef}
+                  data={layouts}
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  keyExtractor={(item, idx) => String(item.id ?? idx)}
+                  onMomentumScrollEnd={onScrollEnd}
+                  removeClippedSubviews={Platform.OS === "android"}
+                  initialNumToRender={2}
+                  windowSize={3}
+                  getItemLayout={(_, index) => ({
+                    length: pageW,
+                    offset: pageW * index,
+                    index,
+                  })}
+                  renderItem={({ item }) => (
+                    <View style={{ width: pageW }}>
+                      <Image
+                        source={{ uri: item.imageUrl }}
+                        style={[
+                          styles.layoutImg,
+                          { width: pageW, backgroundColor: p.surfaceMuted },
+                        ]}
+                        resizeMode="contain"
+                      />
                     {item.title ? (
                       <Text variant="labelMedium" style={[styles.layoutTitle, { color: p.text }]}>
                         {item.title}
@@ -138,7 +155,8 @@ export function FloorLayoutsModal({
                     ) : null}
                   </View>
                 )}
-              />
+                />
+              </View>
               {layouts.length > 1 ? (
                 <ScrollView
                   horizontal

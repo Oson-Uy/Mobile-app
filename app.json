@@ -11,10 +11,10 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#F8FAFC",
+      "backgroundColor": "#FFFFFF",
       "dark": {
         "image": "./assets/splash.png",
-        "backgroundColor": "#F8FAFC"
+        "backgroundColor": "#FFFFFF"
       }
     },
     "ios": {
@@ -27,13 +27,21 @@
       "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#1E3A8A"
+        "backgroundColor": "#FFFFFF"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "apiUrl": "https://api.oson-uy.uz",
+      "heroVideoUrl": "",
+      "eas": {
+        "projectId": "b30a68b1-e29e-4779-b817-dc60054440a1"
+      }
+    },
+    "owner": "sardor-sofr-solutions"
   }
 }

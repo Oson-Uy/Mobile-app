@@ -1,9 +1,13 @@
-import React, { useMemo, type ComponentProps } from "react";
+import React, { useMemo, useState, type ComponentProps } from "react";
+import { Pressable, Text, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useI18n } from "../../i18n/I18nProvider";
+import { CatalogSettingsModal } from "../catalog/CatalogSettingsModal";
+import { HeaderCatalogButton } from "../../ui/HeaderCatalogButton";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 
 const Tab = createBottomTabNavigator();
@@ -12,6 +16,8 @@ const Stack = createNativeStackNavigator();
 function DeveloperTabs() {
   const { t } = useI18n();
   const { palette: p } = useAppTheme();
+  const insets = useSafeAreaInsets();
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const icons = useMemo(
     () => ({
@@ -25,23 +31,45 @@ function DeveloperTabs() {
   );
 
   return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
+    <View style={{ flex: 1 }}>
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
         headerShown: true,
         headerStyle: { backgroundColor: p.background },
         headerTintColor: p.primary,
         headerShadowVisible: false,
         headerTitleStyle: { fontWeight: "900", color: p.text },
+        headerLeft: () => <HeaderCatalogButton />,
+        headerRight: () => (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t("catalog.settings")}
+            onPress={() => setSettingsOpen(true)}
+            hitSlop={8}
+            style={{ paddingHorizontal: 10, paddingVertical: 6, marginRight: 4 }}
+          >
+            <MaterialCommunityIcons name="cog-outline" size={22} color={p.primary} />
+          </Pressable>
+        ),
         tabBarActiveTintColor: p.primary,
         tabBarInactiveTintColor: p.textMuted,
         tabBarStyle: {
           borderTopColor: p.outline,
           backgroundColor: p.surface,
-          height: 60,
-          paddingTop: 6,
-          paddingBottom: 8,
+          paddingHorizontal: 10,
+          paddingTop: 4,
+          paddingBottom: insets.bottom > 0 ? insets.bottom + 4 : 8,
         },
-        tabBarLabelStyle: { fontSize: 11, fontWeight: "800" },
+        tabBarItemStyle: {
+          paddingVertical: 2,
+          paddingHorizontal: 2,
+        },
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: "700",
+          marginTop: -2,
+        },
+        tabBarIconStyle: { marginTop: 2 },
         tabBarIcon: ({ color, size }) => (
           <MaterialCommunityIcons
             name={
@@ -50,11 +78,11 @@ function DeveloperTabs() {
               ] ?? "account"
             }
             color={color}
-            size={size}
+            size={Math.min(22, size - 2)}
           />
         ),
       })}
-    >
+      >
       <Tab.Screen
         name="Projects"
         getComponent={() =>
@@ -88,7 +116,13 @@ function DeveloperTabs() {
         }
         options={{ title: t("developer.profile") ?? "Profile" }}
       />
-    </Tab.Navigator>
+      </Tab.Navigator>
+      <CatalogSettingsModal
+        visible={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        showCabinetEntry={false}
+      />
+    </View>
   );
 }
 

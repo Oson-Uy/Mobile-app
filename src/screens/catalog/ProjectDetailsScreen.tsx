@@ -73,7 +73,12 @@ function createDetailsStyles(p: AppPalette) {
       alignItems: "center",
       justifyContent: "center",
     },
-    thumbStrip: { maxHeight: 72, backgroundColor: "rgba(0,0,0,0.35)" },
+    thumbStrip: {
+      maxHeight: 72,
+      backgroundColor: p.surfaceMuted,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: p.outline,
+    },
     thumbStripIn: { padding: spacing.sm, gap: spacing.sm },
     thumb: {
       width: 72,
@@ -186,15 +191,41 @@ function createDetailsStyles(p: AppPalette) {
       justifyContent: "center",
       padding: spacing.lg,
     },
-    viewerCard: {
+    viewerWrap: {
       width: "100%",
       height: "80%",
+      position: "relative",
+    },
+    viewerCard: {
+      width: "100%",
+      height: "100%",
       borderRadius: radii.xl,
       overflow: "hidden",
     },
+    viewerClose: {
+      position: "absolute",
+      top: spacing.sm,
+      right: spacing.sm,
+      zIndex: 2,
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "rgba(0,0,0,0.55)",
+    },
     viewerImg: { width: "100%", height: "100%" },
     progressHint: { marginTop: spacing.md },
-    logo: { width: 120, height: 48, marginBottom: spacing.sm },
+    devHeaderRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.md,
+      marginBottom: spacing.md,
+    },
+    devLogo: { width: 88, height: 40, flexShrink: 0 },
+    devHeaderText: { flex: 1, minWidth: 0, gap: 4 },
+    devHeaderTitle: { fontWeight: "800", letterSpacing: 0.2, color: p.text },
+    devHeaderSub: { opacity: 0.75, color: p.text },
     devSub: { fontWeight: "800", marginBottom: 4, color: p.text },
     devDesc: { opacity: 0.85, color: p.text },
     divider: { marginVertical: spacing.md, backgroundColor: p.outline },
@@ -753,10 +784,19 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
 
           {dev ? (
             <SectionCard style={styles.section}>
-              <SectionTitle title={t("projectDetails.developerTitle")} subtitle={dev.name} />
-              {dev.logoUrl ? (
-                <Image source={{ uri: dev.logoUrl }} style={styles.logo} resizeMode="contain" />
-              ) : null}
+              <View style={styles.devHeaderRow}>
+                {dev.logoUrl ? (
+                  <Image source={{ uri: dev.logoUrl }} style={styles.devLogo} resizeMode="contain" />
+                ) : null}
+                <View style={styles.devHeaderText}>
+                  <Text variant="titleMedium" style={styles.devHeaderTitle}>
+                    {t("projectDetails.developerTitle")}
+                  </Text>
+                  <Text variant="bodySmall" style={styles.devHeaderSub}>
+                    {dev.name}
+                  </Text>
+                </View>
+              </View>
               {dev.description ? (
                 <>
                   <Text style={styles.devSub}>{t("projectDetails.developerAbout")}</Text>
@@ -914,7 +954,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
                   contentStyle={styles.videoCtaIn}
                   onPress={() => setShowVideo(true)}
                 >
-                  {t("common.open")}
+                  {t("projectDetails.watchVideo")}
                 </Button>
               ) : videoWeb ? (
                 videoWeb.provider === "instagram" ? (
@@ -1051,11 +1091,21 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
         onRequestClose={() => setProgressPhoto(null)}
       >
         <Pressable style={styles.viewerBg} onPress={() => setProgressPhoto(null)}>
-          <Pressable style={styles.viewerCard} onPress={() => {}}>
-            {progressPhoto ? (
-              <Image source={{ uri: progressPhoto }} style={styles.viewerImg} resizeMode="contain" />
-            ) : null}
-          </Pressable>
+          <View style={styles.viewerWrap} pointerEvents="box-none">
+            <Pressable
+              style={styles.viewerClose}
+              onPress={() => setProgressPhoto(null)}
+              accessibilityRole="button"
+              accessibilityLabel={t("developer.close")}
+            >
+              <MaterialCommunityIcons name="close" size={26} color="#FFFFFF" />
+            </Pressable>
+            <Pressable style={styles.viewerCard} onPress={() => {}}>
+              {progressPhoto ? (
+                <Image source={{ uri: progressPhoto }} style={styles.viewerImg} resizeMode="contain" />
+              ) : null}
+            </Pressable>
+          </View>
         </Pressable>
       </Modal>
     </>

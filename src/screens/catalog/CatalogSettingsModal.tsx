@@ -4,7 +4,10 @@ import { Button, IconButton, RadioButton, Text } from "react-native-paper";
 
 import { getToken, clearToken } from "../../auth/token";
 import { useI18n, type Locale } from "../../i18n/I18nProvider";
-import { navigateToDeveloperLoginFromSettings } from "../../navigation/navigationRef";
+import {
+  exitDeveloperWorkspace,
+  navigateToDeveloperWorkspace,
+} from "../../navigation/navigationRef";
 import { useAppPreferences } from "../../preferences/AppPreferencesProvider";
 import { useAppTheme, type ThemeMode } from "../../theme/AppThemeProvider";
 import { radii, spacing } from "../../theme/tokens";
@@ -12,6 +15,8 @@ import { radii, spacing } from "../../theme/tokens";
 type Props = {
   visible: boolean;
   onClose: () => void;
+  /** false внутри кабинета застройщика — без кнопки «в кабинет». */
+  showCabinetEntry?: boolean;
 };
 
 const LOCALES: { id: Locale; labelKey: string }[] = [
@@ -20,7 +25,11 @@ const LOCALES: { id: Locale; labelKey: string }[] = [
   { id: "en", labelKey: "settings.langEn" },
 ];
 
-export function CatalogSettingsModal({ visible, onClose }: Props) {
+export function CatalogSettingsModal({
+  visible,
+  onClose,
+  showCabinetEntry = true,
+}: Props) {
   const { t, locale, setLocale } = useI18n();
   const { mode, setMode, palette: p } = useAppTheme();
   const doneLabelColor = mode === "dark" ? "#0F172A" : "#FFFFFF";
@@ -38,7 +47,7 @@ export function CatalogSettingsModal({ visible, onClose }: Props) {
 
   const onDeveloperLogin = () => {
     onClose();
-    navigateToDeveloperLoginFromSettings();
+    if (showCabinetEntry) navigateToDeveloperWorkspace();
   };
 
   const onExitDeveloper = async () => {
@@ -46,6 +55,7 @@ export function CatalogSettingsModal({ visible, onClose }: Props) {
     await setRole("buyer");
     setHasDevSession(false);
     onClose();
+    exitDeveloperWorkspace();
   };
 
   return (
@@ -99,18 +109,31 @@ export function CatalogSettingsModal({ visible, onClose }: Props) {
             <Text style={[styles.section, styles.sectionSpaced, { color: p.textMuted }]}>
               {t("settings.developerSection")}
             </Text>
-            <Text variant="bodySmall" style={{ color: p.textMuted, marginBottom: spacing.sm }}>
-              {t("settings.developerSectionHint")}
-            </Text>
-            {role === "developer" && hasDevSession ? (
-              <Button mode="outlined" onPress={() => void onExitDeveloper()} style={styles.devBtn}>
+            {showCabinetEntry ? (
+              <Text variant="bodySmall" style={{ color: p.textMuted, marginBottom: spacing.sm }}>
+                {t("settings.developerSectionHint")}
+              </Text>
+            ) : null}
+            {showCabinetEntry ? (
+              <Button
+                mode="contained"
+                onPress={onDeveloperLogin}
+                buttonColor={p.secondary}
+                textColor="#FFFFFF"
+                style={styles.devBtn}
+              >
+                {t("settings.goToDeveloperCabinet")}
+              </Button>
+            ) : null}
+            {hasDevSession ? (
+              <Button
+                mode="outlined"
+                onPress={() => void onExitDeveloper()}
+                style={[styles.devBtn, !showCabinetEntry && styles.devBtnFirstInSection]}
+              >
                 {t("settings.exitDeveloper")}
               </Button>
-            ) : (
-              <Button mode="contained" onPress={onDeveloperLogin} buttonColor={p.secondary} textColor="#FFFFFF" style={styles.devBtn}>
-                {t("settings.developerLogin")}
-              </Button>
-            )}
+            ) : null}
 
             <Button
               mode="contained"
@@ -169,6 +192,9 @@ const styles = StyleSheet.create({
   devBtn: {
     borderRadius: radii.lg,
     marginBottom: spacing.sm,
+  },
+  devBtnFirstInSection: {
+    marginTop: spacing.sm,
   },
   done: {
     marginTop: spacing.lg,
