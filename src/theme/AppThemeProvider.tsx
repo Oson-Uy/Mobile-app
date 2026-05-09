@@ -97,14 +97,17 @@ export function AppThemeProvider({ children }: { children: React.ReactNode }) {
   const [mode, setModeState] = useState<ThemeMode>("light");
 
   useEffect(() => {
+    const cap = setTimeout(() => setHydrated(true), 4500);
     void (async () => {
       try {
         const raw = await getSecureItemWithTimeout(STORAGE_KEYS.theme);
         if (raw === "dark" || raw === "light") setModeState(raw);
       } finally {
+        clearTimeout(cap);
         setHydrated(true);
       }
     })();
+    return () => clearTimeout(cap);
   }, []);
 
   const setMode = useCallback(async (m: ThemeMode) => {

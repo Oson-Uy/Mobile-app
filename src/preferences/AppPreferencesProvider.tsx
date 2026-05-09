@@ -33,6 +33,7 @@ export function AppPreferencesProvider({
   const [role, setRoleState] = useState<UserRole>("buyer");
 
   useEffect(() => {
+    const cap = setTimeout(() => setHydrated(true), 4500);
     void (async () => {
       try {
         const [ob, r] = await Promise.all([
@@ -42,9 +43,11 @@ export function AppPreferencesProvider({
         setOnboardingDone(ob === "1");
         setRoleState(r === "developer" ? "developer" : "buyer");
       } finally {
+        clearTimeout(cap);
         setHydrated(true);
       }
     })();
+    return () => clearTimeout(cap);
   }, []);
 
   const persistRole = useCallback(async (next: UserRole) => {

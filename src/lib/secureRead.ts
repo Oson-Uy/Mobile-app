@@ -1,6 +1,6 @@
 import * as SecureStore from "expo-secure-store";
 
-const READ_MS = 3500;
+const READ_MS = 2500;
 
 /**
  * На части Android SecureStore.getItemAsync может долго не отвечать — тогда

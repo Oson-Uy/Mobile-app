@@ -42,6 +42,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>("ru");
 
   useEffect(() => {
+    const cap = setTimeout(() => setHydrated(true), 4500);
     void (async () => {
       try {
         const raw = await getSecureItemWithTimeout(STORAGE_KEYS.locale);
@@ -49,9 +50,11 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
           setLocaleState(raw);
         }
       } finally {
+        clearTimeout(cap);
         setHydrated(true);
       }
     })();
+    return () => clearTimeout(cap);
   }, []);
 
   const setLocale = useCallback(async (next: Locale) => {
