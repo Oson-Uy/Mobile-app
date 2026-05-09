@@ -98,7 +98,7 @@ export function CatalogListScreen({ navigation }: Props) {
     navigation.setOptions({
       title: t("catalog.title"),
       headerRight: () => (
-        <>
+        <View style={styles.headerActions}>
           <HeaderButton
             accessibilityLabel={t("catalog.settings")}
             onPress={() => setSettingsOpen(true)}
@@ -111,10 +111,10 @@ export function CatalogListScreen({ navigation }: Props) {
           >
             <MaterialCommunityIcons name="filter-variant" size={ICON_SIZE} color={iconColor} />
           </HeaderButton>
-        </>
+        </View>
       ),
     });
-  }, [navigation, t, theme.colors.primary, theme.colors.outlineVariant]);
+  }, [navigation, t, theme.colors.primary]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -210,6 +210,10 @@ export function CatalogListScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   list: {
     padding: spacing.lg,
     paddingBottom: spacing.xxl * 2,

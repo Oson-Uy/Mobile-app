@@ -1,4 +1,4 @@
-/** Normalize URL for playback (expo-av expects absolute https in most cases). */
+/** Normalize URL for playback (expo-video / native players expect absolute https in most cases). */
 export function normalizeVideoUrl(url: string): string {
   const u = url.trim();
   if (!u) return u;
@@ -34,7 +34,7 @@ export function getYoutubeEmbedUrl(raw: string): string | null {
   return null;
 }
 
-/** True if URL likely points to a file stream expo-av can play. */
+/** True if URL likely points to a file stream the native player can play. */
 export function looksLikeDirectVideoFile(url: string): boolean {
   const u = normalizeVideoUrl(url).toLowerCase().split("?")[0] ?? "";
   return /\.(mp4|m4v|webm|mov)(\s*)$/i.test(u);
@@ -114,7 +114,7 @@ function isYoutubeShortsUrl(raw: string): boolean {
   return /youtube\.com\/shorts\//i.test(normalizeVideoUrl(raw));
 }
 
-/** YouTube или Instagram для встроенного WebView; иначе null (используйте expo-av). */
+/** YouTube или Instagram для встроенного WebView; иначе null (прямой поток — expo-video). */
 export function getVideoWebEmbed(raw: string): VideoWebEmbed | null {
   const yt = getYoutubeEmbedUrl(raw);
   if (yt) {

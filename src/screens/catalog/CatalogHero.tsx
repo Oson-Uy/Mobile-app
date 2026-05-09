@@ -1,22 +1,51 @@
-import React, { useState } from "react";
-import { StyleSheet, View } from "react-native";
-import { Text } from "react-native-paper";
-import { Video, ResizeMode } from "expo-av";
+import React, { useCallback, useEffect, useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { useEvent } from "expo";
 import Constants from "expo-constants";
+import { useVideoPlayer, VideoView } from "expo-video";
 
 import { useI18n } from "../../i18n/I18nProvider";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { radii, spacing } from "../../theme/tokens";
 import { BrandWordmark } from "../../ui/BrandWordmark";
 
+function CatalogHeroVideo({
+  uri,
+  videoBg,
+  onError,
+}: {
+  uri: string;
+  videoBg: string;
+  onError: () => void;
+}) {
+  const player = useVideoPlayer(uri, (p) => {
+    p.loop = true;
+    p.play();
+  });
+  const { status } = useEvent(player, "statusChange", { status: player.status });
+
+  useEffect(() => {
+    if (status === "error") onError();
+  }, [status, onError]);
+
+  return (
+    <VideoView
+      style={[styles.video, { backgroundColor: videoBg }]}
+      player={player}
+      nativeControls
+      contentFit="contain"
+    />
+  );
+}
+
 export function CatalogHero() {
   const { t } = useI18n();
   const { palette: p } = useAppTheme();
   const uri = String(
-    (Constants.expoConfig?.extra as { heroVideoUrl?: string } | undefined)
-      ?.heroVideoUrl ?? "",
+    (Constants.expoConfig?.extra as { heroVideoUrl?: string } | undefined)?.heroVideoUrl ?? "",
   ).trim();
   const [videoErr, setVideoErr] = useState(false);
+  const onVideoError = useCallback(() => setVideoErr(true), []);
 
   return (
     <View style={styles.wrap}>
@@ -38,14 +67,7 @@ export function CatalogHero() {
       </View>
 
       {uri && !videoErr ? (
-        <Video
-          style={[styles.video, { backgroundColor: p.surfaceMuted }]}
-          source={{ uri }}
-          useNativeControls
-          resizeMode={ResizeMode.CONTAIN}
-          isLooping
-          onError={() => setVideoErr(true)}
-        />
+        <CatalogHeroVideo uri={uri} videoBg={p.surfaceMuted} onError={onVideoError} />
       ) : null}
     </View>
   );

@@ -1,12 +1,11 @@
 import React from "react";
-import { StyleSheet } from "react-native";
-import { Text } from "react-native-paper";
+import { StyleSheet, Text, type TextStyle } from "react-native";
 
 import { useAppTheme } from "../theme/AppThemeProvider";
 
 type Props = {
   size?: number;
-  textStyle?: React.ComponentProps<typeof Text>["style"];
+  textStyle?: TextStyle;
   /**
    * Если фон тёмный (например primary), то оставляем буквы белыми,
    * но подчёркиваем фирменным оранжевым.
@@ -23,7 +22,10 @@ export function BrandWordmark({
 
   if (onDark) {
     return (
-      <Text accessibilityLabel="Oson Uy" style={[styles.wordmark, { fontSize: size, color: "#FFFFFF" }, textStyle]}>
+      <Text
+        accessibilityLabel="Oson Uy"
+        style={[styles.wordmark, { fontSize: size, color: "#FFFFFF" }, textStyle]}
+      >
         Oson Uy
       </Text>
     );
@@ -32,7 +34,7 @@ export function BrandWordmark({
   return (
     <Text accessibilityLabel="Oson Uy" style={[styles.wordmark, { fontSize: size }, textStyle]}>
       <Text style={{ color: p.primary }}>Oson</Text>
-      <Text>{" "}</Text>
+      <Text> </Text>
       <Text style={{ color: p.secondary }}>Uy</Text>
     </Text>
   );
@@ -44,4 +46,3 @@ const styles = StyleSheet.create({
     letterSpacing: -0.6,
   },
 });
-

@@ -1,12 +1,5 @@
-import React, { useEffect, useRef } from "react";
-import {
-  ActivityIndicator,
-  Animated,
-  Easing,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import React from "react";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 import { useAppTheme } from "../theme/AppThemeProvider";
 import { brandLogoBackdrop } from "../theme/tokens";
@@ -20,35 +13,11 @@ type Props = {
 
 export function FullScreenLoader({ message, compact }: Props) {
   const { palette: p } = useAppTheme();
-  const pulse = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    const anim = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulse, {
-          toValue: 1.07,
-          duration: 850,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulse, {
-          toValue: 1,
-          duration: 850,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-      ]),
-    );
-    anim.start();
-    return () => anim.stop();
-  }, [pulse]);
 
   if (compact) {
     return (
       <View style={styles.compact} accessibilityRole="progressbar">
-        <Animated.View style={{ transform: [{ scale: pulse }] }}>
-          <BrandLogo size={40} />
-        </Animated.View>
+        <BrandLogo size={40} />
         <ActivityIndicator color={p.primary} style={styles.compactSpinner} />
         {message ? (
           <Text style={[styles.msgText, { color: p.textMuted }]}>{message}</Text>
@@ -62,9 +31,7 @@ export function FullScreenLoader({ message, compact }: Props) {
       style={[styles.full, { backgroundColor: brandLogoBackdrop }]}
       accessibilityRole="progressbar"
     >
-      <Animated.View style={{ transform: [{ scale: pulse }] }}>
-        <BrandLogo size={88} />
-      </Animated.View>
+      <BrandLogo size={88} />
       <ActivityIndicator color={p.primary} size="large" style={styles.spinner} />
       {message ? (
         <Text style={[styles.msg, styles.msgText, { color: p.textMuted }]}>{message}</Text>

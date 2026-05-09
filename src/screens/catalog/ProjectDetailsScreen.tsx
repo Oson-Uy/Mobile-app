@@ -26,7 +26,7 @@ import {
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Video, ResizeMode } from "expo-av";
+import { useVideoPlayer, VideoView } from "expo-video";
 import WebView from "react-native-webview";
 
 import {
@@ -34,7 +34,6 @@ import {
   INSTAGRAM_EMBED_INJECTED_JS,
   normalizeVideoUrl,
 } from "../../lib/video-url";
-
 import type { CatalogStackParamList } from "../../navigation/RootNavigator";
 import { apiFetch } from "../../api/client";
 import { useI18n } from "../../i18n/I18nProvider";
@@ -48,6 +47,18 @@ import { SectionTitle } from "../../ui/SectionTitle";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import type { AppPalette } from "../../theme/tokens";
 import { radii, spacing } from "../../theme/tokens";
+
+function ProjectDetailsDirectVideo({
+  uri,
+  style,
+}: {
+  uri: string;
+  style: StyleProp<ViewStyle>;
+}) {
+  const normalized = normalizeVideoUrl(uri);
+  const player = useVideoPlayer(normalized);
+  return <VideoView player={player} style={style} nativeControls contentFit="contain" />;
+}
 
 type Props = NativeStackScreenProps<CatalogStackParamList, "ProjectDetails">;
 
@@ -1009,13 +1020,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
                   />
                 )
               ) : (
-                <Video
-                  source={{ uri: normalizeVideoUrl(data.videoUrl) }}
-                  style={videoPlayerStyle}
-                  useNativeControls
-                  resizeMode={ResizeMode.CONTAIN}
-                  isLooping={false}
-                />
+                <ProjectDetailsDirectVideo uri={data.videoUrl} style={videoPlayerStyle} />
               )}
             </View>
           ) : null}

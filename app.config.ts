@@ -52,6 +52,7 @@ export default ({ config }: any) => ({
       ...(config.plugins ?? []),
       "expo-secure-store",
       "expo-font",
+      "expo-video",
       [
         "expo-splash-screen",
         {
