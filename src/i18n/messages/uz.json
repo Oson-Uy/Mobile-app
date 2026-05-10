@@ -136,7 +136,11 @@
     "reviewsTitle": "Xaridorlar fikrlari",
     "reviewsHint": "Murojaatlar boʻyicha baholar",
     "noComment": "Izoh yoʻq",
-    "ratingCount": "{n} ta fikr"
+    "ratingCount": "{n} ta fikr",
+    "qrTitle": "Loyiha QR-kodi",
+    "qrHint": "Kamera orqali skanerlang — oson-uy.uz saytida loyiha sahifasi ochiladi.",
+    "qrCopyLink": "Havolani nusxalash",
+    "qrCopied": "Havola nusxalandi"
   },
   "leadModal": {
     "title": "Bogʻlanish",

@@ -136,7 +136,11 @@
     "reviewsTitle": "Buyer reviews",
     "reviewsHint": "Ratings and comments from leads",
     "noComment": "No comment",
-    "ratingCount": "{n} reviews"
+    "ratingCount": "{n} reviews",
+    "qrTitle": "Project QR code",
+    "qrHint": "Scan with your phone camera to open this project on oson-uy.uz.",
+    "qrCopyLink": "Copy link",
+    "qrCopied": "Link copied"
   },
   "leadModal": {
     "title": "Contact us",

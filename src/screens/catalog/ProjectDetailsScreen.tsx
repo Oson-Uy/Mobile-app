@@ -42,6 +42,7 @@ import { minPricePerM2FromApiProject } from "../../lib/project-price";
 import { formatUzs } from "../../lib/currency";
 import { FloorLayoutsModal } from "./FloorLayoutsModal";
 import { FullScreenLoader } from "../../ui/FullScreenLoader";
+import { ProjectQrCard } from "../../ui/ProjectQrCard";
 import { SectionCard } from "../../ui/SectionCard";
 import { SectionTitle } from "../../ui/SectionTitle";
 import { useAppTheme } from "../../theme/AppThemeProvider";
@@ -777,6 +778,10 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
           >
             {t("projectDetails.leaveRequest")}
           </Button>
+
+          {data.qrCodeUrl?.trim() ? (
+            <ProjectQrCard value={data.qrCodeUrl.trim()} />
+          ) : null}
 
           <SectionCard style={styles.section}>
             <SectionTitle title={t("projectDetails.specsTitle")} />
