@@ -52,15 +52,15 @@ export function DeveloperSubscriptionsScreen() {
 
   const PLANS = useMemo<PlanDef[]>(
     () => [
-      { id: "START", price: 1000000, color: p.primary, icon: "rocket-launch-outline" },
+      { id: "START", price: 0, color: p.primary, icon: "rocket-launch-outline" },
       {
         id: "PRO",
-        price: 3000000,
+        price: 0,
         color: p.secondary,
         icon: "shield-check-outline",
         popular: true,
       },
-      { id: "ULTIMATE", price: 5000000, color: p.text, icon: "star-outline" },
+      { id: "ULTIMATE", price: 0, color: p.text, icon: "star-outline" },
     ],
     [p.primary, p.secondary, p.text],
   );
