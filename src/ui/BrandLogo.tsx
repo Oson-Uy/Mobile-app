@@ -1,10 +1,10 @@
 import React from "react";
 import { Image, type ImageStyle, type StyleProp } from "react-native";
 
-/** Тот же файл, что `frontend/public/osonuy-logo-removebg-preview.png` (скрипт `scripts/generate-brand-assets.py`). */
-const SRC = require("../../assets/brand-logo.png");
+/** Совпадает с `frontend/public/osonuy-logo-mini-removedbg.png` — только в приложении (не в веб-шапке). */
+const SRC = require("../../assets/osonuy-logo-mini-removedbg.png");
 
-const ASPECT = 513 / 486;
+const ASPECT = 214 / 213;
 
 type Props = {
   /** Высота логотипа; ширина подбирается по пропорциям исходника. */

@@ -1,4 +1,4 @@
-"""Generate Expo icon, adaptive icon, and splash from the site logo (one-off / CI)."""
+"""Generate Expo icon, adaptive icon, splash, and favicon from the site logo (one-off / CI)."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -6,9 +6,8 @@ from pathlib import Path
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
-SITE_LOGO = (
-    ROOT.parent / "frontend" / "public" / "osonuy-logo-removebg-preview.png"
-)
+# Полноразмерное слово с прозрачным фоном — тот же источник, что OG на сайте.
+SITE_LOGO = ROOT.parent / "frontend" / "public" / "osonuy-logo-full-removedbg.png"
 OUT_DIR = ROOT / "assets"
 # Иконка приложения: лого на белом фоне (production / store).
 ICON_BG = (255, 255, 255, 255)
@@ -55,14 +54,10 @@ def main() -> None:
     splash = make_splash(1284, 2778)
     splash.save(OUT_DIR / "splash.png", optimize=True)
 
-    # In-app asset (same source as web footer)
-    brand_dest = OUT_DIR / "brand-logo.png"
-    brand_dest.write_bytes(SITE_LOGO.read_bytes())
-
     fav = make_square_icon(48)
     fav.save(OUT_DIR / "favicon.png", optimize=True)
 
-    print(f"Wrote icon, adaptive-icon, splash, favicon, brand-logo in {OUT_DIR}")
+    print(f"Wrote icon, adaptive-icon, splash, favicon in {OUT_DIR}")
 
 
 if __name__ == "__main__":
