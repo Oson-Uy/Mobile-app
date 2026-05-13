@@ -13,7 +13,6 @@ import { consumePendingDeveloperWorkspace } from "./onboarding/pendingDeveloperL
 import { I18nProvider, useI18n } from "./i18n/I18nProvider";
 import { AppPreferencesProvider, useAppPreferences } from "./preferences/AppPreferencesProvider";
 import { AppThemeProvider, useAppTheme } from "./theme/AppThemeProvider";
-import { brandLogoBackdrop } from "./theme/tokens";
 import { OnboardingScreen } from "./screens/onboarding/OnboardingScreen";
 import { FullScreenLoader } from "./ui/FullScreenLoader";
 
@@ -57,7 +56,7 @@ function AppShell() {
   if (booting) {
     return (
       <PaperProvider theme={theme.paperTheme}>
-        <View style={[styles.boot, { backgroundColor: brandLogoBackdrop }]}>
+        <View style={[styles.boot, { backgroundColor: theme.palette.background }]}>
           <FullScreenLoader />
         </View>
       </PaperProvider>

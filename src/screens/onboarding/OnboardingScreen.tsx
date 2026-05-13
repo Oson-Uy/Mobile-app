@@ -8,7 +8,7 @@ import { useI18n } from "../../i18n/I18nProvider";
 import { setPendingDeveloperWorkspace } from "../../onboarding/pendingDeveloperLogin";
 import { useAppPreferences } from "../../preferences/AppPreferencesProvider";
 import { useAppTheme } from "../../theme/AppThemeProvider";
-import { brandLogoBackdrop, radii, spacing } from "../../theme/tokens";
+import { radii, spacing } from "../../theme/tokens";
 import { BrandLogo } from "../../ui/BrandLogo";
 
 const SITE_URL = "https://oson-uy.uz";
@@ -20,7 +20,7 @@ export function OnboardingScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.safe, { backgroundColor: brandLogoBackdrop }]}
+      style={[styles.safe, { backgroundColor: p.background }]}
       edges={["top", "left", "right"]}
     >
       <ScrollView

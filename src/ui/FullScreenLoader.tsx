@@ -2,7 +2,6 @@ import React from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 import { useAppTheme } from "../theme/AppThemeProvider";
-import { brandLogoBackdrop } from "../theme/tokens";
 import { BrandLogo } from "./BrandLogo";
 
 type Props = {
@@ -28,7 +27,7 @@ export function FullScreenLoader({ message, compact }: Props) {
 
   return (
     <View
-      style={[styles.full, { backgroundColor: brandLogoBackdrop }]}
+      style={[styles.full, { backgroundColor: p.background }]}
       accessibilityRole="progressbar"
     >
       <BrandLogo size={88} />
@@ -41,8 +40,11 @@ export function FullScreenLoader({ message, compact }: Props) {
 }
 
 const styles = StyleSheet.create({
+  /** alignSelf + width: иначе в родителе с alignItems: "center" (часто экраны загрузки) колонка сжимается до ширины контента — «узкая белая полоска». */
   full: {
     flex: 1,
+    alignSelf: "stretch",
+    width: "100%",
     alignItems: "center",
     justifyContent: "center",
   },
