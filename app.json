@@ -5,15 +5,15 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "osonuy",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "userInterfaceStyle": "automatic",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/osonuy-logo-mini-removedbg.png",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/osonuy-logo-mini-removedbg.png",
       "resizeMode": "contain",
       "backgroundColor": "#FFFFFF",
       "dark": {
-        "image": "./assets/splash.png",
+        "image": "./assets/osonuy-logo-mini-removedbg.png",
         "backgroundColor": "#FFFFFF"
       }
     },
@@ -26,8 +26,8 @@
       "package": "com.osonuy.app",
       "versionCode": 1,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
+        "foregroundImage": "./assets/osonuy-logo-mini-removedbg.png",
+        "backgroundColor": "#1E3A8A"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false

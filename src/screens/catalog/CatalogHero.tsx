@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 import { useEvent } from "expo";
 import Constants from "expo-constants";
 import { useVideoPlayer, VideoView } from "expo-video";
@@ -7,7 +7,8 @@ import { useVideoPlayer, VideoView } from "expo-video";
 import { useI18n } from "../../i18n/I18nProvider";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { radii, spacing } from "../../theme/tokens";
-import { BrandWordmark } from "../../ui/BrandWordmark";
+
+const LOGO_FULL = require("../../../assets/osonuy-logo-full-removedbg.png");
 
 function CatalogHeroVideo({
   uri,
@@ -58,10 +59,8 @@ export function CatalogHero() {
           },
         ]}
       >
-        <BrandWordmark size={26} textStyle={styles.brand} />
-        <View style={styles.brandAccentRow}>
-          <View style={[styles.accentRule, { backgroundColor: p.secondary }]} />
-        </View>
+        <Image source={LOGO_FULL} style={styles.logoFull} resizeMode="contain" />
+        <View style={[styles.accentRule, { backgroundColor: p.secondary }]} />
         <Text style={[styles.tagline, { color: p.text }]}>{t("catalog.hero.tagline")}</Text>
         <Text style={[styles.sub, { color: p.textMuted }]}>{t("catalog.hero.sub")}</Text>
       </View>
@@ -84,22 +83,20 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: StyleSheet.hairlineWidth,
   },
-  brand: {
-    fontWeight: "900",
-    fontSize: 26,
-    letterSpacing: -0.5,
-  },
-  brandAccentRow: {
-    marginTop: spacing.sm,
-    alignItems: "flex-start",
+  logoFull: {
+    width: 200,
+    height: 200,
+    marginBottom: spacing.sm,
+    alignSelf: "flex-start",
   },
   accentRule: {
-    height: 4,
-    width: 48,
+    height: 3,
+    width: 52,
     borderRadius: 2,
+    marginBottom: spacing.md,
   },
   tagline: {
-    marginTop: spacing.md,
+    marginTop: 0,
     fontWeight: "800",
     fontSize: 16,
     lineHeight: 22,
