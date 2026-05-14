@@ -1,7 +1,7 @@
 import "dotenv/config";
 
-/** Android adaptive icon: белый фон под foreground (лого). */
-const ADAPTIVE_ICON_BG = "#FFFFFF";
+/** Android adaptive icon: брендовый синий фон — белое лого на нём смотрится как нативная иконка. */
+const ADAPTIVE_ICON_BG = "#1E3A8A";
 /** Splash: белый фон — тёмно-синее лого не теряется на синей подложке. */
 const SPLASH_BG = "#FFFFFF";
 
@@ -12,16 +12,15 @@ export default ({ config }: any) => ({
   version: "1.0.0",
   orientation: "portrait",
   scheme: "osonuy",
-  /** На части Android-устройств New Arch + Fabric давали «вечный» нативный splash без первого кадра RN. */
-  newArchEnabled: false,
+  newArchEnabled: true,
   userInterfaceStyle: "automatic",
-  icon: "./assets/icon.png",
+  icon: "./assets/osonuy-logo-mini-removedbg.png",
   splash: {
-    image: "./assets/splash.png",
+    image: "./assets/osonuy-logo-mini-removedbg.png",
     resizeMode: "contain",
     backgroundColor: SPLASH_BG,
     dark: {
-      image: "./assets/splash.png",
+      image: "./assets/osonuy-logo-mini-removedbg.png",
       backgroundColor: SPLASH_BG,
     },
   },
@@ -31,13 +30,17 @@ export default ({ config }: any) => ({
     buildNumber: "1",
     infoPlist: {
       UIBackgroundModes: ["remote-notification"],
+      NSPhotoLibraryUsageDescription:
+        "Используется для загрузки фотографий проекта.",
+      NSCameraUsageDescription:
+        "Используется для съёмки фотографий проекта.",
     },
   },
   android: {
     package: "com.osonuy.app",
     versionCode: 1,
     adaptiveIcon: {
-      foregroundImage: "./assets/adaptive-icon.png",
+      foregroundImage: "./assets/osonuy-logo-mini-removedbg.png",
       backgroundColor: ADAPTIVE_ICON_BG,
     },
     edgeToEdgeEnabled: true,
@@ -54,13 +57,20 @@ export default ({ config }: any) => ({
       "expo-font",
       "expo-video",
       [
+        "expo-image-picker",
+        {
+          photosPermission: "Используется для загрузки фотографий проекта.",
+          cameraPermission: "Используется для съёмки фотографий проекта.",
+        },
+      ],
+      [
         "expo-splash-screen",
         {
-          image: "./assets/splash.png",
+          image: "./assets/osonuy-logo-mini-removedbg.png",
           resizeMode: "contain",
           backgroundColor: SPLASH_BG,
           dark: {
-            image: "./assets/splash.png",
+            image: "./assets/osonuy-logo-mini-removedbg.png",
             backgroundColor: SPLASH_BG,
           },
         },
