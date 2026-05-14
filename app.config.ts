@@ -1,7 +1,7 @@
 import "dotenv/config";
 
-/** Android adaptive icon: брендовый синий фон — белое лого на нём смотрится как нативная иконка. */
-const ADAPTIVE_ICON_BG = "#1E3A8A";
+/** Android adaptive icon: белый фон — синяя круглая иконка смотрится как на iOS. */
+const ADAPTIVE_ICON_BG = "#FFFFFF";
 /** Splash: белый фон — тёмно-синее лого не теряется на синей подложке. */
 const SPLASH_BG = "#FFFFFF";
 
