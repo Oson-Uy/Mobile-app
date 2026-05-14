@@ -84,8 +84,8 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   logoFull: {
-    width: 200,
-    height: 200,
+    width: 150,
+    height: 50,
     marginBottom: spacing.sm,
     alignSelf: "flex-start",
   },
