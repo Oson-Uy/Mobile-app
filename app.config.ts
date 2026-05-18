@@ -37,7 +37,7 @@ export default ({ config }: any) => ({
     },
   },
   android: {
-    package: "com.osonuy.app",
+    package: "uz.osonuy.app",
     versionCode: 1,
     adaptiveIcon: {
       foregroundImage: "./assets/osonuy-logo-mini-removedbg.png",
