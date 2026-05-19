@@ -40,7 +40,7 @@ export default ({ config }: any) => ({
     package: "uz.osonuy.app",
     versionCode: 1,
     adaptiveIcon: {
-      foregroundImage: "./assets/osonuy-logo-mini-removedbg.png",
+      foregroundImage: "./assets/icon.png",
       backgroundColor: ADAPTIVE_ICON_BG,
     },
     edgeToEdgeEnabled: true,
