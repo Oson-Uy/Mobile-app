@@ -228,7 +228,44 @@ cd android && ./gradlew clean && ./gradlew assembleRelease
 
 ---
 
-## ЧАСТЬ 4 — Быстрый чеклист перед каждым релизом
+## ЧАСТЬ 4 — Push-уведомления (TestFlight / App Store)
+
+Приложение использует **Expo Push** (`ExponentPushToken[...]`). Разрешение в iOS ≠ рабочий push: нужны capability в сборке, APNs-ключ в Expo и токен на бэкенде.
+
+### 4.1 После изменения `app.config.ts` (обязательно перед Archive)
+
+```bash
+cd /Users/sardor/Work/startap/Mobile-app
+npx expo prebuild --platform ios --clean
+cd ios && pod install
+```
+
+В Xcode → **Signing & Capabilities** → у target `OsonUy` должны быть:
+- **Push Notifications**
+- **Background Modes** → Remote notifications
+
+### 4.2 APNs-ключ в Expo (без этого TestFlight молчит)
+
+1. [Apple Developer](https://developer.apple.com) → Keys → **+** → Apple Push Notifications service (APNs) → скачать `.p8` (один раз).
+2. На [expo.dev](https://expo.dev) → проект **oson-uy** → **Credentials** → iOS → загрузить APNs Key (Key ID, Team ID, `.p8`).
+
+Или из терминала (нужен `eas login`):
+
+```bash
+eas credentials -p ios
+```
+
+### 4.3 Проверка на устройстве
+
+1. Войти в **кабинет застройщика** (push только для ЛК, не для каталога покупателя).
+2. Профиль → **«Синхронизировать push»** — должно появиться «Push-токен отправлен на сервер».
+3. Бэкенд шлёт уведомления на `https://exp.host/--/api/v2/push/send` с этим Expo-токеном.
+
+Если кнопка пишет ошибку — текст подскажет (нет projectId, отказ в разрешении, нет APNs в Expo).
+
+---
+
+## ЧАСТЬ 5 — Быстрый чеклист перед каждым релизом
 
 - [ ] Обновить `version` в `app.config.ts` (например `"1.0.1"`)
 - [ ] Увеличить `buildNumber` в `ios` (например `"2"`)
@@ -236,5 +273,8 @@ cd android && ./gradlew clean && ./gradlew assembleRelease
 - [ ] `npm install` — убедиться что зависимости актуальны
 - [ ] `cd ios && pod install` — синхронизировать поды
 - [ ] Проверить что `.env` содержит правильный `EXPO_PUBLIC_API_URL`
+- [ ] `npx expo prebuild --platform ios` (если меняли plugins / bundle id)
+- [ ] APNs-ключ загружен в Expo Credentials
 - [ ] Сборка iOS через Xcode Archive
 - [ ] Сборка Android AAB через `./gradlew bundleRelease`
+- [ ] Push: вход в ЛК → «Синхронизировать push» на TestFlight-сборке

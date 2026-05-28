@@ -4,6 +4,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import type { DeveloperStackParamList } from "../../navigation/RootNavigator";
 import { getToken } from "../../auth/token";
+import { registerForPushAndSyncToken } from "../../push/register";
 import { FullScreenLoader } from "../../ui/FullScreenLoader";
 
 type Props = NativeStackScreenProps<DeveloperStackParamList, "DeveloperGate">;
@@ -23,6 +24,7 @@ export function DeveloperGateScreen({ navigation }: Props) {
       if (doneRef.current) return;
       doneRef.current = true;
       navigation.replace("DeveloperHome");
+      void registerForPushAndSyncToken();
     };
 
     const watchdog = setTimeout(goLogin, GATE_MS);

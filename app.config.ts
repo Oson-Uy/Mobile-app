@@ -53,6 +53,12 @@ export default ({ config }: any) => ({
   plugins: [
     ...new Set([
       ...(config.plugins ?? []),
+      [
+        "expo-notifications",
+        {
+          enableBackgroundRemoteNotifications: true,
+        },
+      ],
       "expo-secure-store",
       "expo-font",
       "expo-video",
@@ -84,5 +90,11 @@ export default ({ config }: any) => ({
       process.env.EXPO_PUBLIC_API_URL?.trim() ||
       "https://api.oson-uy.uz",
     heroVideoUrl: process.env.EXPO_PUBLIC_HERO_VIDEO_URL ?? "",
+    eas: {
+      ...(config.extra?.eas ?? {}),
+      projectId:
+        config.extra?.eas?.projectId ??
+        "b30a68b1-e29e-4779-b817-dc60054440a1",
+    },
   },
 });

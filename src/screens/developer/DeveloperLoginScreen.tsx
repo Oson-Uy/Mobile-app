@@ -41,7 +41,7 @@ export function DeveloperLoginScreen({ navigation, route }: Props) {
         body: JSON.stringify({ email, password }),
       });
       await setToken(res.token);
-      void registerForPushAndSyncToken();
+      await registerForPushAndSyncToken();
       await setRole("developer");
       if (finishMode === "goBackMain") {
         if (navigation.canGoBack()) navigation.goBack();

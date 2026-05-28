@@ -1,4 +1,4 @@
-import React, { useMemo, useState, type ComponentProps } from "react";
+import React, { useEffect, useMemo, useState, type ComponentProps } from "react";
 import { Text, View } from "react-native";
 import { HeaderButton } from "@react-navigation/elements";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useI18n } from "../../i18n/I18nProvider";
 import { CatalogSettingsModal } from "../catalog/CatalogSettingsModal";
 import { HeaderCatalogButton } from "../../ui/HeaderCatalogButton";
+import { registerForPushAndSyncToken } from "../../push/register";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 
 const Tab = createBottomTabNavigator();
@@ -127,6 +128,10 @@ function DeveloperTabs() {
 export function DeveloperHomeScreen() {
   const { t } = useI18n();
   const { palette: p } = useAppTheme();
+
+  useEffect(() => {
+    void registerForPushAndSyncToken();
+  }, []);
 
   return (
     <Stack.Navigator

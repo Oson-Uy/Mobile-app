@@ -144,6 +144,23 @@ export function DeveloperProfileScreen() {
     setSnack(t("developer.signedOut"));
   };
 
+  const onSyncPush = async () => {
+    const res = await registerForPushAndSyncToken();
+    if (res.ok) {
+      setSnack(t("developer.pushSyncOk"));
+      return;
+    }
+    if (res.reason === "denied") {
+      setSnack(t("developer.pushDenied"));
+      return;
+    }
+    if (res.reason === "simulator") {
+      setSnack(t("developer.pushSimulator"));
+      return;
+    }
+    setSnack(res.message ?? t("developer.pushSyncFail"));
+  };
+
   const cancelEdit = async () => {
     setEditMode(false);
     try {
@@ -343,7 +360,7 @@ export function DeveloperProfileScreen() {
 
           <Button
             mode="contained-tonal"
-            onPress={() => void registerForPushAndSyncToken()}
+            onPress={() => void onSyncPush()}
             style={styles.footerBtn}
             contentStyle={styles.btnContent}
           >
