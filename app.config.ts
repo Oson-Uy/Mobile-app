@@ -9,7 +9,7 @@ export default ({ config }: any) => ({
   ...config,
   name: "Oson Uy",
   slug: "oson-uy",
-  version: "1.0.0",
+  version: "1.1.0",
   orientation: "portrait",
   scheme: "osonuy",
   newArchEnabled: true,
@@ -27,7 +27,7 @@ export default ({ config }: any) => ({
   ios: {
     supportsTablet: true,
     bundleIdentifier: "com.osonuy.app",
-    buildNumber: "1",
+    buildNumber: "2",
     infoPlist: {
       UIBackgroundModes: ["remote-notification"],
       NSPhotoLibraryUsageDescription:
@@ -38,7 +38,7 @@ export default ({ config }: any) => ({
   },
   android: {
     package: "uz.osonuy.app",
-    versionCode: 2,
+    versionCode: 3,
     adaptiveIcon: {
       foregroundImage: "./assets/icon.png",
       backgroundColor: ADAPTIVE_ICON_BG,
