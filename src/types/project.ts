@@ -85,6 +85,7 @@ export type ApiProjectFull = ApiProjectListItem & {
   totalFloors?: number | null;
   totalUnits?: number | null;
   plan?: string | null;
+  /** URL изображения QR-кода (PNG/JPG в storage), не ссылка для генерации QR. */
   qrCodeUrl?: string | null;
   mapEmbedUrl?: string | null;
   avgRating?: number | null;

@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
-import { FlatList, Platform, RefreshControl, StyleSheet, View } from "react-native";
+import { FlatList, Platform, Pressable, RefreshControl, StyleSheet, View } from "react-native";
 import { Button, Text, useTheme } from "react-native-paper";
-import { HeaderButton } from "@react-navigation/elements";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { HeaderButton } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { apiFetch } from "../../api/client";
@@ -21,7 +21,9 @@ import { CatalogHero } from "./CatalogHero";
 import { CatalogSettingsModal } from "./CatalogSettingsModal";
 import { ProjectCatalogCard } from "./ProjectCatalogCard";
 import { Screen } from "../../ui/Screen";
-import { spacing } from "../../theme/tokens";
+import { catalogListPadding } from "../../ui/catalog/catalogPlatform";
+import { useAppTheme } from "../../theme/AppThemeProvider";
+import { radii, spacing } from "../../theme/tokens";
 
 type Props = NativeStackScreenProps<CatalogStackParamList, "CatalogList">;
 
@@ -30,6 +32,7 @@ const ICON_SIZE = 22;
 export function CatalogListScreen({ navigation }: Props) {
   const { t } = useI18n();
   const theme = useTheme();
+  const { palette: p } = useAppTheme();
   const [raw, setRaw] = useState<ApiProjectListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -181,15 +184,24 @@ export function CatalogListScreen({ navigation }: Props) {
         }
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text variant="titleMedium" style={styles.emptyTitle}>
+            <MaterialCommunityIcons name="home-search-outline" size={52} color={p.textMuted} />
+            <Text variant="titleMedium" style={[styles.emptyTitle, { color: p.text }]}>
               {t("catalog.noResults")}
             </Text>
-            <Text variant="bodyMedium" style={styles.emptyHint}>
+            <Text variant="bodyMedium" style={[styles.emptyHint, { color: p.textMuted }]}>
               {t("catalog.noResultsHint")}
             </Text>
-            <Button mode="outlined" onPress={resetFilters} style={styles.mt}>
-              {t("catalog.drawer.reset")}
-            </Button>
+            <Pressable
+              onPress={resetFilters}
+              style={({ pressed }) => [
+                styles.resetBtn,
+                { borderColor: p.outline, opacity: pressed ? 0.75 : 1 },
+              ]}
+            >
+              <Text style={[styles.resetBtnTxt, { color: p.primary }]}>
+                {t("catalog.drawer.reset")}
+              </Text>
+            </Pressable>
           </View>
         }
         renderItem={({ item }) => (
@@ -215,7 +227,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   list: {
-    padding: spacing.lg,
+    padding: catalogListPadding,
     paddingBottom: spacing.xxl * 2,
   },
   centered: {
@@ -229,7 +241,16 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xxl * 2,
     paddingHorizontal: spacing.lg,
     alignItems: "center",
+    gap: spacing.sm,
   },
   emptyTitle: { fontWeight: "800", textAlign: "center" },
-  emptyHint: { opacity: 0.7, textAlign: "center", marginTop: spacing.sm },
+  emptyHint: { textAlign: "center", lineHeight: 20 },
+  resetBtn: {
+    marginTop: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: Platform.select({ ios: 12, android: 14, default: 12 }),
+    borderRadius: radii.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  resetBtnTxt: { fontWeight: "700", fontSize: Platform.select({ ios: 15, android: 14, default: 15 }) },
 });

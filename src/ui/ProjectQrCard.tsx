@@ -1,27 +1,43 @@
 import * as Clipboard from "expo-clipboard";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { StyleSheet, View } from "react-native";
-import QRCode from "react-native-qrcode-svg";
-import { Button, Text } from "react-native-paper";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
+  useWindowDimensions,
+} from "react-native";
+import { Text } from "react-native-paper";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { useI18n } from "../i18n/I18nProvider";
 import { useAppTheme } from "../theme/AppThemeProvider";
-import { radii, spacing } from "../theme/tokens";
+import { spacing } from "../theme/tokens";
 import { SectionCard } from "./SectionCard";
 import { SectionTitle } from "./SectionTitle";
 
 type Props = {
-  /** URL или другая строка, закодированная в QR (как на сайте oson-uy.uz). */
-  value: string;
+  imageUrl: string;
+  shareUrl: string;
 };
 
-const QR_SIZE = 176;
+const QR_MAX = Platform.select({ ios: 256, android: 248, default: 252 })!;
 
-export function ProjectQrCard({ value }: Props) {
+export function ProjectQrCard({ imageUrl, shareUrl }: Props) {
   const { t } = useI18n();
   const { palette: p } = useAppTheme();
+  const { width } = useWindowDimensions();
   const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const size = useMemo(() => {
+    const pad = spacing.lg * 4;
+    return Math.min(QR_MAX, Math.floor(width - pad));
+  }, [width]);
 
   useEffect(
     () => () => {
@@ -30,15 +46,20 @@ export function ProjectQrCard({ value }: Props) {
     [],
   );
 
+  useEffect(() => {
+    setLoading(true);
+    setFailed(false);
+  }, [imageUrl]);
+
   const onCopy = useCallback(async () => {
-    await Clipboard.setStringAsync(value);
+    await Clipboard.setStringAsync(shareUrl);
     if (copyTimer.current) clearTimeout(copyTimer.current);
     setCopied(true);
     copyTimer.current = setTimeout(() => {
       setCopied(false);
       copyTimer.current = null;
     }, 2000);
-  }, [value]);
+  }, [shareUrl]);
 
   return (
     <SectionCard style={styles.section}>
@@ -46,39 +67,60 @@ export function ProjectQrCard({ value }: Props) {
       <Text variant="bodySmall" style={[styles.hint, { color: p.textMuted }]}>
         {t("projectDetails.qrHint")}
       </Text>
-      <View
-        style={[
-          styles.qrFrame,
-          {
-            borderColor: p.outline,
-            backgroundColor: "#FFFFFF",
-          },
+
+      <View style={styles.qrWrap}>
+        {loading && !failed ? (
+          <ActivityIndicator color={p.primary} style={styles.loader} />
+        ) : null}
+        {failed ? (
+          <MaterialCommunityIcons name="qrcode-remove" size={48} color={p.textMuted} />
+        ) : (
+          <Image
+            source={{ uri: imageUrl }}
+            style={{ width: size, height: size, opacity: loading ? 0 : 1 }}
+            resizeMode="contain"
+            onLoadEnd={() => setLoading(false)}
+            onError={() => {
+              setLoading(false);
+              setFailed(true);
+            }}
+          />
+        )}
+      </View>
+
+      <Pressable
+        onPress={() => void onCopy()}
+        style={({ pressed }) => [
+          styles.copyRow,
+          { borderColor: p.outline, opacity: pressed ? 0.75 : 1 },
         ]}
       >
-        <QRCode value={value} size={QR_SIZE} color="#000000" backgroundColor="#FFFFFF" />
-      </View>
-      <Button mode="outlined" onPress={() => void onCopy()} style={styles.copyBtn}>
-        {t("projectDetails.qrCopyLink")}
-      </Button>
-      {copied ? (
-        <Text variant="labelSmall" style={[styles.copied, { color: p.secondary }]}>
-          {t("projectDetails.qrCopied")}
+        <MaterialCommunityIcons name="link-variant" size={20} color={p.primary} />
+        <Text variant="labelLarge" style={{ color: p.primary, fontWeight: "600" }}>
+          {copied ? t("projectDetails.qrCopied") : t("projectDetails.qrCopyLink")}
         </Text>
-      ) : null}
+      </Pressable>
     </SectionCard>
   );
 }
 
 const styles = StyleSheet.create({
   section: { marginTop: spacing.md },
-  hint: { marginBottom: spacing.md, lineHeight: 20 },
-  qrFrame: {
-    alignSelf: "center",
-    padding: spacing.md,
-    borderRadius: radii.lg,
-    borderWidth: StyleSheet.hairlineWidth,
-    marginBottom: spacing.md,
+  hint: { marginBottom: spacing.lg, lineHeight: 20 },
+  qrWrap: {
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 200,
+    marginBottom: spacing.lg,
   },
-  copyBtn: { alignSelf: "stretch" },
-  copied: { textAlign: "center", marginTop: spacing.sm, fontWeight: "700" },
+  loader: { position: "absolute" },
+  copyRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.sm,
+    paddingVertical: Platform.select({ ios: 14, android: 16, default: 14 }),
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
 });

@@ -11,19 +11,16 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import {
-  Button,
-  Divider,
-  FAB,
-  Snackbar,
-  Text,
-} from "react-native-paper";
+import { FAB, Snackbar, Text } from "react-native-paper";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 
 import { apiFetch } from "../../api/client";
 import { useI18n } from "../../i18n/I18nProvider";
 import { Screen } from "../../ui/Screen";
-import { SectionCard } from "../../ui/SectionCard";
+import { DevCard } from "../../ui/developer/DevCard";
+import { DevIconButton } from "../../ui/developer/DevIconButton";
+import { devFabRadius, devListPadding } from "../../ui/developer/devPlatform";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { radii, spacing } from "../../theme/tokens";
 import { FullScreenLoader } from "../../ui/FullScreenLoader";
@@ -229,55 +226,75 @@ export function DeveloperFloorsScreen() {
               {t("developer.floors")}
             </Text>
             {projects.length > 0 ? (
-              <Button
-                mode="outlined"
-                icon="chevron-down"
+              <Pressable
                 onPress={openProjectPicker}
-                style={styles.filterBtn}
-                contentStyle={styles.filterBtnContent}
+                style={({ pressed }) => [
+                  styles.filterPill,
+                  {
+                    borderColor: p.outline,
+                    backgroundColor: p.surfaceMuted,
+                    opacity: pressed ? 0.85 : 1,
+                  },
+                ]}
               >
-                {t("developer.filterByProject")}: {selectedProjectName}
-              </Button>
+                <Text style={[styles.filterLabel, { color: p.textMuted }]}>
+                  {t("developer.filterByProject")}
+                </Text>
+                <View style={styles.filterValueRow}>
+                  <Text style={[styles.filterValue, { color: p.text }]} numberOfLines={1}>
+                    {selectedProjectName}
+                  </Text>
+                  <MaterialCommunityIcons name="chevron-down" size={22} color={p.primary} />
+                </View>
+              </Pressable>
             ) : null}
             {error ? <Text style={[styles.err, { color: p.error }]}>{error}</Text> : null}
           </View>
         }
         renderItem={({ item }) => (
-          <SectionCard style={styles.floorCard} padded>
+          <DevCard style={styles.floorCard}>
             <View style={styles.floorTop}>
               <View style={{ flex: 1 }}>
-                <Text style={[styles.floorTitle, { color: p.primary }]}>
+                <Text style={[styles.floorTitle, { color: p.text }]}>
                   {t("developer.floorLabel", { n: item.floor })}
                 </Text>
-                <Text variant="bodySmall" style={[styles.muted, { color: p.textMuted }]}>
+                <Text variant="bodySmall" style={{ color: p.textMuted }}>
                   {projects.find((proj) => proj.id === item.projectId)?.name ?? "—"}
                 </Text>
-                <Text style={[styles.muted, { color: p.text }]}>
+                <Text variant="bodyMedium" style={{ color: p.text, fontWeight: "600", marginTop: 4 }}>
                   {t("developer.pricePerM2")}: {item.pricePerM2}
                 </Text>
               </View>
               <View style={styles.actions}>
-                <Button compact mode="text" onPress={() => openEdit(item)}>
-                  {t("developer.edit")}
-                </Button>
-                <Button compact mode="text" textColor={p.error} onPress={() => void remove(item.id)}>
-                  {t("developer.delete")}
-                </Button>
+                <DevIconButton
+                  icon="pencil-outline"
+                  variant="tonal"
+                  accessibilityLabel={t("developer.edit")}
+                  onPress={() => openEdit(item)}
+                />
+                <DevIconButton
+                  icon="trash-can-outline"
+                  variant="tonal"
+                  color={p.error}
+                  accessibilityLabel={t("developer.delete")}
+                  onPress={() => void remove(item.id)}
+                />
               </View>
             </View>
-            <Divider style={{ marginVertical: spacing.sm }} />
-            <Text variant="bodySmall" style={[styles.muted, { color: p.textMuted }]}>
-              {t("developer.areas")}:{" "}
-              {(item.areaOptions ?? [])
-                .slice()
-                .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
-                .map((a) => a.areaSqm)
-                .join(", ") || "—"}
-            </Text>
-            <Text variant="bodySmall" style={[styles.muted, { color: p.textMuted }]}>
-              {t("developer.layouts")}: {(item.layouts ?? []).length}
-            </Text>
-          </SectionCard>
+            <View style={[styles.metaBlock, { borderTopColor: p.outline }]}>
+              <Text variant="bodySmall" style={{ color: p.textMuted }}>
+                {t("developer.areas")}:{" "}
+                {(item.areaOptions ?? [])
+                  .slice()
+                  .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+                  .map((a) => a.areaSqm)
+                  .join(", ") || "—"}
+              </Text>
+              <Text variant="bodySmall" style={{ color: p.textMuted, marginTop: 4 }}>
+                {t("developer.layouts")}: {(item.layouts ?? []).length}
+              </Text>
+            </View>
+          </DevCard>
         )}
         ListEmptyComponent={
           loading ? (
@@ -300,7 +317,7 @@ export function DeveloperFloorsScreen() {
 
       <FAB
         icon="plus"
-        style={[styles.fab, { backgroundColor: p.secondary }]}
+        style={[styles.fab, { backgroundColor: p.primary }]}
         color="#FFFFFF"
         onPress={openCreate}
         label={t("developer.newFloor")}
@@ -332,21 +349,32 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   pickerRowLabel: { fontSize: 17, paddingVertical: 12, paddingHorizontal: spacing.lg },
-  list: { padding: spacing.lg, paddingBottom: spacing.xxl * 3 },
-  head: { fontWeight: "900" },
-  filterBtn: { marginTop: spacing.sm, alignSelf: "stretch" },
-  filterBtnContent: { flexWrap: "wrap", justifyContent: "flex-start" },
+  list: { padding: devListPadding, paddingBottom: spacing.xxl * 3 },
+  head: { fontWeight: "800", fontSize: Platform.select({ ios: 22, android: 24, default: 22 }) },
+  filterPill: {
+    marginTop: spacing.sm,
+    borderRadius: radii.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    padding: spacing.md,
+  },
+  filterLabel: { fontWeight: "600", fontSize: 12, marginBottom: 4 },
+  filterValueRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
+  filterValue: { flex: 1, fontWeight: "700", fontSize: 16 },
   err: { marginTop: 6 },
   empty: { paddingVertical: spacing.xxl * 2, alignItems: "center" },
   fab: {
     position: "absolute",
-    right: spacing.lg,
-    bottom: spacing.lg,
-    borderRadius: 18,
+    right: devListPadding,
+    bottom: devListPadding,
+    borderRadius: devFabRadius,
   },
   floorCard: { marginBottom: spacing.md },
-  floorTop: { flexDirection: "row", gap: spacing.md },
-  floorTitle: { fontWeight: "900", fontSize: 16 },
-  muted: {},
-  actions: { justifyContent: "center" },
+  floorTop: { flexDirection: "row", gap: spacing.md, alignItems: "flex-start" },
+  floorTitle: { fontWeight: "800", fontSize: 17 },
+  actions: { gap: spacing.xs },
+  metaBlock: {
+    marginTop: spacing.md,
+    paddingTop: spacing.md,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
 });

@@ -3,19 +3,22 @@ import {
   Dimensions,
   FlatList,
   Image,
+  Platform,
   Pressable,
   StyleSheet,
   View,
   type NativeSyntheticEvent,
   type NativeScrollEvent,
 } from "react-native";
-import { Button, Card, Chip, Text } from "react-native-paper";
+import { Chip, Text } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { minPricePerM2FromApiProject } from "../../lib/project-price";
 import { formatUzs } from "../../lib/currency";
 import { useI18n } from "../../i18n/I18nProvider";
 import type { ApiProjectListItem } from "../../types/project";
+import { CatalogSurfaceCard } from "../../ui/catalog/CatalogSurfaceCard";
+import { catalogBtnHeight, catalogSecondaryBtnHeight } from "../../ui/catalog/catalogPlatform";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { radii, spacing } from "../../theme/tokens";
 
@@ -56,7 +59,7 @@ export function ProjectCatalogCard({ project, onPress, onLeaveRequest }: Props) 
   };
 
   return (
-    <Card style={[styles.card, { backgroundColor: p.surface }]} mode="elevated">
+    <CatalogSurfaceCard style={styles.card}>
       <View style={styles.imageWrap}>
         {gallery.length ? (
           <>
@@ -120,10 +123,11 @@ export function ProjectCatalogCard({ project, onPress, onLeaveRequest }: Props) 
         </View>
       </View>
 
-      <Card.Content style={styles.content}>
+      <View style={styles.content}>
         <Pressable
           onPress={onPress}
           style={({ pressed }) => [styles.infoPress, pressed && { opacity: 0.85 }]}
+          accessibilityRole="button"
         >
           <Text variant="titleMedium" style={[styles.title, { color: p.primary }]}>
             {project.name}
@@ -160,36 +164,36 @@ export function ProjectCatalogCard({ project, onPress, onLeaveRequest }: Props) 
             ) : null}
           </View>
         </Pressable>
-        <View style={styles.actionsRow}>
-          <Button
-            mode="outlined"
-            onPress={onPress}
-            style={styles.actionHalf}
-            contentStyle={styles.ctaContent}
-            textColor={p.primary}
-          >
+
+        <Pressable
+          onPress={onLeaveRequest}
+          style={({ pressed }) => [
+            styles.primaryBtn,
+            { backgroundColor: p.secondary, opacity: pressed ? 0.9 : 1 },
+          ]}
+          accessibilityRole="button"
+        >
+          <Text style={styles.primaryBtnTxt}>{t("projectDetails.leaveRequest")}</Text>
+        </Pressable>
+
+        <Pressable
+          onPress={onPress}
+          style={({ pressed }) => [styles.secondaryBtn, { opacity: pressed ? 0.65 : 1 }]}
+          accessibilityRole="button"
+        >
+          <Text style={[styles.secondaryBtnTxt, { color: p.primary }]}>
             {t("projectCard.moreDetails")}
-          </Button>
-          <Button
-            mode="contained"
-            buttonColor={p.secondary}
-            textColor="#FFFFFF"
-            style={styles.actionHalf}
-            contentStyle={styles.ctaContent}
-            onPress={onLeaveRequest}
-          >
-            {t("projectDetails.leaveRequest")}
-          </Button>
-        </View>
-      </Card.Content>
-    </Card>
+          </Text>
+          <MaterialCommunityIcons name="chevron-right" size={20} color={p.primary} />
+        </Pressable>
+      </View>
+    </CatalogSurfaceCard>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
     marginBottom: spacing.lg,
-    borderRadius: radii.card,
     overflow: "hidden",
   },
   imageWrap: {
@@ -240,6 +244,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   content: {
+    padding: spacing.md,
     paddingTop: spacing.md,
     gap: spacing.sm,
   },
@@ -248,6 +253,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontWeight: "900",
+    fontSize: Platform.select({ ios: 17, android: 18, default: 17 }),
   },
   locRow: {
     flexDirection: "row",
@@ -258,15 +264,27 @@ const styles = StyleSheet.create({
   price: { fontWeight: "700" },
   priceNum: {},
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
-  actionsRow: {
-    flexDirection: "row",
-    gap: spacing.sm,
-    marginTop: spacing.xs,
-    alignSelf: "stretch",
-  },
-  actionHalf: {
-    flex: 1,
+  primaryBtn: {
+    height: catalogBtnHeight,
     borderRadius: radii.lg,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: spacing.xs,
   },
-  ctaContent: { paddingVertical: 6 },
+  primaryBtnTxt: {
+    color: "#FFFFFF",
+    fontWeight: "800",
+    fontSize: Platform.select({ ios: 16, android: 15, default: 16 }),
+  },
+  secondaryBtn: {
+    height: catalogSecondaryBtnHeight,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 2,
+  },
+  secondaryBtnTxt: {
+    fontWeight: "700",
+    fontSize: Platform.select({ ios: 15, android: 14, default: 15 }),
+  },
 });

@@ -2,24 +2,30 @@ import React, { useLayoutEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   View,
 } from "react-native";
-import { Button, Snackbar, Text, TextInput } from "react-native-paper";
+import { ActivityIndicator, Snackbar, Text, TextInput } from "react-native-paper";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import type { CatalogStackParamList } from "../../navigation/RootNavigator";
 import { apiFetch } from "../../api/client";
 import { formatUzPhoneInput, normalizeUzPhoneDigits } from "../../lib/phone";
 import { useI18n } from "../../i18n/I18nProvider";
-import { spacing } from "../../theme/tokens";
+import { CatalogSurfaceCard } from "../../ui/catalog/CatalogSurfaceCard";
+import { catalogBtnHeight } from "../../ui/catalog/catalogPlatform";
+import { Screen } from "../../ui/Screen";
+import { useAppTheme } from "../../theme/AppThemeProvider";
+import { radii, spacing } from "../../theme/tokens";
 
 type Props = NativeStackScreenProps<CatalogStackParamList, "LeadForm">;
 
 export function LeadFormScreen({ route, navigation }: Props) {
   const { projectId, floorId, projectName } = route.params;
   const { t } = useI18n();
+  const { palette: p } = useAppTheme();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("+998");
   const [busy, setBusy] = useState(false);
@@ -69,63 +75,82 @@ export function LeadFormScreen({ route, navigation }: Props) {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.flex}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        keyboardShouldPersistTaps="handled"
+    <Screen>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <Text variant="titleMedium" style={styles.head}>
-          {projectName ? `${t("leadModal.interestPrefix")}: ${projectName}` : t("leadModal.title")}
-        </Text>
-        <Text variant="bodyMedium" style={styles.sub}>
-          {t("leadModal.defaultDescription")}
-        </Text>
-        {floorId != null ? (
-          <Text variant="labelMedium" style={styles.floorNote}>
-            {t("leadModal.floorNote", { id: floorId })}
-          </Text>
-        ) : null}
-        <TextInput
-          mode="outlined"
-          label={t("leadModal.fullName")}
-          placeholder={t("leadModal.namePlaceholder")}
-          value={name}
-          onChangeText={setName}
-          style={styles.field}
-        />
-        <TextInput
-          mode="outlined"
-          label={t("leadModal.phone")}
-          value={phone}
-          onChangeText={(v) => setPhone(formatUzPhoneInput(v))}
-          keyboardType="phone-pad"
-          style={styles.field}
-        />
-        <Button
-          mode="contained"
-          loading={busy}
-          onPress={() => void submit()}
-          style={styles.btn}
-          contentStyle={styles.btnIn}
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
         >
-          {busy ? t("leadModal.sending") : t("leadModal.submit")}
-        </Button>
-        <Text variant="bodySmall" style={styles.privacy}>
-          {t("leadModal.privacy")}
-        </Text>
-      </ScrollView>
-      <Snackbar
-        visible={snack != null}
-        onDismiss={() => setSnack(null)}
-        duration={3000}
-        style={snack?.ok ? styles.snackOk : styles.snackErr}
-      >
-        {snack?.msg ?? ""}
-      </Snackbar>
-    </KeyboardAvoidingView>
+          <CatalogSurfaceCard style={styles.formCard}>
+            <Text variant="titleMedium" style={[styles.head, { color: p.text }]}>
+              {projectName
+                ? `${t("leadModal.interestPrefix")}: ${projectName}`
+                : t("leadModal.title")}
+            </Text>
+            <Text variant="bodyMedium" style={[styles.sub, { color: p.textMuted }]}>
+              {t("leadModal.defaultDescription")}
+            </Text>
+            {floorId != null ? (
+              <View style={[styles.floorPill, { backgroundColor: p.surfaceMuted }]}>
+                <Text variant="labelLarge" style={{ color: p.text, fontWeight: "700" }}>
+                  {t("leadModal.floorNote", { id: floorId })}
+                </Text>
+              </View>
+            ) : null}
+            <TextInput
+              mode="outlined"
+              label={t("leadModal.fullName")}
+              placeholder={t("leadModal.namePlaceholder")}
+              value={name}
+              onChangeText={setName}
+              style={styles.field}
+              outlineStyle={styles.fieldOutline}
+            />
+            <TextInput
+              mode="outlined"
+              label={t("leadModal.phone")}
+              value={phone}
+              onChangeText={(v) => setPhone(formatUzPhoneInput(v))}
+              keyboardType="phone-pad"
+              style={styles.field}
+              outlineStyle={styles.fieldOutline}
+            />
+            <Pressable
+              onPress={() => void submit()}
+              disabled={busy}
+              style={({ pressed }) => [
+                styles.btn,
+                {
+                  backgroundColor: p.secondary,
+                  opacity: busy || pressed ? 0.88 : 1,
+                },
+              ]}
+              accessibilityRole="button"
+            >
+              {busy ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text style={styles.btnTxt}>{t("leadModal.submit")}</Text>
+              )}
+            </Pressable>
+            <Text variant="bodySmall" style={[styles.privacy, { color: p.textMuted }]}>
+              {t("leadModal.privacy")}
+            </Text>
+          </CatalogSurfaceCard>
+        </ScrollView>
+        <Snackbar
+          visible={snack != null}
+          onDismiss={() => setSnack(null)}
+          duration={3000}
+          style={snack?.ok ? styles.snackOk : styles.snackErr}
+        >
+          {snack?.msg ?? ""}
+        </Snackbar>
+      </KeyboardAvoidingView>
+    </Screen>
   );
 }
 
@@ -135,13 +160,34 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     paddingBottom: spacing.xxl * 2,
   },
-  head: { fontWeight: "900", marginBottom: spacing.sm },
-  sub: { opacity: 0.75, marginBottom: spacing.lg },
-  floorNote: { marginBottom: spacing.md, fontWeight: "700" },
-  field: { marginBottom: spacing.md },
-  btn: { marginTop: spacing.sm, borderRadius: 14 },
-  btnIn: { paddingVertical: 6 },
-  privacy: { opacity: 0.55, marginTop: spacing.lg, textAlign: "center" },
+  formCard: {
+    padding: spacing.lg,
+    gap: spacing.sm,
+  },
+  head: { fontWeight: "900", marginBottom: spacing.xs },
+  sub: { marginBottom: spacing.md, lineHeight: 20 },
+  floorPill: {
+    alignSelf: "flex-start",
+    paddingHorizontal: spacing.md,
+    paddingVertical: Platform.select({ ios: 6, android: 8, default: 6 }),
+    borderRadius: radii.md,
+    marginBottom: spacing.sm,
+  },
+  field: { marginBottom: spacing.sm, backgroundColor: "transparent" },
+  fieldOutline: { borderRadius: radii.lg },
+  btn: {
+    height: catalogBtnHeight,
+    borderRadius: radii.lg,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: spacing.sm,
+  },
+  btnTxt: {
+    color: "#FFFFFF",
+    fontWeight: "800",
+    fontSize: Platform.select({ ios: 16, android: 15, default: 16 }),
+  },
+  privacy: { marginTop: spacing.lg, textAlign: "center", lineHeight: 18 },
   snackOk: { backgroundColor: "#15803D" },
   snackErr: { backgroundColor: "#B91C1C" },
 });

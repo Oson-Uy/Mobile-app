@@ -5,6 +5,7 @@ import Constants from "expo-constants";
 import { useVideoPlayer, VideoView } from "expo-video";
 
 import { useI18n } from "../../i18n/I18nProvider";
+import { CatalogSurfaceCard } from "../../ui/catalog/CatalogSurfaceCard";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { radii, spacing } from "../../theme/tokens";
 
@@ -50,20 +51,12 @@ export function CatalogHero() {
 
   return (
     <View style={styles.wrap}>
-      <View
-        style={[
-          styles.card,
-          {
-            backgroundColor: p.surface,
-            borderColor: p.outline,
-          },
-        ]}
-      >
+      <CatalogSurfaceCard style={styles.card}>
         <Image source={LOGO_FULL} style={styles.logoFull} resizeMode="contain" />
         <View style={[styles.accentRule, { backgroundColor: p.secondary }]} />
         <Text style={[styles.tagline, { color: p.text }]}>{t("catalog.hero.tagline")}</Text>
         <Text style={[styles.sub, { color: p.textMuted }]}>{t("catalog.hero.sub")}</Text>
-      </View>
+      </CatalogSurfaceCard>
 
       {uri && !videoErr ? (
         <CatalogHeroVideo uri={uri} videoBg={p.surfaceMuted} onError={onVideoError} />
@@ -78,10 +71,8 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   card: {
-    borderRadius: radii.xl,
     padding: spacing.lg,
     overflow: "hidden",
-    borderWidth: StyleSheet.hairlineWidth,
   },
   logoFull: {
     width: 150,

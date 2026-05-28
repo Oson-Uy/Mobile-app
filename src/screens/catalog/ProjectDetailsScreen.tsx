@@ -1,5 +1,6 @@
 import React, { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Dimensions,
   FlatList,
   Image,
@@ -26,40 +27,22 @@ import {
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useVideoPlayer, VideoView } from "expo-video";
-import WebView from "react-native-webview";
-
-import {
-  getVideoWebEmbed,
-  INSTAGRAM_EMBED_INJECTED_JS,
-  normalizeVideoUrl,
-} from "../../lib/video-url";
 import type { CatalogStackParamList } from "../../navigation/RootNavigator";
 import { apiFetch } from "../../api/client";
 import { useI18n } from "../../i18n/I18nProvider";
 import type { ApiFloor, ApiProjectFull, ApiProjectPreview } from "../../types/project";
 import { minPricePerM2FromApiProject } from "../../lib/project-price";
 import { formatUzs } from "../../lib/currency";
+import { geocodePlace, parseCoord, PROJECT_MAP_HEIGHT, type MapCoords } from "../../lib/projectMap";
 import { FloorLayoutsModal } from "./FloorLayoutsModal";
 import { FullScreenLoader } from "../../ui/FullScreenLoader";
+import { ProjectMapWebView } from "../../ui/ProjectMapWebView";
 import { ProjectQrCard } from "../../ui/ProjectQrCard";
 import { SectionCard } from "../../ui/SectionCard";
 import { SectionTitle } from "../../ui/SectionTitle";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import type { AppPalette } from "../../theme/tokens";
 import { radii, spacing } from "../../theme/tokens";
-
-function ProjectDetailsDirectVideo({
-  uri,
-  style,
-}: {
-  uri: string;
-  style: StyleProp<ViewStyle>;
-}) {
-  const normalized = normalizeVideoUrl(uri);
-  const player = useVideoPlayer(normalized);
-  return <VideoView player={player} style={style} nativeControls contentFit="contain" />;
-}
 
 type Props = NativeStackScreenProps<CatalogStackParamList, "ProjectDetails">;
 
@@ -287,22 +270,22 @@ function createDetailsStyles(p: AppPalette) {
       gap: spacing.xs,
       flexWrap: "wrap",
     },
-    videoHint: { color: p.textMuted, marginBottom: spacing.sm },
-    /** Горизонтальное видео (YouTube и т.п.) */
-    videoBox: {
-      width: "100%",
-      aspectRatio: 16 / 9,
-      borderRadius: radii.md,
-      backgroundColor: "#000",
-      overflow: "hidden",
-    },
-    /** Базовые стили вертикального блока; width/height задаются в экране под 9:16 */
-    videoBoxReelOuter: {
-      alignSelf: "center",
+    mapHint: { color: p.textMuted, marginBottom: spacing.sm },
+    mapBox: {
       borderRadius: radii.lg,
-      backgroundColor: "#000",
+      minHeight: PROJECT_MAP_HEIGHT,
       overflow: "hidden",
+      alignSelf: "stretch",
+      backgroundColor: p.surfaceMuted,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: p.outline,
     },
+    mapLoading: {
+      minHeight: PROJECT_MAP_HEIGHT,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    mapActionsRow: { flexDirection: "row", gap: spacing.sm, marginTop: spacing.sm, flexWrap: "wrap" },
     reviewHint: { color: p.textMuted, marginBottom: spacing.sm },
     reviewCard: {
       padding: spacing.md,
@@ -314,8 +297,12 @@ function createDetailsStyles(p: AppPalette) {
     },
     reviewStars: { flexDirection: "row", gap: 2, marginBottom: spacing.sm },
     reviewQuote: { color: p.text, fontStyle: "italic", lineHeight: 20 },
-    videoCta: { borderRadius: radii.lg, alignSelf: "flex-start" },
-    videoCtaIn: { paddingVertical: 6, paddingHorizontal: 6 },
+    mapBtn: { borderRadius: radii.lg, alignSelf: "flex-start" },
+    mapBtnIn: Platform.select({
+      ios: { paddingVertical: 6 },
+      android: { paddingVertical: 8 },
+      default: { paddingVertical: 6 },
+    }),
   });
 }
 
@@ -387,7 +374,8 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
   const [descOpen, setDescOpen] = useState(false);
   const [floorModal, setFloorModal] = useState<ApiFloor | null>(null);
   const [progressPhoto, setProgressPhoto] = useState<string | null>(null);
-  const [showVideo, setShowVideo] = useState(false);
+  const [mapCoords, setMapCoords] = useState<MapCoords | null>(null);
+  const [mapGeoLoading, setMapGeoLoading] = useState(false);
   const galleryRef = useRef<FlatList<string>>(null);
 
   const load = useCallback(async () => {
@@ -407,6 +395,44 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
     setLoading(true);
     void load();
   }, [load]);
+
+  useEffect(() => {
+    if (!data) {
+      setMapCoords(null);
+      setMapGeoLoading(false);
+      return;
+    }
+    let cancelled = false;
+
+    const lat = parseCoord(data.latitude);
+    const lon = parseCoord(data.longitude);
+    if (lat != null && lon != null) {
+      setMapCoords({ lat, lon });
+      setMapGeoLoading(false);
+      return;
+    }
+
+    const placeQuery = [data.district, data.location].filter(Boolean).join(", ");
+    if (!placeQuery) {
+      setMapCoords(null);
+      setMapGeoLoading(false);
+      return;
+    }
+
+    setMapGeoLoading(true);
+    setMapCoords(null);
+    void (async () => {
+      const hit = await geocodePlace(placeQuery);
+      if (!cancelled) {
+        setMapCoords(hit);
+        setMapGeoLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [data?.id, data?.latitude, data?.longitude, data?.district, data?.location]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -558,23 +584,20 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
 
   const place = [data.district, data.location].filter(Boolean).join(", ");
   const dev = data.developer;
-  const videoWeb = data.videoUrl ? getVideoWebEmbed(data.videoUrl) : null;
-  const videoContentW = slideW - spacing.lg * 2;
-  const reelFrameH = Math.min(
-    (videoContentW * 16) / 9,
-    Dimensions.get("window").height * 0.72,
-  );
-  /** Zoom + обрезка: боковые поля; смещение вверх — дополнительно убирает нижнюю панель (лайки, «ещё в Instagram»). */
-  const IG_EMBED_ZOOM = 1.17;
-  /** Доля высоты кадра: насколько сдвинуть embed вверх относительно центрированного crop (0 = симметрично). */
-  const IG_EMBED_CROP_BOTTOM_BIAS = 0.07;
-  const videoPlayerStyle: StyleProp<ViewStyle> = (() => {
-    if (!data.videoUrl) return styles.videoBox;
-    if (videoWeb?.vertical) {
-      return [styles.videoBoxReelOuter, { width: videoContentW, height: reelFrameH }];
-    }
-    return styles.videoBox;
-  })();
+  const showMapSection = Boolean(mapCoords || mapGeoLoading || place);
+  const mapOpenUrl = mapCoords
+    ? Platform.select({
+        ios: `http://maps.apple.com/?q=${encodeURIComponent(data.name)}&ll=${mapCoords.lat},${mapCoords.lon}`,
+        android: `geo:${mapCoords.lat},${mapCoords.lon}?q=${mapCoords.lat},${mapCoords.lon}(${encodeURIComponent(data.name)})`,
+        default: `https://www.google.com/maps?q=${mapCoords.lat},${mapCoords.lon}`,
+      })
+    : place
+      ? Platform.select({
+          ios: `http://maps.apple.com/?q=${encodeURIComponent(place)}`,
+          android: `geo:0,0?q=${encodeURIComponent(place)}`,
+          default: `https://www.google.com/maps?q=${encodeURIComponent(place)}`,
+        })
+      : null;
 
   return (
     <>
@@ -780,7 +803,10 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
           </Button>
 
           {data.qrCodeUrl?.trim() ? (
-            <ProjectQrCard value={data.qrCodeUrl.trim()} />
+            <ProjectQrCard
+              imageUrl={data.qrCodeUrl.trim()}
+              shareUrl={`https://oson-uy.uz/projects/${data.id}`}
+            />
           ) : null}
 
           <SectionCard style={styles.section}>
@@ -953,80 +979,33 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
             styles={styles}
           />
 
-          {data.videoUrl ? (
+          {showMapSection ? (
             <View style={styles.section}>
-              <SectionTitle title={t("projectDetails.videoTitle")} />
-              <Text variant="bodySmall" style={styles.videoHint}>
-                {videoWeb?.vertical
-                  ? t("projectDetails.videoSubtitleReels")
-                  : t("projectDetails.videoSubtitle")}
+              <SectionTitle title={t("projectDetails.mapTitle")} />
+              <Text variant="bodySmall" style={styles.mapHint}>
+                {t("projectDetails.mapHint")}
               </Text>
-              {!showVideo ? (
-                <Button
-                  mode="contained"
-                  buttonColor={p.primary}
-                  textColor="#FFFFFF"
-                  style={styles.videoCta}
-                  contentStyle={styles.videoCtaIn}
-                  onPress={() => setShowVideo(true)}
-                >
-                  {t("projectDetails.watchVideo")}
-                </Button>
-              ) : videoWeb ? (
-                videoWeb.provider === "instagram" ? (
-                  <View
-                    style={[
-                      styles.videoBoxReelOuter,
-                      {
-                        width: videoContentW,
-                        height: reelFrameH,
-                        overflow: "hidden",
-                        backgroundColor: "#000",
-                      },
-                    ]}
-                  >
-                    <WebView
-                      source={{ uri: videoWeb.uri }}
-                      userAgent={videoWeb.userAgent}
-                      style={{
-                        width: videoContentW * IG_EMBED_ZOOM,
-                        height: reelFrameH * IG_EMBED_ZOOM,
-                        marginLeft: -(videoContentW * (IG_EMBED_ZOOM - 1)) / 2,
-                        marginTop:
-                          -(reelFrameH * (IG_EMBED_ZOOM - 1)) / 2 +
-                          reelFrameH * IG_EMBED_CROP_BOTTOM_BIAS,
-                        backgroundColor: "transparent",
-                      }}
-                      scrollEnabled={false}
-                      bounces={false}
-                      allowsFullscreenVideo
-                      allowsInlineMediaPlayback
-                      mediaPlaybackRequiresUserAction={false}
-                      javaScriptEnabled
-                      domStorageEnabled
-                      mixedContentMode="compatibility"
-                      sharedCookiesEnabled
-                      thirdPartyCookiesEnabled
-                      injectedJavaScript={INSTAGRAM_EMBED_INJECTED_JS}
-                    />
+              <View style={styles.mapBox}>
+                {mapGeoLoading ? (
+                  <View style={styles.mapLoading}>
+                    <ActivityIndicator color={p.primary} />
                   </View>
-                ) : (
-                  <WebView
-                    source={{ uri: videoWeb.uri }}
-                    style={videoPlayerStyle}
-                    allowsFullscreenVideo
-                    allowsInlineMediaPlayback
-                    mediaPlaybackRequiresUserAction={false}
-                    javaScriptEnabled
-                    domStorageEnabled
-                    mixedContentMode="compatibility"
-                    sharedCookiesEnabled
-                    thirdPartyCookiesEnabled
-                  />
-                )
-              ) : (
-                <ProjectDetailsDirectVideo uri={data.videoUrl} style={videoPlayerStyle} />
-              )}
+                ) : mapCoords ? (
+                  <ProjectMapWebView lat={mapCoords.lat} lon={mapCoords.lon} />
+                ) : null}
+              </View>
+              {mapOpenUrl ? (
+                <View style={styles.mapActionsRow}>
+                  <Button
+                    mode="outlined"
+                    style={styles.mapBtn}
+                    contentStyle={styles.mapBtnIn as any}
+                    onPress={() => void openLink(mapOpenUrl)}
+                  >
+                    {t("projectDetails.openMap")}
+                  </Button>
+                </View>
+              ) : null}
             </View>
           ) : null}
 
