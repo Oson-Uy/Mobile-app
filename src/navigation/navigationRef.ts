@@ -1,4 +1,4 @@
-import { createNavigationContainerRef } from "@react-navigation/native";
+import { CommonActions, createNavigationContainerRef } from "@react-navigation/native";
 
 import type { RootStackParamList } from "./RootNavigator";
 
@@ -11,14 +11,15 @@ export function navigateToDeveloperWorkspace() {
   }
 }
 
-/** Закрыть кабинет и вернуться к каталогу. */
+/** Закрыть кабинет и вернуться к каталогу (сброс стека — для logout и кнопки «Каталог»). */
 export function exitDeveloperWorkspace() {
   if (!navigationRef.isReady()) return;
-  if (navigationRef.canGoBack()) {
-    navigationRef.goBack();
-  } else {
-    navigationRef.navigate("Main");
-  }
+  navigationRef.dispatch(
+    CommonActions.reset({
+      index: 0,
+      routes: [{ name: "Main" }],
+    }),
+  );
 }
 
 /** @deprecated Используйте navigateToDeveloperWorkspace */

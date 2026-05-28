@@ -16,8 +16,10 @@ import * as Clipboard from "expo-clipboard";
 
 import { apiFetch } from "../../api/client";
 import { clearToken } from "../../auth/token";
+import { exitDeveloperWorkspace } from "../../navigation/navigationRef";
 import { registerForPushAndSyncToken } from "../../push/register";
 import { useI18n } from "../../i18n/I18nProvider";
+import { useAppPreferences } from "../../preferences/AppPreferencesProvider";
 import { Screen } from "../../ui/Screen";
 import { SectionCard } from "../../ui/SectionCard";
 import { DevIconButton } from "../../ui/developer/DevIconButton";
@@ -44,6 +46,7 @@ const AVATAR = Platform.select({ ios: 96, android: 104, default: 96 })!;
 
 export function DeveloperProfileScreen() {
   const { t } = useI18n();
+  const { setRole } = useAppPreferences();
   const { palette: p } = useAppTheme();
   const [dev, setDev] = useState<ApiDeveloper | null>(null);
   const [editMode, setEditMode] = useState(false);
@@ -141,7 +144,8 @@ export function DeveloperProfileScreen() {
 
   const signOut = async () => {
     await clearToken();
-    setSnack(t("developer.signedOut"));
+    await setRole("buyer");
+    exitDeveloperWorkspace();
   };
 
   const onSyncPush = async () => {
