@@ -362,6 +362,7 @@ const styles = StyleSheet.create({
   filterValue: { flex: 1, fontWeight: "700", fontSize: 16 },
   err: { marginTop: 6 },
   empty: { paddingVertical: spacing.xxl * 2, alignItems: "center" },
+  muted: { textAlign: "center" },
   fab: {
     position: "absolute",
     right: devListPadding,

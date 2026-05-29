@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View, type ViewProps } from "react-native";
+import { View, type ViewProps } from "react-native";
 
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { catalogCardSurface } from "./catalogPlatform";

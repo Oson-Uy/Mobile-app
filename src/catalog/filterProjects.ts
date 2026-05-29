@@ -1,3 +1,6 @@
+import type { ApiProjectListItem } from "../types/project";
+import { parseMoneyInput } from "../lib/currency";
+
 export type CatalogFilterState = {
   pricePerM2Min: string;
   pricePerM2Max: string;
@@ -21,15 +24,6 @@ export const defaultCatalogFilters: CatalogFilterState = {
   district: "",
   hasInstallment: false,
 };
-
-import type { ApiProjectListItem } from "../types/project";
-
-type ApiFloor = {
-  pricePerM2?: number;
-  areaOptions?: { areaSqm?: number }[];
-};
-
-import { parseMoneyInput } from "../lib/currency";
 
 const toNumber = (value: string): number | undefined => {
   const parsed = Number(value.replace(/\s/g, ""));

@@ -97,7 +97,6 @@ export function DeveloperProjectEditorScreen({ navigation }: any) {
   const route = useRoute();
   const { projectId } = (route.params ?? {}) as RouteParams;
 
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm());
   const [snack, setSnack] = useState<string | null>(null);
@@ -115,7 +114,6 @@ export function DeveloperProjectEditorScreen({ navigation }: any) {
   useEffect(() => {
     void (async () => {
       try {
-        setLoading(true);
         setErr(null);
         if (!projectId) {
           setForm(emptyForm());
@@ -161,8 +159,6 @@ export function DeveloperProjectEditorScreen({ navigation }: any) {
         });
       } catch (e) {
         setErr(e instanceof Error ? e.message : "Load failed");
-      } finally {
-        setLoading(false);
       }
     })();
   }, [projectId]);

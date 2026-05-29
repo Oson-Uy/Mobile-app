@@ -33,7 +33,7 @@ export function CatalogSettingsModal({
   const { t, locale, setLocale } = useI18n();
   const { mode, setMode, palette: p } = useAppTheme();
   const doneLabelColor = mode === "dark" ? "#0F172A" : "#FFFFFF";
-  const { role, setRole } = useAppPreferences();
+  const { setRole } = useAppPreferences();
   const [hasDevSession, setHasDevSession] = useState(false);
 
   const refreshSession = useCallback(async () => {

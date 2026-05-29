@@ -12,7 +12,6 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Text } from "react-native-paper";
 
 import { useAppTheme } from "../../theme/AppThemeProvider";
-import { radii } from "../../theme/tokens";
 import { devIconButtonSize } from "./devPlatform";
 
 type IconName = React.ComponentProps<typeof MaterialCommunityIcons>["name"];

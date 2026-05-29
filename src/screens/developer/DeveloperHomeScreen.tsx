@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, type ComponentProps } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import { HeaderButton } from "@react-navigation/elements";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";

@@ -21,8 +21,3 @@ export function exitDeveloperWorkspace() {
     }),
   );
 }
-
-/** @deprecated Используйте navigateToDeveloperWorkspace */
-export function navigateToDeveloperLoginFromSettings() {
-  navigateToDeveloperWorkspace();
-}

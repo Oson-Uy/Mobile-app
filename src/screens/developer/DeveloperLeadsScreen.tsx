@@ -291,7 +291,7 @@ export function DeveloperLeadsScreen() {
                 {feedbackBusy ? (
                   <ActivityIndicator size="small" color={p.primary} />
                 ) : (
-                  <MaterialCommunityIcons name="message-draw-outline" size={20} color={p.primary} />
+                  <MaterialCommunityIcons name="message-text-outline" size={20} color={p.primary} />
                 )}
                 <Text variant="labelLarge" style={[styles.feedbackTxt, { color: p.primary }]}>
                   {t("developer.requestFeedback")}
