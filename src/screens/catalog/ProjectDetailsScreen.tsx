@@ -31,7 +31,15 @@ import { useI18n } from "../../i18n/I18nProvider";
 import type { ApiFloor, ApiProjectFull, ApiProjectPreview } from "../../types/project";
 import { minPricePerM2FromApiProject } from "../../lib/project-price";
 import { formatUzs } from "../../lib/currency";
-import { geocodePlace, parseCoord, PROJECT_MAP_HEIGHT, type MapCoords } from "../../lib/projectMap";
+import {
+  extractCoordsFromGoogleUrl,
+  geocodePlace,
+  isGoogleEmbedUrl,
+  parseCoord,
+  PROJECT_MAP_HEIGHT,
+  resolveMapUrl,
+  type MapCoords,
+} from "../../lib/projectMap";
 import { FloorLayoutsModal } from "./FloorLayoutsModal";
 import { FullScreenLoader } from "../../ui/FullScreenLoader";
 import { ProjectMapWebView } from "../../ui/ProjectMapWebView";
@@ -373,6 +381,8 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
   const [floorModal, setFloorModal] = useState<ApiFloor | null>(null);
   const [progressPhoto, setProgressPhoto] = useState<string | null>(null);
   const [mapCoords, setMapCoords] = useState<MapCoords | null>(null);
+  const [mapEmbed, setMapEmbed] = useState<string | null>(null);
+  const [mapOpenLink, setMapOpenLink] = useState<string | null>(null);
   const [mapGeoLoading, setMapGeoLoading] = useState(false);
   const galleryRef = useRef<FlatList<string>>(null);
 
@@ -397,28 +407,83 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
   useEffect(() => {
     if (!data) {
       setMapCoords(null);
+      setMapEmbed(null);
+      setMapOpenLink(null);
       setMapGeoLoading(false);
       return;
     }
     let cancelled = false;
 
-    const lat = parseCoord(data.latitude);
-    const lon = parseCoord(data.longitude);
-    if (lat != null && lon != null) {
-      setMapCoords({ lat, lon });
-      setMapGeoLoading(false);
-      return;
-    }
+    const reset = () => {
+      setMapCoords(null);
+      setMapEmbed(null);
+    };
+
+    const fromFields = (): boolean => {
+      const lat = parseCoord(data.latitude);
+      const lon = parseCoord(data.longitude);
+      if (lat != null && lon != null) {
+        reset();
+        setMapCoords({ lat, lon });
+        setMapGeoLoading(false);
+        return true;
+      }
+      return false;
+    };
 
     const placeQuery = [data.district, data.location].filter(Boolean).join(", ");
+
+    const embedRaw = data.mapEmbedUrl?.trim();
+    if (embedRaw) {
+      // Приоритет — ссылка на Google-карту с бэкенда (точное место).
+      setMapGeoLoading(true);
+      setMapOpenLink(embedRaw);
+      void (async () => {
+        const finalUrl = await resolveMapUrl(embedRaw);
+        if (cancelled) return;
+        setMapOpenLink(finalUrl);
+        const coords = extractCoordsFromGoogleUrl(finalUrl);
+        if (coords) {
+          reset();
+          setMapCoords(coords);
+          setMapGeoLoading(false);
+          return;
+        }
+        if (isGoogleEmbedUrl(finalUrl)) {
+          reset();
+          setMapEmbed(finalUrl);
+          setMapGeoLoading(false);
+          return;
+        }
+        // Из ссылки координаты не достали — пробуем поля, затем геокодинг адреса.
+        if (fromFields()) return;
+        if (!placeQuery) {
+          reset();
+          setMapGeoLoading(false);
+          return;
+        }
+        const hit = await geocodePlace(placeQuery);
+        if (cancelled) return;
+        reset();
+        setMapCoords(hit);
+        setMapGeoLoading(false);
+      })();
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    setMapOpenLink(null);
+    if (fromFields()) return;
+
     if (!placeQuery) {
-      setMapCoords(null);
+      reset();
       setMapGeoLoading(false);
       return;
     }
 
     setMapGeoLoading(true);
-    setMapCoords(null);
+    reset();
     void (async () => {
       const hit = await geocodePlace(placeQuery);
       if (!cancelled) {
@@ -430,7 +495,14 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [data?.id, data?.latitude, data?.longitude, data?.district, data?.location]);
+  }, [
+    data?.id,
+    data?.latitude,
+    data?.longitude,
+    data?.district,
+    data?.location,
+    data?.mapEmbedUrl,
+  ]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -582,20 +654,22 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
 
   const place = [data.district, data.location].filter(Boolean).join(", ");
   const dev = data.developer;
-  const showMapSection = Boolean(mapCoords || mapGeoLoading || place);
-  const mapOpenUrl = mapCoords
-    ? Platform.select({
-        ios: `http://maps.apple.com/?q=${encodeURIComponent(data.name)}&ll=${mapCoords.lat},${mapCoords.lon}`,
-        android: `geo:${mapCoords.lat},${mapCoords.lon}?q=${mapCoords.lat},${mapCoords.lon}(${encodeURIComponent(data.name)})`,
-        default: `https://www.google.com/maps?q=${mapCoords.lat},${mapCoords.lon}`,
-      })
-    : place
+  const showMapSection = Boolean(mapCoords || mapEmbed || mapGeoLoading || place);
+  const mapOpenUrl = mapOpenLink
+    ? mapOpenLink
+    : mapCoords
       ? Platform.select({
-          ios: `http://maps.apple.com/?q=${encodeURIComponent(place)}`,
-          android: `geo:0,0?q=${encodeURIComponent(place)}`,
-          default: `https://www.google.com/maps?q=${encodeURIComponent(place)}`,
+          ios: `http://maps.apple.com/?q=${encodeURIComponent(data.name)}&ll=${mapCoords.lat},${mapCoords.lon}`,
+          android: `geo:${mapCoords.lat},${mapCoords.lon}?q=${mapCoords.lat},${mapCoords.lon}(${encodeURIComponent(data.name)})`,
+          default: `https://www.google.com/maps?q=${mapCoords.lat},${mapCoords.lon}`,
         })
-      : null;
+      : place
+        ? Platform.select({
+            ios: `http://maps.apple.com/?q=${encodeURIComponent(place)}`,
+            android: `geo:0,0?q=${encodeURIComponent(place)}`,
+            default: `https://www.google.com/maps?q=${encodeURIComponent(place)}`,
+          })
+        : null;
 
   return (
     <>
@@ -990,6 +1064,8 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
                   </View>
                 ) : mapCoords ? (
                   <ProjectMapWebView lat={mapCoords.lat} lon={mapCoords.lon} />
+                ) : mapEmbed ? (
+                  <ProjectMapWebView embedUrl={mapEmbed} />
                 ) : null}
               </View>
               {mapOpenUrl ? (

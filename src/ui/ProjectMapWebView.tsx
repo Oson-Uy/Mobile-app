@@ -2,22 +2,43 @@ import React, { useMemo, useState } from "react";
 import { ActivityIndicator, Dimensions, Platform, StyleSheet, View } from "react-native";
 import WebView from "react-native-webview";
 
-import { buildLeafletMapHtml, PROJECT_MAP_HEIGHT } from "../lib/projectMap";
+import {
+  buildEmbedIframeHtml,
+  buildLeafletMapHtml,
+  PROJECT_MAP_HEIGHT,
+} from "../lib/projectMap";
 import { useAppTheme } from "../theme/AppThemeProvider";
 import { spacing } from "../theme/tokens";
 
 type Props = {
-  lat: number;
-  lon: number;
+  /** Координаты для Leaflet (приоритет). */
+  lat?: number;
+  lon?: number;
+  /** Прямой Google embed-URL, если координаты недоступны. */
+  embedUrl?: string;
   /** Ширина с учётом горизонтальных отступов экрана (spacing.lg × 2). */
   horizontalPadding?: number;
 };
 
-export function ProjectMapWebView({ lat, lon, horizontalPadding = spacing.lg * 2 }: Props) {
+export function ProjectMapWebView({
+  lat,
+  lon,
+  embedUrl,
+  horizontalPadding = spacing.lg * 2,
+}: Props) {
   const { palette: p } = useAppTheme();
   const [webReady, setWebReady] = useState(false);
   const width = Dimensions.get("window").width - horizontalPadding;
-  const html = useMemo(() => buildLeafletMapHtml(lat, lon), [lat, lon]);
+
+  const html = useMemo(() => {
+    if (typeof lat === "number" && typeof lon === "number") {
+      return buildLeafletMapHtml(lat, lon);
+    }
+    if (embedUrl) return buildEmbedIframeHtml(embedUrl);
+    return null;
+  }, [lat, lon, embedUrl]);
+
+  if (!html) return null;
 
   return (
     <View style={[styles.wrap, { width, height: PROJECT_MAP_HEIGHT, backgroundColor: p.surfaceMuted }]}>

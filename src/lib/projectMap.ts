@@ -12,6 +12,56 @@ export function parseCoord(v: unknown): number | null {
 
 export type MapCoords = { lat: number; lon: number };
 
+function validCoords(lat: number, lon: number): MapCoords | null {
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+  if (lat < -90 || lat > 90 || lon < -180 || lon > 180) return null;
+  if (lat === 0 && lon === 0) return null;
+  return { lat, lon };
+}
+
+/** Достаёт координаты из ссылки Google Maps (place / embed / share). */
+export function extractCoordsFromGoogleUrl(url: string): MapCoords | null {
+  const u = url.trim();
+  if (!u) return null;
+
+  // @lat,lng (обычная ссылка карты)
+  let m = u.match(/@(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/);
+  if (m) return validCoords(Number(m[1]), Number(m[2]));
+
+  // q= / query= / ll= / center= / destination= / daddr= / saddr= → lat,lng
+  m = u.match(
+    /[?&](?:q|query|ll|center|destination|daddr|saddr)=(-?\d{1,3}\.\d+),\s*(-?\d{1,3}\.\d+)/,
+  );
+  if (m) return validCoords(Number(m[1]), Number(m[2]));
+
+  // !3d<lat>!4d<lng> (place URL)
+  m = u.match(/!3d(-?\d{1,3}\.\d+)!4d(-?\d{1,3}\.\d+)/);
+  if (m) return validCoords(Number(m[1]), Number(m[2]));
+
+  // !2d<lng>!3d<lat> (embed pb-центр)
+  m = u.match(/!2d(-?\d{1,3}\.\d+)!3d(-?\d{1,3}\.\d+)/);
+  if (m) return validCoords(Number(m[2]), Number(m[1]));
+
+  return null;
+}
+
+/** Прямой embed-URL Google Maps (iframe `?pb=`). */
+export function isGoogleEmbedUrl(url: string): boolean {
+  return /google\.[^/]+\/maps\/embed/i.test(url.trim());
+}
+
+/** Короткие ссылки (maps.app.goo.gl / goo.gl/maps) — резолвим редирект, чтобы достать координаты. */
+export async function resolveMapUrl(url: string): Promise<string> {
+  const u = url.trim();
+  if (!/goo\.gl|maps\.app\.goo\.gl/i.test(u)) return u;
+  try {
+    const res = await fetch(u, { method: "GET", redirect: "follow" });
+    return res.url || u;
+  } catch {
+    return u;
+  }
+}
+
 /** Leaflet + тайлы OSM — стабильнее, чем embed openstreetmap.org / Google в WKWebView. */
 export function buildLeafletMapHtml(lat: number, lon: number): string {
   const la = lat.toFixed(6);
@@ -44,6 +94,22 @@ export function buildLeafletMapHtml(lat: number, lon: number): string {
 </html>`;
 }
 
+/** Обёртка для прямого Google embed-URL (когда координаты вытащить не удалось). */
+export function buildEmbedIframeHtml(embedUrl: string): string {
+  const safe = embedUrl.replace(/"/g, "&quot;");
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<style>html,body,iframe{margin:0;padding:0;height:100%;width:100%;border:0;background:#e8ecef;}</style>
+</head>
+<body>
+<iframe src="${safe}" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+</body>
+</html>`;
+}
+
 export async function geocodePlace(query: string): Promise<MapCoords | null> {
   const q = query.trim();
   if (!q) return null;
@@ -59,10 +125,7 @@ export async function geocodePlace(query: string): Promise<MapCoords | null> {
     const rows = (await res.json()) as { lat?: string; lon?: string }[];
     const hit = rows[0];
     if (!hit?.lat || !hit?.lon) return null;
-    const lat = Number(hit.lat);
-    const lon = Number(hit.lon);
-    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
-    return { lat, lon };
+    return validCoords(Number(hit.lat), Number(hit.lon));
   } catch {
     return null;
   }
