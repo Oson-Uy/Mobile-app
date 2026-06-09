@@ -16,11 +16,11 @@ const SITE_URL = "https://oson-uy.uz";
 export function OnboardingScreen() {
   const { t } = useI18n();
   const { completeOnboarding } = useAppPreferences();
-  const { palette: p } = useAppTheme();
+  const { colors: c } = useAppTheme();
 
   return (
     <SafeAreaView
-      style={[styles.safe, { backgroundColor: p.background }]}
+      style={[styles.safe, { backgroundColor: c.bg }]}
       edges={["top", "left", "right"]}
     >
       <ScrollView
@@ -32,34 +32,34 @@ export function OnboardingScreen() {
           <View style={styles.brandMark}>
             <BrandLogo size={48} />
             <Text style={styles.wordmark}>
-              <Text style={{ color: p.primary }}>Oson</Text>
-              <Text style={{ color: p.secondary }}>Uy</Text>
+              <Text style={{ color: c.brand }}>Oson</Text>
+              <Text style={{ color: c.brandSecondary }}>Uy</Text>
             </Text>
           </View>
-          <View style={[styles.accentUnderLogo, { backgroundColor: p.secondary }]} />
+          <View style={[styles.accentUnderLogo, { backgroundColor: c.brandSecondary }]} />
         </View>
-        <Text variant="headlineSmall" style={[styles.title, { color: p.text }]}>
+        <Text variant="headlineSmall" style={[styles.title, { color: c.label }]}>
           {t("onboarding.welcomeTitle")}
         </Text>
-        <Text style={[styles.subtitle, { color: p.textMuted }]}>
+        <Text style={[styles.subtitle, { color: c.labelSecondary }]}>
           {t("onboarding.welcomeSubtitle")}
         </Text>
 
         <View
           style={[
             styles.card,
-            { backgroundColor: p.surface, borderColor: p.outline },
+            { backgroundColor: c.bgElevated, borderColor: c.separator },
           ]}
         >
-          <View style={[styles.iconWrap, { backgroundColor: `${p.primary}18` }]}>
-            <MaterialCommunityIcons name="home-search" size={28} color={p.primary} />
+          <View style={[styles.iconWrap, { backgroundColor: `${c.brand}18` }]}>
+            <MaterialCommunityIcons name="home-search" size={28} color={c.brand} />
           </View>
-          <Text style={[styles.cardTitle, { color: p.text }]}>{t("onboarding.buyerTitle")}</Text>
-          <Text style={[styles.cardHint, { color: p.textMuted }]}>{t("onboarding.buyerHint")}</Text>
+          <Text style={[styles.cardTitle, { color: c.label }]}>{t("onboarding.buyerTitle")}</Text>
+          <Text style={[styles.cardHint, { color: c.labelSecondary }]}>{t("onboarding.buyerHint")}</Text>
           <Button
             mode="contained"
             onPress={() => void completeOnboarding("buyer")}
-            buttonColor={p.primary}
+            buttonColor={c.brand}
             style={styles.cardBtn}
             contentStyle={styles.cardBtnInner}
           >
@@ -71,14 +71,14 @@ export function OnboardingScreen() {
           style={[
             styles.card,
             styles.devCard,
-            { backgroundColor: p.surface, borderColor: p.outline },
+            { backgroundColor: c.bgElevated, borderColor: c.separator },
           ]}
         >
-          <View style={[styles.iconWrap, { backgroundColor: `${p.secondary}18` }]}>
-            <MaterialCommunityIcons name="office-building-outline" size={28} color={p.secondary} />
+          <View style={[styles.iconWrap, { backgroundColor: `${c.brandSecondary}18` }]}>
+            <MaterialCommunityIcons name="office-building-outline" size={28} color={c.brandSecondary} />
           </View>
-          <Text style={[styles.cardTitle, { color: p.text }]}>{t("onboarding.developerTitle")}</Text>
-          <Text style={[styles.cardHint, { color: p.textMuted }]}>{t("onboarding.developerHint")}</Text>
+          <Text style={[styles.cardTitle, { color: c.label }]}>{t("onboarding.developerTitle")}</Text>
+          <Text style={[styles.cardHint, { color: c.labelSecondary }]}>{t("onboarding.developerHint")}</Text>
           <Button
             mode="contained"
             onPress={() => {
@@ -87,8 +87,8 @@ export function OnboardingScreen() {
                 await completeOnboarding("developer");
               })();
             }}
-            buttonColor={p.secondary}
-            textColor="#FFFFFF"
+            buttonColor={c.brandSecondary}
+            textColor={c.brandOn}
             style={styles.cardBtn}
             contentStyle={styles.cardBtnInner}
           >
@@ -96,12 +96,12 @@ export function OnboardingScreen() {
           </Button>
         </View>
 
-        <Text style={[styles.devHint, { color: p.textMuted }]}>{t("onboarding.partnerHint")}</Text>
+        <Text style={[styles.devHint, { color: c.labelSecondary }]}>{t("onboarding.partnerHint")}</Text>
         <Pressable
           onPress={() => void Linking.openURL(SITE_URL)}
           style={({ pressed }) => [styles.siteLinkWrap, pressed && { opacity: 0.7 }]}
         >
-          <Text style={[styles.siteLink, { color: p.primary }]}>{t("onboarding.partnerSite")}</Text>
+          <Text style={[styles.siteLink, { color: c.brand }]}>{t("onboarding.partnerSite")}</Text>
         </Pressable>
       </ScrollView>
     </SafeAreaView>

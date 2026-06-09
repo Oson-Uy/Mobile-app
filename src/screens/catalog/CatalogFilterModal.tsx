@@ -36,6 +36,7 @@ function FilterCheckRow({
   label,
   outline,
   primary,
+  brandOn,
   textColor,
 }: {
   checked: boolean;
@@ -43,6 +44,7 @@ function FilterCheckRow({
   label: string;
   outline: string;
   primary: string;
+  brandOn: string;
   textColor: string;
 }) {
   return (
@@ -61,7 +63,7 @@ function FilterCheckRow({
           },
         ]}
       >
-        {checked ? <MaterialCommunityIcons name="check" size={15} color="#FFFFFF" /> : null}
+        {checked ? <MaterialCommunityIcons name="check" size={15} color={brandOn} /> : null}
       </View>
       <Text style={[styles.checkLabel, { color: textColor }]}>{label}</Text>
     </Pressable>
@@ -78,7 +80,7 @@ export function CatalogFilterModal({
 }: Props) {
   const { t } = useI18n();
   const theme = useTheme();
-  const { palette: p } = useAppTheme();
+  const { colors: c } = useAppTheme();
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [pickOpen, setPickOpen] = useState<null | "region" | "district">(null);
 
@@ -120,18 +122,18 @@ export function CatalogFilterModal({
             style={[
               styles.sheet,
               {
-                backgroundColor: p.surface,
-                borderTopColor: p.outline,
+                backgroundColor: c.bgElevated,
+                borderTopColor: c.separator,
               },
             ]}
           >
             <View style={styles.sheetHandleZone}>
-              <View style={[styles.handle, { backgroundColor: p.outline }]} />
+              <View style={[styles.handle, { backgroundColor: c.separator }]} />
             </View>
-            <Text variant="titleLarge" style={[styles.title, { color: p.text }]}>
+            <Text variant="titleLarge" style={[styles.title, { color: c.label }]}>
               {t("catalog.drawer.title")}
             </Text>
-            <Text variant="bodyMedium" style={[styles.desc, { color: p.textMuted }]}>
+            <Text variant="bodyMedium" style={[styles.desc, { color: c.labelSecondary }]}>
               {t("catalog.drawer.description")}
             </Text>
             <ScrollView
@@ -140,7 +142,7 @@ export function CatalogFilterModal({
               style={styles.scrollFlex}
               contentContainerStyle={styles.scroll}
             >
-              <Text style={[styles.label, { color: p.textMuted }]}>
+              <Text style={[styles.label, { color: c.labelSecondary }]}>
                 {t("catalog.drawer.pricePerM2Label")}
               </Text>
               <View style={styles.row}>
@@ -149,9 +151,9 @@ export function CatalogFilterModal({
                   dense
                   style={styles.input}
                   placeholder={t("catalog.drawer.from")}
-                  placeholderTextColor={p.textMuted}
-                  textColor={p.text}
-                  outlineColor={p.outline}
+                  placeholderTextColor={c.labelSecondary}
+                  textColor={c.label}
+                  outlineColor={c.separator}
                   activeOutlineColor={theme.colors.primary}
                   value={filters.pricePerM2Min}
                   onChangeText={(v) =>
@@ -167,9 +169,9 @@ export function CatalogFilterModal({
                   dense
                   style={styles.input}
                   placeholder={t("catalog.drawer.to")}
-                  placeholderTextColor={p.textMuted}
-                  textColor={p.text}
-                  outlineColor={p.outline}
+                  placeholderTextColor={c.labelSecondary}
+                  textColor={c.label}
+                  outlineColor={c.separator}
                   activeOutlineColor={theme.colors.primary}
                   value={filters.pricePerM2Max}
                   onChangeText={(v) =>
@@ -182,7 +184,7 @@ export function CatalogFilterModal({
                 />
               </View>
 
-              <Text style={[styles.label, styles.mt, { color: p.textMuted }]}>
+              <Text style={[styles.label, styles.mt, { color: c.labelSecondary }]}>
                 {t("catalog.drawer.areaLabel")}
               </Text>
               <View style={styles.row}>
@@ -191,9 +193,9 @@ export function CatalogFilterModal({
                   dense
                   style={styles.input}
                   placeholder={t("catalog.drawer.area_from")}
-                  placeholderTextColor={p.textMuted}
-                  textColor={p.text}
-                  outlineColor={p.outline}
+                  placeholderTextColor={c.labelSecondary}
+                  textColor={c.label}
+                  outlineColor={c.separator}
                   activeOutlineColor={theme.colors.primary}
                   value={filters.areaMin}
                   onChangeText={(v) =>
@@ -206,9 +208,9 @@ export function CatalogFilterModal({
                   dense
                   style={styles.input}
                   placeholder={t("catalog.drawer.area_to")}
-                  placeholderTextColor={p.textMuted}
-                  textColor={p.text}
-                  outlineColor={p.outline}
+                  placeholderTextColor={c.labelSecondary}
+                  textColor={c.label}
+                  outlineColor={c.separator}
                   activeOutlineColor={theme.colors.primary}
                   value={filters.areaMax}
                   onChangeText={(v) =>
@@ -218,32 +220,34 @@ export function CatalogFilterModal({
                 />
               </View>
 
-              <Text style={[styles.label, styles.mt, { color: p.textMuted }]}>
+              <Text style={[styles.label, styles.mt, { color: c.labelSecondary }]}>
                 {t("catalog.drawer.additionalLabel")}
               </Text>
               <FilterCheckRow
                 checked={filters.verified}
                 onToggle={() => onChange({ ...filters, verified: !filters.verified })}
                 label={t("catalog.drawer.verified")}
-                outline={p.outline}
-                primary={p.primary}
-                textColor={p.text}
+                outline={c.separator}
+                primary={c.brand}
+                brandOn={c.brandOn}
+                textColor={c.label}
               />
               <FilterCheckRow
                 checked={filters.popular}
                 onToggle={() => onChange({ ...filters, popular: !filters.popular })}
                 label={t("catalog.popular")}
-                outline={p.outline}
-                primary={p.primary}
-                textColor={p.text}
+                outline={c.separator}
+                primary={c.brand}
+                brandOn={c.brandOn}
+                textColor={c.label}
               />
 
-              <View style={[styles.advancedToggle, { borderColor: p.outline }]}>
+              <View style={[styles.advancedToggle, { borderColor: c.separator }]}>
                 <View style={{ flex: 1 }}>
-                  <Text style={[styles.advancedTitle, { color: p.text }]}>
+                  <Text style={[styles.advancedTitle, { color: c.label }]}>
                     {t("catalog.filtersAdvanced")}
                   </Text>
-                  <Text style={[styles.advancedHint, { color: p.textMuted }]}>
+                  <Text style={[styles.advancedHint, { color: c.labelSecondary }]}>
                     {t("catalog.filtersAdvancedHint")}
                   </Text>
                 </View>
@@ -252,7 +256,7 @@ export function CatalogFilterModal({
 
               {advancedOpen ? (
                 <>
-                  <Text style={[styles.label, { color: p.textMuted }]}>
+                  <Text style={[styles.label, { color: c.labelSecondary }]}>
                     {t("catalog.drawer.region")}
                   </Text>
                   <Pressable
@@ -260,21 +264,21 @@ export function CatalogFilterModal({
                     style={({ pressed }) => [
                       styles.selectField,
                       {
-                        borderColor: p.outline,
-                        backgroundColor: pressed ? p.surfaceMuted : p.surface,
+                        borderColor: c.separator,
+                        backgroundColor: pressed ? c.fill : c.bgElevated,
                       },
                     ]}
                   >
                     <Text
-                      style={[styles.selectText, { color: filters.location ? p.text : p.textMuted }]}
+                      style={[styles.selectText, { color: filters.location ? c.label : c.labelSecondary }]}
                       numberOfLines={2}
                     >
                       {filters.location || t("catalog.drawer.selectRegion")}
                     </Text>
-                    <MaterialCommunityIcons name="chevron-down" size={22} color={p.textMuted} />
+                    <MaterialCommunityIcons name="chevron-down" size={22} color={c.labelSecondary} />
                   </Pressable>
 
-                  <Text style={[styles.label, styles.mt, { color: p.textMuted }]}>
+                  <Text style={[styles.label, styles.mt, { color: c.labelSecondary }]}>
                     {t("catalog.drawer.district")}
                   </Text>
                   <Pressable
@@ -286,19 +290,19 @@ export function CatalogFilterModal({
                     style={({ pressed }) => [
                       styles.selectField,
                       {
-                        borderColor: p.outline,
-                        backgroundColor: pressed ? p.surfaceMuted : p.surface,
+                        borderColor: c.separator,
+                        backgroundColor: pressed ? c.fill : c.bgElevated,
                         opacity: filters.location ? 1 : 0.55,
                       },
                     ]}
                   >
                     <Text
-                      style={[styles.selectText, { color: filters.district ? p.text : p.textMuted }]}
+                      style={[styles.selectText, { color: filters.district ? c.label : c.labelSecondary }]}
                       numberOfLines={2}
                     >
                       {filters.district || t("catalog.drawer.selectDistrict")}
                     </Text>
-                    <MaterialCommunityIcons name="chevron-down" size={22} color={p.textMuted} />
+                    <MaterialCommunityIcons name="chevron-down" size={22} color={c.labelSecondary} />
                   </Pressable>
 
                   <View style={styles.mt}>
@@ -311,16 +315,17 @@ export function CatalogFilterModal({
                         })
                       }
                       label={t("projectCard.installment")}
-                      outline={p.outline}
-                      primary={p.primary}
-                      textColor={p.text}
+                      outline={c.separator}
+                      primary={c.brand}
+                      brandOn={c.brandOn}
+                      textColor={c.label}
                     />
                   </View>
                 </>
               ) : null}
             </ScrollView>
 
-            <Divider style={[styles.divider, { backgroundColor: p.outline }]} />
+            <Divider style={[styles.divider, { backgroundColor: c.separator }]} />
             <View style={styles.actions}>
               <Button mode="outlined" onPress={onReset} style={styles.btn}>
                 {t("catalog.drawer.reset")}
@@ -348,10 +353,10 @@ export function CatalogFilterModal({
               edges={["bottom"]}
               style={[
                 styles.pickerSheet,
-                { backgroundColor: p.surface, borderTopColor: p.outline },
+                { backgroundColor: c.bgElevated, borderTopColor: c.separator },
               ]}
             >
-              <Text style={[styles.pickerTitle, { color: p.text }]}>
+              <Text style={[styles.pickerTitle, { color: c.label }]}>
                 {pickOpen === "region"
                   ? t("catalog.drawer.region")
                   : t("catalog.drawer.district")}
@@ -375,10 +380,10 @@ export function CatalogFilterModal({
                       onPress={() => pickRegion(item.value)}
                       style={({ pressed }) => [
                         styles.pickerRow,
-                        { backgroundColor: pressed ? p.surfaceMuted : "transparent" },
+                        { backgroundColor: pressed ? c.fill : "transparent" },
                       ]}
                     >
-                      <Text style={[styles.pickerRowText, { color: p.text }]} numberOfLines={3}>
+                      <Text style={[styles.pickerRowText, { color: c.label }]} numberOfLines={3}>
                         {item.label}
                       </Text>
                       {filters.location === item.value ? (
@@ -403,10 +408,10 @@ export function CatalogFilterModal({
                       onPress={() => pickDistrict(item.value)}
                       style={({ pressed }) => [
                         styles.pickerRow,
-                        { backgroundColor: pressed ? p.surfaceMuted : "transparent" },
+                        { backgroundColor: pressed ? c.fill : "transparent" },
                       ]}
                     >
-                      <Text style={[styles.pickerRowText, { color: p.text }]} numberOfLines={3}>
+                      <Text style={[styles.pickerRowText, { color: c.label }]} numberOfLines={3}>
                         {item.label}
                       </Text>
                       {filters.district === item.value ? (

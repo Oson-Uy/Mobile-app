@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { FlatList, Platform, Pressable, RefreshControl, StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Text, useTheme } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { HeaderButton } from "@react-navigation/elements";
@@ -7,7 +8,9 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { apiFetch } from "../../api/client";
 import { useI18n } from "../../i18n/I18nProvider";
-import type { CatalogStackParamList } from "../../navigation/RootNavigator";
+import { buyerTabBarBottomInset } from "../../navigation/tabBarInsets";
+import { iosScrollInset } from "../../navigation/glassOptions";
+import type { CatalogStackParamList } from "../../navigation/types";
 import {
   defaultCatalogFilters,
   filterCatalogProjects,
@@ -21,7 +24,7 @@ import { CatalogHero } from "./CatalogHero";
 import { CatalogSettingsModal } from "./CatalogSettingsModal";
 import { ProjectCatalogCard } from "./ProjectCatalogCard";
 import { Screen } from "../../ui/Screen";
-import { catalogListPadding } from "../../ui/catalog/catalogPlatform";
+import { listPadding } from "../../ui/platform";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { radii, spacing } from "../../theme/tokens";
 
@@ -32,7 +35,9 @@ const ICON_SIZE = 22;
 export function CatalogListScreen({ navigation }: Props) {
   const { t } = useI18n();
   const theme = useTheme();
-  const { palette: p } = useAppTheme();
+  const { colors: c } = useAppTheme();
+  const insets = useSafeAreaInsets();
+  const listBottomPad = buyerTabBarBottomInset(insets.bottom);
   const [raw, setRaw] = useState<ApiProjectListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -175,8 +180,9 @@ export function CatalogListScreen({ navigation }: Props) {
         }}
       />
       <FlatList
+        {...iosScrollInset}
         ListHeaderComponent={<CatalogHero />}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={[styles.list, { paddingBottom: listBottomPad }]}
         data={items}
         keyExtractor={(i) => String(i.id)}
         refreshControl={
@@ -184,21 +190,21 @@ export function CatalogListScreen({ navigation }: Props) {
         }
         ListEmptyComponent={
           <View style={styles.empty}>
-            <MaterialCommunityIcons name="home-search-outline" size={52} color={p.textMuted} />
-            <Text variant="titleMedium" style={[styles.emptyTitle, { color: p.text }]}>
+            <MaterialCommunityIcons name="home-search-outline" size={52} color={c.labelSecondary} />
+            <Text variant="titleMedium" style={[styles.emptyTitle, { color: c.label }]}>
               {t("catalog.noResults")}
             </Text>
-            <Text variant="bodyMedium" style={[styles.emptyHint, { color: p.textMuted }]}>
+            <Text variant="bodyMedium" style={[styles.emptyHint, { color: c.labelSecondary }]}>
               {t("catalog.noResultsHint")}
             </Text>
             <Pressable
               onPress={resetFilters}
               style={({ pressed }) => [
                 styles.resetBtn,
-                { borderColor: p.outline, opacity: pressed ? 0.75 : 1 },
+                { borderColor: c.separator, opacity: pressed ? 0.75 : 1 },
               ]}
             >
-              <Text style={[styles.resetBtnTxt, { color: p.primary }]}>
+              <Text style={[styles.resetBtnTxt, { color: c.brand }]}>
                 {t("catalog.drawer.reset")}
               </Text>
             </Pressable>
@@ -227,7 +233,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   list: {
-    padding: catalogListPadding,
+    padding: listPadding,
     paddingBottom: spacing.xxl * 2,
   },
   centered: {

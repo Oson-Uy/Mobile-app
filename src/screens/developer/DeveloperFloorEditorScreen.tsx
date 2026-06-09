@@ -12,6 +12,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useRoute } from "@react-navigation/native";
 
 import { apiFetch } from "../../api/client";
+import { iosScrollInset } from "../../navigation/glassOptions";
 import { useI18n } from "../../i18n/I18nProvider";
 import { Screen } from "../../ui/Screen";
 import { SectionCard } from "../../ui/SectionCard";
@@ -55,7 +56,7 @@ const emptyDraft = (projectId: number): FloorDraft => ({
 
 export function DeveloperFloorEditorScreen({ navigation }: any) {
   const { t } = useI18n();
-  const { palette: themePalette } = useAppTheme();
+  const { colors: c } = useAppTheme();
   const route = useRoute();
   const { projectId: paramProjectId, floorId } = (route.params ?? {}) as RouteParams;
 
@@ -212,15 +213,19 @@ export function DeveloperFloorEditorScreen({ navigation }: any) {
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        {...iosScrollInset}
+        contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+      >
         <SectionCard>
           <SectionTitle title={title} subtitle={t("developer.floorEditorHint")} />
 
           {err ? (
-            <Text style={[styles.err, { color: themePalette.error }]}>{err}</Text>
+            <Text style={[styles.err, { color: c.error }]}>{err}</Text>
           ) : null}
 
-          <Text style={[styles.smallLabel, { color: themePalette.textMuted }]}>
+          <Text style={[styles.smallLabel, { color: c.labelSecondary }]}>
             {t("developer.filterByProject")}
           </Text>
           <Menu
@@ -276,7 +281,7 @@ export function DeveloperFloorEditorScreen({ navigation }: any) {
           />
 
           <Divider style={styles.div} />
-          <Text style={[styles.smallLabel, { color: themePalette.textMuted }]}>
+          <Text style={[styles.smallLabel, { color: c.labelSecondary }]}>
             {t("developer.areas")}
           </Text>
           {draft.areas.map((a, idx) => (
@@ -296,7 +301,7 @@ export function DeveloperFloorEditorScreen({ navigation }: any) {
               />
               <Button
                 mode="text"
-                textColor={themePalette.error}
+                textColor={c.error}
                 onPress={() =>
                   setDraft((d) => ({
                     ...d,
@@ -317,13 +322,13 @@ export function DeveloperFloorEditorScreen({ navigation }: any) {
           </Button>
 
           <Divider style={styles.div} />
-          <Text style={[styles.smallLabel, { color: themePalette.textMuted }]}>
+          <Text style={[styles.smallLabel, { color: c.labelSecondary }]}>
             {t("developer.layouts")}
           </Text>
           {draft.layouts.map((l, idx) => (
             <SectionCard
               key={idx}
-              style={[styles.layoutCard, { backgroundColor: themePalette.surfaceMuted }]}
+              style={[styles.layoutCard, { backgroundColor: c.fill }]}
               padded
             >
               <TextInput
@@ -358,7 +363,7 @@ export function DeveloperFloorEditorScreen({ navigation }: any) {
                 </Button>
                 <Button
                   mode="text"
-                  textColor={themePalette.error}
+                  textColor={c.error}
                   onPress={() =>
                     setDraft((d) => ({
                       ...d,

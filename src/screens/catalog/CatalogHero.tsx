@@ -5,7 +5,7 @@ import Constants from "expo-constants";
 import { useVideoPlayer, VideoView } from "expo-video";
 
 import { useI18n } from "../../i18n/I18nProvider";
-import { CatalogSurfaceCard } from "../../ui/catalog/CatalogSurfaceCard";
+import { SurfaceCard } from "../../ui/SurfaceCard";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { radii, spacing } from "../../theme/tokens";
 
@@ -42,7 +42,7 @@ function CatalogHeroVideo({
 
 export function CatalogHero() {
   const { t } = useI18n();
-  const { palette: p } = useAppTheme();
+  const { colors: c } = useAppTheme();
   const uri = String(
     (Constants.expoConfig?.extra as { heroVideoUrl?: string } | undefined)?.heroVideoUrl ?? "",
   ).trim();
@@ -51,15 +51,15 @@ export function CatalogHero() {
 
   return (
     <View style={styles.wrap}>
-      <CatalogSurfaceCard style={styles.card}>
+      <SurfaceCard style={styles.card}>
         <Image source={LOGO_FULL} style={styles.logoFull} resizeMode="contain" />
-        <View style={[styles.accentRule, { backgroundColor: p.secondary }]} />
-        <Text style={[styles.tagline, { color: p.text }]}>{t("catalog.hero.tagline")}</Text>
-        <Text style={[styles.sub, { color: p.textMuted }]}>{t("catalog.hero.sub")}</Text>
-      </CatalogSurfaceCard>
+        <View style={[styles.accentRule, { backgroundColor: c.brandSecondary }]} />
+        <Text style={[styles.tagline, { color: c.label }]}>{t("catalog.hero.tagline")}</Text>
+        <Text style={[styles.sub, { color: c.labelSecondary }]}>{t("catalog.hero.sub")}</Text>
+      </SurfaceCard>
 
       {uri && !videoErr ? (
-        <CatalogHeroVideo uri={uri} videoBg={p.surfaceMuted} onError={onVideoError} />
+        <CatalogHeroVideo uri={uri} videoBg={c.fill} onError={onVideoError} />
       ) : null}
     </View>
   );

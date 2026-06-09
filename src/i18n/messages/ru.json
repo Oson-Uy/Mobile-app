@@ -1,7 +1,38 @@
 {
   "tabs": {
     "catalog": "Каталог",
-    "developer": "Кабинет"
+    "developer": "Кабинет",
+    "myApartment": "Моя квартира",
+    "myApartmentShort": "Квартира"
+  },
+  "cabinet": {
+    "loginTitle": "Личный кабинет покупателя",
+    "loginSubtitle": "Телефон и код доступа выдаёт застройщик.",
+    "phone": "Телефон",
+    "code": "Код доступа",
+    "submit": "Войти",
+    "error": "Проверьте телефон и код",
+    "dashboardTitle": "Моя квартира",
+    "logout": "Выйти",
+    "project": "Проект",
+    "apartment": "Квартира",
+    "floor": "Этаж",
+    "area": "Площадь",
+    "rooms": "комн.",
+    "total": "Договор",
+    "paid": "Оплачено",
+    "remaining": "Остаток",
+    "monthlyDue": "В этом месяце к оплате",
+    "monthlyDueHint": "Сумму задаёт застройщик в CRM.",
+    "debt": "Задолженность",
+    "progress": "Стройка",
+    "documents": "Документы",
+    "payments": "Оплаты",
+    "paymentsSummaryHint": "Договор, оплачено и остаток — как внес застройщик. Ниже список всех записанных платежей.",
+    "paymentsNone": "Платежи ещё не добавлены",
+    "noApartment": "Квартира ещё не привязана",
+    "verifyOpen": "Проверить регистрацию",
+    "loading": "Загрузка…"
   },
   "common": {
     "retry": "Повторить",
@@ -35,6 +66,7 @@
     "theme": "Тема",
     "themeLight": "Светлая",
     "themeDark": "Тёмная",
+    "themeSystem": "Как в системе",
     "role": "Тип профиля",
     "roleBuyer": "Покупатель",
     "roleDeveloper": "Застройщик",

@@ -1,7 +1,38 @@
 {
   "tabs": {
     "catalog": "Catalog",
-    "developer": "Dashboard"
+    "developer": "Dashboard",
+    "myApartment": "My apartment",
+    "myApartmentShort": "Apartment"
+  },
+  "cabinet": {
+    "loginTitle": "Buyer account",
+    "loginSubtitle": "Phone and access code are provided by the developer.",
+    "phone": "Phone",
+    "code": "Access code",
+    "submit": "Sign in",
+    "error": "Check your phone and code",
+    "dashboardTitle": "My apartment",
+    "logout": "Sign out",
+    "project": "Project",
+    "apartment": "Apartment",
+    "floor": "Floor",
+    "area": "Area",
+    "rooms": "rooms",
+    "total": "Contract",
+    "paid": "Paid",
+    "remaining": "Remaining",
+    "monthlyDue": "Due this month",
+    "monthlyDueHint": "Amount is set by the developer in CRM.",
+    "debt": "Debt",
+    "progress": "Construction",
+    "documents": "Documents",
+    "payments": "Payments",
+    "paymentsSummaryHint": "Contract, paid and remaining — as entered by the developer. Payment history below.",
+    "paymentsNone": "No payments recorded yet",
+    "noApartment": "Apartment not linked yet",
+    "verifyOpen": "Verify registration",
+    "loading": "Loading…"
   },
   "common": {
     "retry": "Retry",
@@ -35,6 +66,7 @@
     "theme": "Theme",
     "themeLight": "Light",
     "themeDark": "Dark",
+    "themeSystem": "Match system",
     "role": "Profile type",
     "roleBuyer": "Buyer",
     "roleDeveloper": "Developer",

@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from "react-native";
 import { Button, Surface, Text, TextInput } from "react-native-paper";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { router } from "expo-router";
 
 import { apiFetch } from "../../api/client";
 import { setToken } from "../../auth/token";
 import { useI18n } from "../../i18n/I18nProvider";
-import type { DeveloperStackParamList, RootStackParamList } from "../../navigation/RootNavigator";
+import { iosScrollInset } from "../../navigation/glassOptions";
+import type { DeveloperStackParamList, RootStackParamList } from "../../navigation/types";
 import { registerForPushAndSyncToken } from "../../push/register";
 import { useAppPreferences } from "../../preferences/AppPreferencesProvider";
 import { Screen } from "../../ui/Screen";
@@ -24,7 +26,7 @@ type LoginResponse = {
 
 export function DeveloperLoginScreen({ navigation, route }: Props) {
   const { t } = useI18n();
-  const { palette: p } = useAppTheme();
+  const { colors: c } = useAppTheme();
   const { setRole } = useAppPreferences();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -45,7 +47,7 @@ export function DeveloperLoginScreen({ navigation, route }: Props) {
       await setRole("developer");
       if (finishMode === "goBackMain") {
         if (navigation.canGoBack()) navigation.goBack();
-        else (navigation as { navigate: (n: string) => void }).navigate("Main");
+        else router.replace("/(buyer)/(catalog)");
       } else {
         (navigation as { replace: (n: string) => void }).replace("DeveloperHome");
       }
@@ -63,6 +65,7 @@ export function DeveloperLoginScreen({ navigation, route }: Props) {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
+          {...iosScrollInset}
           contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
@@ -71,19 +74,19 @@ export function DeveloperLoginScreen({ navigation, route }: Props) {
             style={[
               styles.card,
               {
-                backgroundColor: p.surface,
-                borderColor: p.outline,
+                backgroundColor: c.bgElevated,
+                borderColor: c.separator,
               },
             ]}
             elevation={2}
           >
-            <Text variant="headlineSmall" style={[styles.title, { color: p.text }]}>
+            <Text variant="headlineSmall" style={[styles.title, { color: c.label }]}>
               {t("developer.login")}
             </Text>
-            <Text style={[styles.subtitle, { color: p.textMuted }]}>
+            <Text style={[styles.subtitle, { color: c.labelSecondary }]}>
               {t("developer.loginSubtitle")}
             </Text>
-            <Text style={[styles.registerHint, { color: p.textMuted }]}>
+            <Text style={[styles.registerHint, { color: c.labelSecondary }]}>
               {t("developer.registerOnWebHint")}
             </Text>
 

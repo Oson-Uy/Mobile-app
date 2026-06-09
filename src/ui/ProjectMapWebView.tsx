@@ -26,7 +26,7 @@ export function ProjectMapWebView({
   embedUrl,
   horizontalPadding = spacing.lg * 2,
 }: Props) {
-  const { palette: p } = useAppTheme();
+  const { colors: c } = useAppTheme();
   const [webReady, setWebReady] = useState(false);
   const width = Dimensions.get("window").width - horizontalPadding;
 
@@ -41,10 +41,10 @@ export function ProjectMapWebView({
   if (!html) return null;
 
   return (
-    <View style={[styles.wrap, { width, height: PROJECT_MAP_HEIGHT, backgroundColor: p.surfaceMuted }]}>
+    <View style={[styles.wrap, { width, height: PROJECT_MAP_HEIGHT, backgroundColor: c.fill }]}>
       {!webReady ? (
         <View style={styles.loader}>
-          <ActivityIndicator color={p.primary} />
+          <ActivityIndicator color={c.brand} />
         </View>
       ) : null}
       <WebView

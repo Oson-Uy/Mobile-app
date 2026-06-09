@@ -15,7 +15,7 @@ import { useAppTheme } from "../theme/AppThemeProvider";
  */
 export function HeaderCatalogButton() {
   const { t } = useI18n();
-  const { palette: p } = useAppTheme();
+  const { colors: c } = useAppTheme();
 
   return (
     <HeaderButton
@@ -24,11 +24,11 @@ export function HeaderCatalogButton() {
       pressColor={Platform.OS === "android" ? "rgba(0,0,0,0.08)" : undefined}
       style={[
         styles.btn,
-        { borderColor: p.outline, backgroundColor: p.surfaceMuted },
+        { borderColor: c.separator, backgroundColor: c.fill },
       ]}
     >
-      <MaterialCommunityIcons name="storefront-outline" size={18} color={p.primary} />
-      <Text style={[styles.label, { color: p.primary }]} numberOfLines={1}>
+      <MaterialCommunityIcons name="storefront-outline" size={18} color={c.brand} />
+      <Text style={[styles.label, { color: c.brand }]} numberOfLines={1}>
         {t("developer.openProjectCatalog")}
       </Text>
     </HeaderButton>

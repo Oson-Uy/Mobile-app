@@ -5,11 +5,12 @@ import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { apiFetch } from "../../api/client";
+import { iosScrollInset } from "../../navigation/glassOptions";
 import { useI18n } from "../../i18n/I18nProvider";
 import { Screen } from "../../ui/Screen";
 import { DevCard } from "../../ui/developer/DevCard";
 import { DevIconButton } from "../../ui/developer/DevIconButton";
-import { devFabRadius, devListPadding } from "../../ui/developer/devPlatform";
+import { fabRadius, listPadding } from "../../ui/platform";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { radii, spacing } from "../../theme/tokens";
 import type { ApiMedia } from "../../types/project";
@@ -35,7 +36,7 @@ function projectThumbUrl(item: ApiProject): string | null {
 
 export function DeveloperProjectsScreen() {
   const { t } = useI18n();
-  const { palette: p } = useAppTheme();
+  const { colors: c } = useAppTheme();
   const navigation = useNavigation<any>();
   const [dev, setDev] = useState<ApiDeveloper | null>(null);
   const [items, setItems] = useState<ApiProject[]>([]);
@@ -79,6 +80,7 @@ export function DeveloperProjectsScreen() {
   return (
     <Screen>
       <FlatList
+        {...iosScrollInset}
         contentContainerStyle={styles.list}
         data={items}
         keyExtractor={(i) => String(i.id)}
@@ -86,10 +88,10 @@ export function DeveloperProjectsScreen() {
         ListHeaderComponent={
           dev ? (
             <View style={styles.header}>
-              <Text variant="titleLarge" style={[styles.devName, { color: p.text }]}>
+              <Text variant="titleLarge" style={[styles.devName, { color: c.label }]}>
                 {dev.name}
               </Text>
-              <Text variant="bodyMedium" style={{ color: p.textMuted }}>
+              <Text variant="bodyMedium" style={{ color: c.labelSecondary }}>
                 {countText}
               </Text>
             </View>
@@ -103,15 +105,15 @@ export function DeveloperProjectsScreen() {
                 {uri ? (
                   <Image source={{ uri }} style={styles.thumb} />
                 ) : (
-                  <View style={[styles.thumb, styles.thumbPh, { backgroundColor: p.surfaceMuted }]}>
-                    <MaterialCommunityIcons name="image-off-outline" size={26} color={p.textMuted} />
+                  <View style={[styles.thumb, styles.thumbPh, { backgroundColor: c.fill }]}>
+                    <MaterialCommunityIcons name="image-off-outline" size={26} color={c.labelSecondary} />
                   </View>
                 )}
                 <View style={styles.cardText}>
-                  <Text variant="titleSmall" style={[styles.cardTitle, { color: p.text }]} numberOfLines={2}>
+                  <Text variant="titleSmall" style={[styles.cardTitle, { color: c.label }]} numberOfLines={2}>
                     {item.name}
                   </Text>
-                  <Text variant="bodySmall" style={{ color: p.textMuted }} numberOfLines={2}>
+                  <Text variant="bodySmall" style={{ color: c.labelSecondary }} numberOfLines={2}>
                     {[item.district, item.location].filter(Boolean).join(", ")}
                   </Text>
                 </View>
@@ -139,8 +141,8 @@ export function DeveloperProjectsScreen() {
         }}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <MaterialCommunityIcons name="office-building-outline" size={48} color={p.textMuted} />
-            <Text variant="bodyLarge" style={[styles.emptyTitle, { color: p.textMuted }]}>
+            <MaterialCommunityIcons name="office-building-outline" size={48} color={c.labelSecondary} />
+            <Text variant="bodyLarge" style={[styles.emptyTitle, { color: c.labelSecondary }]}>
               {error ?? t("developer.emptyProjects")}
             </Text>
           </View>
@@ -148,8 +150,8 @@ export function DeveloperProjectsScreen() {
       />
       <FAB
         icon="plus"
-        style={[styles.fab, { backgroundColor: p.primary }]}
-        color="#FFFFFF"
+        style={[styles.fab, { backgroundColor: c.brand }]}
+        color={c.brandOn}
         onPress={() => navigation.navigate("DeveloperProjectEditor", {})}
         label={t("developer.newProject")}
       />
@@ -158,7 +160,7 @@ export function DeveloperProjectsScreen() {
 }
 
 const styles = StyleSheet.create({
-  list: { padding: devListPadding, paddingBottom: spacing.xxl * 3 },
+  list: { padding: listPadding, paddingBottom: spacing.xxl * 3 },
   header: { marginBottom: spacing.lg, gap: 4 },
   devName: { fontWeight: "800" },
   card: { marginBottom: spacing.md },
@@ -188,8 +190,8 @@ const styles = StyleSheet.create({
   emptyTitle: { textAlign: "center" },
   fab: {
     position: "absolute",
-    right: devListPadding,
-    bottom: devListPadding,
-    borderRadius: devFabRadius,
+    right: listPadding,
+    bottom: listPadding,
+    borderRadius: fabRadius,
   },
 });

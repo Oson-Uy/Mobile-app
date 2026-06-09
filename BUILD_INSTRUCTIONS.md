@@ -47,6 +47,8 @@ cd /Users/sardor/Work/startap/Mobile-app
 npm install
 ```
 
+**Нижние вкладки покупателя (Каталог / Моя квартира)** — нативный tab bar через Expo Router `NativeTabs` (`app/(buyer)/_layout.tsx`). Это **не работает в Expo Go**: нужна dev-сборка или релиз (`npx expo run:ios` / Xcode Archive). Требуется `react-native-screens` 4.25+ (уже в `package.json`).
+
 ### 1.3 Установить поды (Pod Install)
 
 ```bash

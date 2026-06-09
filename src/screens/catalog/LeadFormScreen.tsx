@@ -10,12 +10,13 @@ import {
 import { ActivityIndicator, Snackbar, Text, TextInput } from "react-native-paper";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
-import type { CatalogStackParamList } from "../../navigation/RootNavigator";
+import { iosScrollInset } from "../../navigation/glassOptions";
+import type { CatalogStackParamList } from "../../navigation/types";
 import { apiFetch } from "../../api/client";
 import { formatUzPhoneInput, normalizeUzPhoneDigits } from "../../lib/phone";
 import { useI18n } from "../../i18n/I18nProvider";
-import { CatalogSurfaceCard } from "../../ui/catalog/CatalogSurfaceCard";
-import { catalogBtnHeight } from "../../ui/catalog/catalogPlatform";
+import { SurfaceCard } from "../../ui/SurfaceCard";
+import { primaryBtnHeight } from "../../ui/platform";
 import { Screen } from "../../ui/Screen";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { radii, spacing } from "../../theme/tokens";
@@ -25,7 +26,7 @@ type Props = NativeStackScreenProps<CatalogStackParamList, "LeadForm">;
 export function LeadFormScreen({ route, navigation }: Props) {
   const { projectId, floorId, projectName } = route.params;
   const { t } = useI18n();
-  const { palette: p } = useAppTheme();
+  const { colors: c } = useAppTheme();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("+998");
   const [busy, setBusy] = useState(false);
@@ -81,21 +82,22 @@ export function LeadFormScreen({ route, navigation }: Props) {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
+          {...iosScrollInset}
           contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
         >
-          <CatalogSurfaceCard style={styles.formCard}>
-            <Text variant="titleMedium" style={[styles.head, { color: p.text }]}>
+          <SurfaceCard style={styles.formCard}>
+            <Text variant="titleMedium" style={[styles.head, { color: c.label }]}>
               {projectName
                 ? `${t("leadModal.interestPrefix")}: ${projectName}`
                 : t("leadModal.title")}
             </Text>
-            <Text variant="bodyMedium" style={[styles.sub, { color: p.textMuted }]}>
+            <Text variant="bodyMedium" style={[styles.sub, { color: c.labelSecondary }]}>
               {t("leadModal.defaultDescription")}
             </Text>
             {floorId != null ? (
-              <View style={[styles.floorPill, { backgroundColor: p.surfaceMuted }]}>
-                <Text variant="labelLarge" style={{ color: p.text, fontWeight: "700" }}>
+              <View style={[styles.floorPill, { backgroundColor: c.fill }]}>
+                <Text variant="labelLarge" style={{ color: c.label, fontWeight: "700" }}>
                   {t("leadModal.floorNote", { id: floorId })}
                 </Text>
               </View>
@@ -124,22 +126,22 @@ export function LeadFormScreen({ route, navigation }: Props) {
               style={({ pressed }) => [
                 styles.btn,
                 {
-                  backgroundColor: p.secondary,
+                  backgroundColor: c.brandSecondary,
                   opacity: busy || pressed ? 0.88 : 1,
                 },
               ]}
               accessibilityRole="button"
             >
               {busy ? (
-                <ActivityIndicator color="#FFFFFF" />
+                <ActivityIndicator color={c.brandOn} />
               ) : (
-                <Text style={styles.btnTxt}>{t("leadModal.submit")}</Text>
+                <Text style={[styles.btnTxt, { color: c.brandOn }]}>{t("leadModal.submit")}</Text>
               )}
             </Pressable>
-            <Text variant="bodySmall" style={[styles.privacy, { color: p.textMuted }]}>
+            <Text variant="bodySmall" style={[styles.privacy, { color: c.labelSecondary }]}>
               {t("leadModal.privacy")}
             </Text>
-          </CatalogSurfaceCard>
+          </SurfaceCard>
         </ScrollView>
         <Snackbar
           visible={snack != null}
@@ -176,14 +178,14 @@ const styles = StyleSheet.create({
   field: { marginBottom: spacing.sm, backgroundColor: "transparent" },
   fieldOutline: { borderRadius: radii.lg },
   btn: {
-    height: catalogBtnHeight,
+    height: primaryBtnHeight,
     borderRadius: radii.lg,
     alignItems: "center",
     justifyContent: "center",
     marginTop: spacing.sm,
   },
   btnTxt: {
-    color: "#FFFFFF",
+    
     fontWeight: "800",
     fontSize: Platform.select({ ios: 16, android: 15, default: 16 }),
   },

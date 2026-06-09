@@ -1,7 +1,38 @@
 {
   "tabs": {
     "catalog": "Katalog",
-    "developer": "Kabinet"
+    "developer": "Kabinet",
+    "myApartment": "Mening kvartiram",
+    "myApartmentShort": "Kvartira"
+  },
+  "cabinet": {
+    "loginTitle": "Xaridor kabineti",
+    "loginSubtitle": "Telefon va kirish kodi quruvchidan beriladi.",
+    "phone": "Telefon",
+    "code": "Kirish kodi",
+    "submit": "Kirish",
+    "error": "Telefon va kodni tekshiring",
+    "dashboardTitle": "Mening kvartiram",
+    "logout": "Chiqish",
+    "project": "Loyiha",
+    "apartment": "Kvartira",
+    "floor": "Qavat",
+    "area": "Maydon",
+    "rooms": "xona",
+    "total": "Shartnoma",
+    "paid": "Toʻlangan",
+    "remaining": "Qoldiq",
+    "monthlyDue": "Shu oy toʻlov",
+    "monthlyDueHint": "Summani quruvchi CRM da belgilaydi.",
+    "debt": "Qarz",
+    "progress": "Qurilish",
+    "documents": "Hujjatlar",
+    "payments": "Toʻlovlar",
+    "paymentsSummaryHint": "Shartnoma, toʻlangan va qoldiq — quruvchi kiritganidek. Pastda barcha toʻlovlar.",
+    "paymentsNone": "Toʻlovlar hali qoʻshilmagan",
+    "noApartment": "Kvartira hali biriktirilmagan",
+    "verifyOpen": "Roʻyxatdan oʻtishni tekshirish",
+    "loading": "Yuklanmoqda…"
   },
   "common": {
     "retry": "Qayta urinish",
@@ -35,6 +66,7 @@
     "theme": "Mavzu",
     "themeLight": "Yorugʻ",
     "themeDark": "Qorongʻi",
+    "themeSystem": "Tizim bo'yicha",
     "role": "Profil turi",
     "roleBuyer": "Xaridor",
     "roleDeveloper": "Quruvchi",

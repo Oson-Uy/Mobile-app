@@ -6,102 +6,77 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { Platform } from "react-native";
-import {
-  DarkTheme as NavigationDarkTheme,
-  DefaultTheme as NavigationDefaultTheme,
-} from "@react-navigation/native";
-import { MD3DarkTheme, MD3LightTheme, type MD3Theme } from "react-native-paper";
+import { useColorScheme } from "react-native";
+import type { MD3Theme } from "react-native-paper";
 import * as SecureStore from "expo-secure-store";
 
 import { getSecureItemWithTimeout } from "../lib/secureRead";
 import { STORAGE_KEYS } from "../preferences/storageKeys";
-import { darkPalette, palette, type AppPalette } from "./tokens";
+import { buildPaperTheme } from "./paper";
+import { syncNativeAppearance } from "./nativeAppearance";
+import { parseThemePreference, resolveThemeMode } from "./resolveMode";
+import {
+  getColors,
+  type AppColors,
+  type ResolvedThemeMode,
+  type ThemePreference,
+} from "./tokens";
 
-export type ThemeMode = "light" | "dark";
+/** @deprecated Use ResolvedThemeMode */
+export type ThemeMode = ResolvedThemeMode;
 
 type AppThemeContextValue = {
   hydrated: boolean;
-  mode: ThemeMode;
-  palette: AppPalette;
-  setMode: (m: ThemeMode) => Promise<void>;
+  preference: ThemePreference;
+  resolvedMode: ResolvedThemeMode;
+  colors: AppColors;
+  setPreference: (p: ThemePreference) => Promise<void>;
   toggleMode: () => Promise<void>;
   paperTheme: MD3Theme;
-  navTheme: typeof NavigationDefaultTheme;
+  /** @deprecated Use colors / resolvedMode */
+  mode: ResolvedThemeMode;
+  /** @deprecated Use colors */
+  palette: AppColors & {
+    primary: string;
+    secondary: string;
+    background: string;
+    surface: string;
+    surfaceMuted: string;
+    outline: string;
+    text: string;
+    textMuted: string;
+  };
+  /** @deprecated Use setPreference */
+  setMode: (m: ResolvedThemeMode) => Promise<void>;
 };
 
 const AppThemeContext = createContext<AppThemeContextValue | null>(null);
 
-function buildPaperTheme(mode: ThemeMode): MD3Theme {
-  const p = mode === "dark" ? darkPalette : palette;
-  const base = mode === "dark" ? MD3DarkTheme : MD3LightTheme;
-  const titleWeight = Platform.OS === "ios" ? "600" : "600";
+function toLegacyPalette(colors: AppColors) {
   return {
-    ...base,
-    roundness: 14,
-    fonts: {
-      ...base.fonts,
-      titleLarge: {
-        ...base.fonts.titleLarge,
-        fontWeight: titleWeight,
-      },
-      titleMedium: {
-        ...base.fonts.titleMedium,
-        fontWeight: titleWeight,
-      },
-    },
-    colors: {
-      ...base.colors,
-      primary: p.primary,
-      onPrimary: mode === "dark" ? "#0F172A" : "#FFFFFF",
-      primaryContainer: mode === "dark" ? "#1E3A8A" : "#E0E7FF",
-      onPrimaryContainer: mode === "dark" ? "#E0E7FF" : "#172554",
-      secondary: p.secondary,
-      onSecondary: "#FFFFFF",
-      secondaryContainer: mode === "dark" ? "#7C2D12" : "#FFEDD5",
-      onSecondaryContainer: mode === "dark" ? "#FFEDD5" : "#7C2D12",
-      background: p.background,
-      surface: p.surface,
-      surfaceVariant: p.surfaceMuted,
-      onSurface: p.text,
-      onSurfaceVariant: p.textMuted,
-      outline: p.outline,
-      outlineVariant: mode === "dark" ? "#475569" : "#CBD5E1",
-      elevation: {
-        ...base.colors.elevation,
-        level1: p.surface,
-      },
-    },
-  };
-}
-
-function buildNavTheme(mode: ThemeMode) {
-  const p = mode === "dark" ? darkPalette : palette;
-  const base = mode === "dark" ? NavigationDarkTheme : NavigationDefaultTheme;
-  return {
-    ...base,
-    colors: {
-      ...base.colors,
-      primary: p.primary,
-      background: p.background,
-      card: p.surface,
-      text: p.text,
-      border: p.outline,
-      notification: p.secondary,
-    },
+    ...colors,
+    primary: colors.brand,
+    secondary: colors.brandSecondary,
+    background: colors.bg,
+    surface: colors.bgElevated,
+    surfaceMuted: colors.fill,
+    outline: colors.separator,
+    text: colors.label,
+    textMuted: colors.labelSecondary,
   };
 }
 
 export function AppThemeProvider({ children }: { children: React.ReactNode }) {
+  const systemScheme = useColorScheme();
   const [hydrated, setHydrated] = useState(false);
-  const [mode, setModeState] = useState<ThemeMode>("light");
+  const [preference, setPreferenceState] = useState<ThemePreference>("system");
 
   useEffect(() => {
     const cap = setTimeout(() => setHydrated(true), 4500);
     void (async () => {
       try {
         const raw = await getSecureItemWithTimeout(STORAGE_KEYS.theme);
-        if (raw === "dark" || raw === "light") setModeState(raw);
+        setPreferenceState(parseThemePreference(raw));
       } finally {
         clearTimeout(cap);
         setHydrated(true);
@@ -110,31 +85,57 @@ export function AppThemeProvider({ children }: { children: React.ReactNode }) {
     return () => clearTimeout(cap);
   }, []);
 
-  const setMode = useCallback(async (m: ThemeMode) => {
-    await SecureStore.setItemAsync(STORAGE_KEYS.theme, m);
-    setModeState(m);
+  const resolvedMode = resolveThemeMode(preference, systemScheme);
+  const colors = getColors(resolvedMode);
+
+  useEffect(() => {
+    syncNativeAppearance(preference, resolvedMode);
+  }, [preference, resolvedMode]);
+
+  const setPreference = useCallback(async (p: ThemePreference) => {
+    await SecureStore.setItemAsync(STORAGE_KEYS.theme, p);
+    setPreferenceState(p);
   }, []);
 
-  const toggleMode = useCallback(async () => {
-    const next = mode === "light" ? "dark" : "light";
-    await setMode(next);
-  }, [mode, setMode]);
+  const setMode = useCallback(
+    async (m: ResolvedThemeMode) => {
+      await setPreference(m);
+    },
+    [setPreference],
+  );
 
-  const p = mode === "dark" ? darkPalette : palette;
-  const paperTheme = useMemo(() => buildPaperTheme(mode), [mode]);
-  const navTheme = useMemo(() => buildNavTheme(mode), [mode]);
+  const toggleMode = useCallback(async () => {
+    const next: ResolvedThemeMode = resolvedMode === "light" ? "dark" : "light";
+    await setPreference(next);
+  }, [resolvedMode, setPreference]);
+
+  const paperTheme = useMemo(() => buildPaperTheme(resolvedMode), [resolvedMode]);
+  const legacyPalette = useMemo(() => toLegacyPalette(colors), [colors]);
 
   const value = useMemo<AppThemeContextValue>(
     () => ({
       hydrated,
-      mode,
-      palette: p,
-      setMode,
+      preference,
+      resolvedMode,
+      colors,
+      setPreference,
       toggleMode,
       paperTheme,
-      navTheme,
+      mode: resolvedMode,
+      palette: legacyPalette,
+      setMode,
     }),
-    [hydrated, mode, p, setMode, toggleMode, paperTheme, navTheme],
+    [
+      hydrated,
+      preference,
+      resolvedMode,
+      colors,
+      setPreference,
+      toggleMode,
+      paperTheme,
+      legacyPalette,
+      setMode,
+    ],
   );
 
   return (

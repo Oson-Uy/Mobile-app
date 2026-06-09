@@ -6,6 +6,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 
 import { apiFetch } from "../../api/client";
+import { iosScrollInset } from "../../navigation/glassOptions";
 import { uploadImageAsset } from "../../dev/uploadImage";
 import { useI18n } from "../../i18n/I18nProvider";
 import { Screen } from "../../ui/Screen";
@@ -44,7 +45,7 @@ const emptyRow = (sortOrder: number): ApiMilestone => ({
 
 export function DeveloperProjectProgressScreen({ navigation }: any) {
   const { t } = useI18n();
-  const { palette: p } = useAppTheme();
+  const { colors: c } = useAppTheme();
   const route = useRoute();
   const { projectId } = (route.params ?? {}) as RouteParams;
 
@@ -182,19 +183,23 @@ export function DeveloperProjectProgressScreen({ navigation }: any) {
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        {...iosScrollInset}
+        contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+      >
         <SectionCard>
           <View style={styles.headRow}>
             <SectionTitle title={t("developer.progressTitle")} subtitle={t("developer.progressHint")} />
             <View style={styles.pctPill}>
-              <MaterialCommunityIcons name="progress-check" size={18} color={p.primary} />
-              <Text style={[styles.pctTxt, { color: p.text }]}>{percent != null ? `${percent}%` : "—"}</Text>
+              <MaterialCommunityIcons name="progress-check" size={18} color={c.brand} />
+              <Text style={[styles.pctTxt, { color: c.label }]}>{percent != null ? `${percent}%` : "—"}</Text>
             </View>
           </View>
 
-          {err ? <Text style={[styles.err, { color: p.error }]}>{err}</Text> : null}
+          {err ? <Text style={[styles.err, { color: c.error }]}>{err}</Text> : null}
 
-          <Divider style={[styles.div, { backgroundColor: p.outline }]} />
+          <Divider style={[styles.div, { backgroundColor: c.separator }]} />
 
           {rows.map((r, idx) => (
             <View key={idx}>
@@ -202,7 +207,7 @@ export function DeveloperProjectProgressScreen({ navigation }: any) {
                 <View style={styles.rowTop}>
                   <IconButton
                     icon={r.done ? "check-circle" : "checkbox-blank-circle-outline"}
-                    iconColor={r.done ? p.success : p.textMuted}
+                    iconColor={r.done ? c.success : c.labelSecondary}
                     onPress={() =>
                       setRows((prev) => prev.map((x, i) => (i === idx ? { ...x, done: !x.done } : x)))
                     }
@@ -221,10 +226,10 @@ export function DeveloperProjectProgressScreen({ navigation }: any) {
                 </View>
 
                 <View style={styles.rowActions}>
-                  <IconButton icon="chevron-up" iconColor={p.primary} onPress={() => move(idx, -1)} />
-                  <IconButton icon="chevron-down" iconColor={p.primary} onPress={() => move(idx, 1)} />
-                  <IconButton icon="camera-plus-outline" iconColor={p.primary} onPress={() => void addPhoto(idx)} />
-                  <IconButton icon="trash-can-outline" iconColor={p.error} onPress={() => removeRow(idx)} />
+                  <IconButton icon="chevron-up" iconColor={c.brand} onPress={() => move(idx, -1)} />
+                  <IconButton icon="chevron-down" iconColor={c.brand} onPress={() => move(idx, 1)} />
+                  <IconButton icon="camera-plus-outline" iconColor={c.brand} onPress={() => void addPhoto(idx)} />
+                  <IconButton icon="trash-can-outline" iconColor={c.error} onPress={() => removeRow(idx)} />
                 </View>
               </View>
               {r.photoUrls?.length ? (
@@ -239,13 +244,13 @@ export function DeveloperProjectProgressScreen({ navigation }: any) {
                       <TouchableOpacity activeOpacity={0.85} onPress={() => setPreview(item)} hitSlop={8}>
                         <Image
                           source={{ uri: item }}
-                          style={[styles.photo, { borderColor: p.outline, backgroundColor: p.surfaceMuted }]}
+                          style={[styles.photo, { borderColor: c.separator, backgroundColor: c.fill }]}
                         />
                       </TouchableOpacity>
                       <IconButton
                         icon="close-circle"
                         size={18}
-                        iconColor={p.error}
+                        iconColor={c.error}
                         style={styles.photoRemove}
                         onPress={() => removePhoto(idx, item)}
                       />
@@ -265,8 +270,8 @@ export function DeveloperProjectProgressScreen({ navigation }: any) {
             onPress={() => void onSave()}
             loading={saving}
             disabled={saving}
-            buttonColor={p.secondary}
-            textColor="#FFFFFF"
+            buttonColor={c.brandSecondary}
+            textColor={c.brandOn}
             style={styles.saveBtn}
           >
             {t("common.save")}

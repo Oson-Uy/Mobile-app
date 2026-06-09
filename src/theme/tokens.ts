@@ -1,37 +1,71 @@
-/** Подложка под фирменное лого (splash, лоадеры): белый — синее лого читается. */
+/** Подложка под фирменное лого (splash): всегда белая. */
 export const brandLogoBackdrop = "#FFFFFF";
 
-export const palette = {
-  primary: "#1E3A8A",
-  secondary: "#F97316",
-  /** Светлый фон приложения — белый, без «синего» оттенка за логотипом. */
-  background: brandLogoBackdrop,
-  surface: "#FFFFFF",
-  surfaceMuted: "#F8FAFC",
-  outline: "#E2E8F0",
-  text: "#0F172A",
-  textMuted: "#64748B",
+export type AppColors = {
+  bg: string;
+  bgGrouped: string;
+  bgElevated: string;
+  label: string;
+  labelSecondary: string;
+  separator: string;
+  brand: string;
+  brandOn: string;
+  brandSecondary: string;
+  fill: string;
+  success: string;
+  error: string;
+  warning: string;
+  popular: string;
+  onMedia: string;
+  overlay: string;
+};
+
+/** iOS system grouped / M3 light surfaces */
+export const lightColors: AppColors = {
+  bg: brandLogoBackdrop,
+  bgGrouped: "#F2F2F7",
+  bgElevated: "#FFFFFF",
+  label: "#000000",
+  labelSecondary: "#636366",
+  separator: "#C6C6C8",
+  brand: "#1E3A8A",
+  brandOn: "#FFFFFF",
+  brandSecondary: "#F97316",
+  fill: "#E5E5EA",
   success: "#10B981",
   error: "#DC2626",
+  warning: "#F5A623",
   popular: "#FB7185",
-} as const;
+  onMedia: "#FFFFFF",
+  overlay: "rgba(0,0,0,0.45)",
+};
 
-/** Dark theme: same brand, surfaces tuned for night UI */
-export const darkPalette = {
-  primary: "#93C5FD",
-  secondary: "#FB923C",
-  background: "#0B1220",
-  surface: "#111C2F",
-  surfaceMuted: "#172554",
-  outline: "#334155",
-  text: "#F8FAFC",
-  textMuted: "#94A3B8",
-  success: "#34D399",
-  error: "#F87171",
-  popular: "#FB7185",
-} as const;
+/** Нейтральный dark (iOS Settings / M3), brand только на акцентах */
+export const darkColors: AppColors = {
+  bg: "#000000",
+  bgGrouped: "#000000",
+  bgElevated: "#1C1C1E",
+  label: "#FFFFFF",
+  labelSecondary: "#8E8E93",
+  separator: "#38383A",
+  brand: "#5B8DEF",
+  brandOn: "#FFFFFF",
+  brandSecondary: "#FB923C",
+  fill: "#2C2C2E",
+  success: "#30D158",
+  error: "#FF453A",
+  warning: "#FFD60A",
+  popular: "#FF6482",
+  onMedia: "#FFFFFF",
+  overlay: "rgba(0,0,0,0.55)",
+};
 
-export type AppPalette = typeof palette | typeof darkPalette;
+export type ResolvedThemeMode = "light" | "dark";
+export type ThemePreference = "system" | ResolvedThemeMode;
+
+export function getColors(mode: ResolvedThemeMode): AppColors {
+  return mode === "dark" ? darkColors : lightColors;
+}
 
 export const spacing = {
   xs: 4,
@@ -48,14 +82,4 @@ export const radii = {
   lg: 18,
   xl: 22,
   card: 20,
-} as const;
-
-export const elevation = {
-  card: {
-    shadowColor: "#0F172A",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 3,
-  },
 } as const;

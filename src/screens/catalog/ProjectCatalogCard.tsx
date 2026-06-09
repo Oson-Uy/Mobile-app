@@ -17,8 +17,8 @@ import { minPricePerM2FromApiProject } from "../../lib/project-price";
 import { formatUzs } from "../../lib/currency";
 import { useI18n } from "../../i18n/I18nProvider";
 import type { ApiProjectListItem } from "../../types/project";
-import { CatalogSurfaceCard } from "../../ui/catalog/CatalogSurfaceCard";
-import { catalogBtnHeight, catalogSecondaryBtnHeight } from "../../ui/catalog/catalogPlatform";
+import { SurfaceCard } from "../../ui/SurfaceCard";
+import { primaryBtnHeight, secondaryBtnHeight } from "../../ui/platform";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { radii, spacing } from "../../theme/tokens";
 
@@ -33,7 +33,7 @@ const localeFor = (l: string) =>
 
 export function ProjectCatalogCard({ project, onPress, onLeaveRequest }: Props) {
   const { t, locale } = useI18n();
-  const { palette: p } = useAppTheme();
+  const { colors: c } = useAppTheme();
   const loc = localeFor(locale);
   const width = Dimensions.get("window").width - spacing.lg * 2;
   const [imgIndex, setImgIndex] = useState(0);
@@ -59,7 +59,7 @@ export function ProjectCatalogCard({ project, onPress, onLeaveRequest }: Props) 
   };
 
   return (
-    <CatalogSurfaceCard style={styles.card}>
+    <SurfaceCard style={styles.card}>
       <View style={styles.imageWrap}>
         {gallery.length ? (
           <>
@@ -91,7 +91,9 @@ export function ProjectCatalogCard({ project, onPress, onLeaveRequest }: Props) 
                     <View
                       style={[
                         styles.dot,
-                        imgIndex === i ? styles.dotActive : styles.dotIdle,
+                        imgIndex === i
+                          ? [styles.dotActive, { backgroundColor: c.onMedia }]
+                          : styles.dotIdle,
                       ]}
                     />
                   </Pressable>
@@ -103,21 +105,25 @@ export function ProjectCatalogCard({ project, onPress, onLeaveRequest }: Props) 
           <View
             style={[
               styles.placeholder,
-              { width, height: width * 0.45, backgroundColor: p.surfaceMuted },
+              { width, height: width * 0.45, backgroundColor: c.fill },
             ]}
           >
-            <MaterialCommunityIcons name="image-off-outline" size={40} color={p.textMuted} />
+            <MaterialCommunityIcons name="image-off-outline" size={40} color={c.labelSecondary} />
           </View>
         )}
         <View style={styles.badges}>
           {project.topInCatalog || project.topInHome ? (
-            <View style={[styles.badge, { backgroundColor: p.popular }]}>
-              <Text style={styles.badgeText}>{t("projectCard.popular")}</Text>
+            <View style={[styles.badge, { backgroundColor: c.popular }]}>
+              <Text style={[styles.badgeText, { color: c.onMedia }]}>
+                {t("projectCard.popular")}
+              </Text>
             </View>
           ) : null}
           {project.hasInstallment ? (
-            <View style={[styles.badge, { backgroundColor: p.secondary }]}>
-              <Text style={styles.badgeText}>{t("projectCard.installment")}</Text>
+            <View style={[styles.badge, { backgroundColor: c.brandSecondary }]}>
+              <Text style={[styles.badgeText, { color: c.onMedia }]}>
+                {t("projectCard.installment")}
+              </Text>
             </View>
           ) : null}
         </View>
@@ -129,19 +135,19 @@ export function ProjectCatalogCard({ project, onPress, onLeaveRequest }: Props) 
           style={({ pressed }) => [styles.infoPress, pressed && { opacity: 0.85 }]}
           accessibilityRole="button"
         >
-          <Text variant="titleMedium" style={[styles.title, { color: p.primary }]}>
+          <Text variant="titleMedium" style={[styles.title, { color: c.brand }]}>
             {project.name}
           </Text>
           <View style={styles.locRow}>
-            <MaterialCommunityIcons name="map-marker-outline" size={16} color={p.secondary} />
-            <Text variant="bodySmall" style={[styles.loc, { color: p.textMuted }]} numberOfLines={2}>
+            <MaterialCommunityIcons name="map-marker-outline" size={16} color={c.brandSecondary} />
+            <Text variant="bodySmall" style={[styles.loc, { color: c.labelSecondary }]} numberOfLines={2}>
               {place}
             </Text>
           </View>
           {minM2 > 0 ? (
-            <Text variant="titleSmall" style={[styles.price, { color: p.text }]}>
+            <Text variant="titleSmall" style={[styles.price, { color: c.label }]}>
               {t("projectCard.fromPerM2")}{" "}
-              <Text style={[styles.priceNum, { color: p.primary }]}>
+              <Text style={[styles.priceNum, { color: c.brand }]}>
                 {formatUzs(minM2, loc)} {t("common.sum")}/{t("common.m2")}
               </Text>
             </Text>
@@ -151,14 +157,14 @@ export function ProjectCatalogCard({ project, onPress, onLeaveRequest }: Props) 
               <Chip
                 compact
                 icon="shield-check"
-                style={{ backgroundColor: p.surfaceMuted }}
-                textStyle={{ color: p.text }}
+                style={{ backgroundColor: c.fill }}
+                textStyle={{ color: c.label }}
               >
                 {t("projectCard.verifiedDeveloper")}
               </Chip>
             ) : null}
             {project.isPopular ? (
-              <Chip compact style={{ backgroundColor: p.surfaceMuted }} textStyle={{ color: p.text }}>
+              <Chip compact style={{ backgroundColor: c.fill }} textStyle={{ color: c.label }}>
                 {t("catalog.popular")}
               </Chip>
             ) : null}
@@ -169,11 +175,13 @@ export function ProjectCatalogCard({ project, onPress, onLeaveRequest }: Props) 
           onPress={onLeaveRequest}
           style={({ pressed }) => [
             styles.primaryBtn,
-            { backgroundColor: p.secondary, opacity: pressed ? 0.9 : 1 },
+            { backgroundColor: c.brandSecondary, opacity: pressed ? 0.9 : 1 },
           ]}
           accessibilityRole="button"
         >
-          <Text style={styles.primaryBtnTxt}>{t("projectDetails.leaveRequest")}</Text>
+          <Text style={[styles.primaryBtnTxt, { color: c.brandOn }]}>
+            {t("projectDetails.leaveRequest")}
+          </Text>
         </Pressable>
 
         <Pressable
@@ -181,13 +189,13 @@ export function ProjectCatalogCard({ project, onPress, onLeaveRequest }: Props) 
           style={({ pressed }) => [styles.secondaryBtn, { opacity: pressed ? 0.65 : 1 }]}
           accessibilityRole="button"
         >
-          <Text style={[styles.secondaryBtnTxt, { color: p.primary }]}>
+          <Text style={[styles.secondaryBtnTxt, { color: c.brand }]}>
             {t("projectCard.moreDetails")}
           </Text>
-          <MaterialCommunityIcons name="chevron-right" size={20} color={p.primary} />
+          <MaterialCommunityIcons name="chevron-right" size={20} color={c.brand} />
         </Pressable>
       </View>
-    </CatalogSurfaceCard>
+    </SurfaceCard>
   );
 }
 
@@ -218,7 +226,6 @@ const styles = StyleSheet.create({
   },
   dotActive: {
     width: 18,
-    backgroundColor: "#fff",
   },
   dotIdle: {
     width: 4,
@@ -237,7 +244,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   badgeText: {
-    color: "#fff",
     fontSize: 10,
     fontWeight: "900",
     letterSpacing: 0.5,
@@ -265,19 +271,18 @@ const styles = StyleSheet.create({
   priceNum: {},
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
   primaryBtn: {
-    height: catalogBtnHeight,
+    height: primaryBtnHeight,
     borderRadius: radii.lg,
     alignItems: "center",
     justifyContent: "center",
     marginTop: spacing.xs,
   },
   primaryBtnTxt: {
-    color: "#FFFFFF",
     fontWeight: "800",
     fontSize: Platform.select({ ios: 16, android: 15, default: 16 }),
   },
   secondaryBtn: {
-    height: catalogSecondaryBtnHeight,
+    height: secondaryBtnHeight,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",

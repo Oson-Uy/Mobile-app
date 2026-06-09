@@ -14,12 +14,14 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 
 import { apiFetch } from "../../api/client";
+import { iosScrollInset } from "../../navigation/glassOptions";
 import { useI18n } from "../../i18n/I18nProvider";
 import { Screen } from "../../ui/Screen";
 import { DevCard } from "../../ui/developer/DevCard";
 import { DevIconAction } from "../../ui/developer/DevIconButton";
 import { ProjectFilterChips } from "../../ui/developer/ProjectFilterChips";
-import { devListPadding, devPillHeight, devSearchHeight } from "../../ui/developer/devPlatform";
+import { statusChip } from "../../theme/chips";
+import { listPadding, pillHeight, searchHeight } from "../../ui/platform";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { radii, spacing } from "../../theme/tokens";
 
@@ -37,7 +39,7 @@ type ApiLead = {
 export function DeveloperLeadsScreen() {
   const { t } = useI18n();
   const theme = useTheme();
-  const { palette: p, mode } = useAppTheme();
+  const { colors: c, resolvedMode } = useAppTheme();
   const [items, setItems] = useState<ApiLead[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [query, setQuery] = useState("");
@@ -46,10 +48,8 @@ export function DeveloperLeadsScreen() {
   const [busyFeedbackId, setBusyFeedbackId] = useState<number | null>(null);
   const [feedbackLink, setFeedbackLink] = useState<string | null>(null);
 
-  const chipNewBg = mode === "dark" ? "rgba(251,191,36,0.22)" : "#FEF3C7";
-  const chipNewFg = mode === "dark" ? "#FCD34D" : "#92400E";
-  const chipDoneBg = mode === "dark" ? "rgba(52,211,153,0.18)" : "#DCFCE7";
-  const chipDoneFg = mode === "dark" ? "#6EE7B7" : "#166534";
+  const chipNew = statusChip("new", resolvedMode);
+  const chipDone = statusChip("done", resolvedMode);
 
   const load = async () => {
     const leads = await apiFetch<ApiLead[]>("/leads");
@@ -162,6 +162,7 @@ export function DeveloperLeadsScreen() {
   return (
     <Screen>
       <FlatList
+        {...iosScrollInset}
         contentContainerStyle={styles.list}
         data={filtered}
         keyExtractor={(i) => String(i.id)}
@@ -180,30 +181,37 @@ export function DeveloperLeadsScreen() {
             />
             {projectOptions.length > 0 ? (
               <View>
-                <Text variant="labelMedium" style={[styles.filterLabel, { color: p.textMuted }]}>
+                <Text variant="labelMedium" style={[styles.filterLabel, { color: c.labelSecondary }]}>
                   {t("developer.filterByProject")}
                 </Text>
                 <ProjectFilterChips
-                  projects={projectOptions}
-                  selectedId={projectFilterId}
-                  onSelect={setProjectFilterId}
-                  allLabel={t("developer.allProjects")}
+                  chips={[
+                    { id: "all", label: t("developer.allProjects") },
+                    ...projectOptions.map((proj) => ({
+                      id: String(proj.id),
+                      label: proj.name,
+                    })),
+                  ]}
+                  activeId={projectFilterId == null ? "all" : String(projectFilterId)}
+                  onChange={(id) =>
+                    setProjectFilterId(id === "all" ? null : Number(id))
+                  }
                 />
               </View>
             ) : null}
             <View style={styles.statsRow}>
-              <StatPill label={t("developer.statsAll")} value={stats.total} bg={p.surfaceMuted} fg={p.text} />
+              <StatPill label={t("developer.statsAll")} value={stats.total} bg={c.fill} fg={c.label} />
               <StatPill
                 label={t("developer.statsNew")}
                 value={stats.newCount}
-                bg={chipNewBg}
-                fg={chipNewFg}
+                bg={chipNew.bg}
+                fg={chipNew.fg}
               />
               <StatPill
                 label={t("developer.statsContacted")}
                 value={stats.contacted}
-                bg={chipDoneBg}
-                fg={chipDoneFg}
+                bg={chipDone.bg}
+                fg={chipDone.fg}
               />
             </View>
           </View>
@@ -215,10 +223,10 @@ export function DeveloperLeadsScreen() {
             <DevCard style={styles.card}>
               <View style={styles.cardTop}>
                 <View style={styles.cardTopLeft}>
-                  <Text variant="titleMedium" style={[styles.cardTitle, { color: p.text }]}>
+                  <Text variant="titleMedium" style={[styles.cardTitle, { color: c.label }]}>
                     {item.name}
                   </Text>
-                  <Text variant="bodySmall" style={{ color: p.textMuted }} numberOfLines={2}>
+                  <Text variant="bodySmall" style={{ color: c.labelSecondary }} numberOfLines={2}>
                     {(item.project?.name ?? "—") +
                       (item.floor ? ` · ${t("developer.leadFloor", { n: item.floor.floor })}` : "")}
                   </Text>
@@ -226,13 +234,13 @@ export function DeveloperLeadsScreen() {
                 <View
                   style={[
                     styles.statusBadge,
-                    { backgroundColor: isNew ? chipNewBg : chipDoneBg },
+                    { backgroundColor: isNew ? chipNew.bg : chipDone.bg },
                   ]}
                 >
                   <Text
                     style={[
                       styles.statusTxt,
-                      { color: isNew ? chipNewFg : chipDoneFg },
+                      { color: isNew ? chipNew.fg : chipDone.fg },
                     ]}
                   >
                     {isNew ? t("developer.statusNew") : t("developer.statusContacted")}
@@ -240,10 +248,10 @@ export function DeveloperLeadsScreen() {
                 </View>
               </View>
 
-              <Text variant="titleSmall" style={[styles.phone, { color: p.text }]}>
+              <Text variant="titleSmall" style={[styles.phone, { color: c.label }]}>
                 {item.phone}
               </Text>
-              <Text variant="bodySmall" style={{ color: p.textMuted }}>
+              <Text variant="bodySmall" style={{ color: c.labelSecondary }}>
                 {formatDate(item.createdAt)}
               </Text>
 
@@ -265,13 +273,15 @@ export function DeveloperLeadsScreen() {
                     onPress={() => void markContacted(item.id)}
                     style={({ pressed }) => [
                       styles.primaryPill,
-                      { backgroundColor: p.primary, opacity: pressed ? 0.88 : 1 },
+                      { backgroundColor: c.brand, opacity: pressed ? 0.88 : 1 },
                     ]}
                     accessibilityRole="button"
                     accessibilityLabel={t("developer.markContacted")}
                   >
-                    <MaterialCommunityIcons name="check" size={18} color="#FFFFFF" />
-                    <Text style={styles.primaryPillTxt}>{t("developer.markContacted")}</Text>
+                    <MaterialCommunityIcons name="check" size={18} color={c.brandOn} />
+                    <Text style={[styles.primaryPillTxt, { color: c.brandOn }]}>
+                      {t("developer.markContacted")}
+                    </Text>
                   </Pressable>
                 ) : (
                   <View style={styles.primaryPillSpacer} />
@@ -283,17 +293,17 @@ export function DeveloperLeadsScreen() {
                 disabled={feedbackBusy}
                 style={({ pressed }) => [
                   styles.feedbackRow,
-                  { borderColor: p.outline, opacity: pressed || feedbackBusy ? 0.75 : 1 },
+                  { borderColor: c.separator, opacity: pressed || feedbackBusy ? 0.75 : 1 },
                 ]}
                 accessibilityRole="button"
                 accessibilityLabel={t("developer.requestFeedback")}
               >
                 {feedbackBusy ? (
-                  <ActivityIndicator size="small" color={p.primary} />
+                  <ActivityIndicator size="small" color={c.brand} />
                 ) : (
-                  <MaterialCommunityIcons name="message-text-outline" size={20} color={p.primary} />
+                  <MaterialCommunityIcons name="message-text-outline" size={20} color={c.brand} />
                 )}
-                <Text variant="labelLarge" style={[styles.feedbackTxt, { color: p.primary }]}>
+                <Text variant="labelLarge" style={[styles.feedbackTxt, { color: c.brand }]}>
                   {t("developer.requestFeedback")}
                 </Text>
               </Pressable>
@@ -302,8 +312,8 @@ export function DeveloperLeadsScreen() {
         }}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <MaterialCommunityIcons name="clipboard-text-outline" size={48} color={p.textMuted} />
-            <Text variant="bodyLarge" style={[styles.emptyTxt, { color: p.textMuted }]}>
+            <MaterialCommunityIcons name="clipboard-text-outline" size={48} color={c.labelSecondary} />
+            <Text variant="bodyLarge" style={[styles.emptyTxt, { color: c.labelSecondary }]}>
               {t("developer.emptyLeads")}
             </Text>
           </View>
@@ -350,11 +360,11 @@ function StatPill({
 }
 
 const styles = StyleSheet.create({
-  list: { padding: devListPadding, paddingBottom: spacing.xxl * 2 },
+  list: { padding: listPadding, paddingBottom: spacing.xxl * 2 },
   header: { marginBottom: spacing.md, gap: spacing.md },
   search: {
     backgroundColor: "transparent",
-    height: devSearchHeight,
+    height: searchHeight,
   },
   searchOutline: { borderRadius: radii.lg },
   filterLabel: { fontWeight: "700", marginBottom: spacing.xs },
@@ -406,8 +416,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
     paddingHorizontal: spacing.md,
-    height: devPillHeight,
-    borderRadius: devPillHeight / 2,
+    height: pillHeight,
+    borderRadius: pillHeight / 2,
     marginLeft: "auto",
     ...Platform.select({
       ios: { marginBottom: 18 },
@@ -416,7 +426,7 @@ const styles = StyleSheet.create({
     }),
   },
   primaryPillSpacer: { flex: 1 },
-  primaryPillTxt: { color: "#FFFFFF", fontWeight: "700", fontSize: 13 },
+  primaryPillTxt: { fontWeight: "700", fontSize: 13 },
   feedbackRow: {
     flexDirection: "row",
     alignItems: "center",

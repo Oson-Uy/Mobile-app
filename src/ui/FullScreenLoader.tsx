@@ -6,20 +6,19 @@ import { BrandLogo } from "./BrandLogo";
 
 type Props = {
   message?: string;
-  /** Для пустых списков и второстепенных экранов — компактная колонка. */
   compact?: boolean;
 };
 
 export function FullScreenLoader({ message, compact }: Props) {
-  const { palette: p } = useAppTheme();
+  const { colors: c } = useAppTheme();
 
   if (compact) {
     return (
       <View style={styles.compact} accessibilityRole="progressbar">
         <BrandLogo size={40} />
-        <ActivityIndicator color={p.primary} style={styles.compactSpinner} />
+        <ActivityIndicator color={c.brand} style={styles.compactSpinner} />
         {message ? (
-          <Text style={[styles.msgText, { color: p.textMuted }]}>{message}</Text>
+          <Text style={[styles.msgText, { color: c.labelSecondary }]}>{message}</Text>
         ) : null}
       </View>
     );
@@ -27,20 +26,19 @@ export function FullScreenLoader({ message, compact }: Props) {
 
   return (
     <View
-      style={[styles.full, { backgroundColor: p.background }]}
+      style={[styles.full, { backgroundColor: c.bg }]}
       accessibilityRole="progressbar"
     >
       <BrandLogo size={88} />
-      <ActivityIndicator color={p.primary} size="large" style={styles.spinner} />
+      <ActivityIndicator color={c.brand} size="large" style={styles.spinner} />
       {message ? (
-        <Text style={[styles.msg, styles.msgText, { color: p.textMuted }]}>{message}</Text>
+        <Text style={[styles.msg, styles.msgText, { color: c.labelSecondary }]}>{message}</Text>
       ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  /** alignSelf + width: иначе в родителе с alignItems: "center" (часто экраны загрузки) колонка сжимается до ширины контента — «узкая белая полоска». */
   full: {
     flex: 1,
     alignSelf: "stretch",

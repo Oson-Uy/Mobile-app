@@ -53,6 +53,7 @@ export default ({ config }: any) => ({
   plugins: [
     ...new Set([
       ...(config.plugins ?? []),
+      "expo-router",
       [
         "expo-notifications",
         {

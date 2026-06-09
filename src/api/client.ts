@@ -1,5 +1,6 @@
 import { getApiUrl } from "./config";
 import { getToken } from "../auth/token";
+import { clearCustomerToken, getCustomerToken } from "../auth/customerToken";
 
 /** Без таймаута fetch на Android может «висеть» минутами (неверный хост, сеть, TLS). */
 const FETCH_TIMEOUT_MS = 18_000;
@@ -11,16 +12,16 @@ export class ApiAuthError extends Error {
   }
 }
 
-export async function apiFetch<T>(
+async function requestJson<T>(
   path: string,
   init: RequestInit = {},
+  bearer: string | null,
 ): Promise<T> {
-  const token = await getToken();
   const headers = new Headers(init.headers ?? {});
   if (!headers.has("Content-Type") && !(init.body instanceof FormData)) {
     headers.set("Content-Type", "application/json");
   }
-  if (token) headers.set("Authorization", `Bearer ${token}`);
+  if (bearer) headers.set("Authorization", `Bearer ${bearer}`);
 
   const base = getApiUrl().replace(/\/$/, "");
   const controller = new AbortController();
@@ -55,3 +56,34 @@ export async function apiFetch<T>(
   }
 }
 
+export async function apiFetch<T>(
+  path: string,
+  init: RequestInit = {},
+): Promise<T> {
+  const token = await getToken();
+  return requestJson<T>(path, init, token);
+}
+
+/** Запросы без авторизации. */
+export async function apiFetchPublic<T>(
+  path: string,
+  init: RequestInit = {},
+): Promise<T> {
+  return requestJson<T>(path, init, null);
+}
+
+/** Запросы личного кабинета покупателя (телефон + код доступа). */
+export async function apiFetchCustomer<T>(
+  path: string,
+  init: RequestInit = {},
+): Promise<T> {
+  const token = await getCustomerToken();
+  try {
+    return await requestJson<T>(path, init, token);
+  } catch (e) {
+    if (e instanceof ApiAuthError) {
+      await clearCustomerToken();
+    }
+    throw e;
+  }
+}

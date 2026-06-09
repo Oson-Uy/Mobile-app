@@ -27,7 +27,7 @@ const QR_MAX = Platform.select({ ios: 256, android: 248, default: 252 })!;
 
 export function ProjectQrCard({ imageUrl, shareUrl }: Props) {
   const { t } = useI18n();
-  const { palette: p } = useAppTheme();
+  const { colors: c } = useAppTheme();
   const { width } = useWindowDimensions();
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -64,16 +64,16 @@ export function ProjectQrCard({ imageUrl, shareUrl }: Props) {
   return (
     <SectionCard style={styles.section}>
       <SectionTitle title={t("projectDetails.qrTitle")} />
-      <Text variant="bodySmall" style={[styles.hint, { color: p.textMuted }]}>
+      <Text variant="bodySmall" style={[styles.hint, { color: c.labelSecondary }]}>
         {t("projectDetails.qrHint")}
       </Text>
 
       <View style={styles.qrWrap}>
         {loading && !failed ? (
-          <ActivityIndicator color={p.primary} style={styles.loader} />
+          <ActivityIndicator color={c.brand} style={styles.loader} />
         ) : null}
         {failed ? (
-          <MaterialCommunityIcons name="qrcode-remove" size={48} color={p.textMuted} />
+          <MaterialCommunityIcons name="qrcode-remove" size={48} color={c.labelSecondary} />
         ) : (
           <Image
             source={{ uri: imageUrl }}
@@ -92,11 +92,11 @@ export function ProjectQrCard({ imageUrl, shareUrl }: Props) {
         onPress={() => void onCopy()}
         style={({ pressed }) => [
           styles.copyRow,
-          { borderColor: p.outline, opacity: pressed ? 0.75 : 1 },
+          { borderColor: c.separator, opacity: pressed ? 0.75 : 1 },
         ]}
       >
-        <MaterialCommunityIcons name="link-variant" size={20} color={p.primary} />
-        <Text variant="labelLarge" style={{ color: p.primary, fontWeight: "600" }}>
+        <MaterialCommunityIcons name="link-variant" size={20} color={c.brand} />
+        <Text variant="labelLarge" style={{ color: c.brand, fontWeight: "600" }}>
           {copied ? t("projectDetails.qrCopied") : t("projectDetails.qrCopyLink")}
         </Text>
       </Pressable>

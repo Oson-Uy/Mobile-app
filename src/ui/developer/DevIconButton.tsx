@@ -12,7 +12,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Text } from "react-native-paper";
 
 import { useAppTheme } from "../../theme/AppThemeProvider";
-import { devIconButtonSize } from "./devPlatform";
+import { iconButtonSize } from "../platform";
 
 type IconName = React.ComponentProps<typeof MaterialCommunityIcons>["name"];
 
@@ -20,7 +20,6 @@ type Props = {
   icon: IconName;
   onPress: () => void;
   accessibilityLabel: string;
-  /** filled = primary tint, tonal = muted bg, plain = transparent */
   variant?: "filled" | "tonal" | "plain";
   color?: string;
   disabled?: boolean;
@@ -38,16 +37,13 @@ export function DevIconButton({
   loading,
   style,
 }: Props) {
-  const { palette: p } = useAppTheme();
+  const { colors: c } = useAppTheme();
   const iconColor =
-    color ?? (variant === "filled" ? "#FFFFFF" : variant === "tonal" ? p.primary : p.text);
+    color ??
+    (variant === "filled" ? c.brandOn : variant === "tonal" ? c.brand : c.label);
 
   const bg =
-    variant === "filled"
-      ? p.primary
-      : variant === "tonal"
-        ? p.surfaceMuted
-        : "transparent";
+    variant === "filled" ? c.brand : variant === "tonal" ? c.bgGrouped : "transparent";
 
   return (
     <Pressable
@@ -71,7 +67,6 @@ export function DevIconButton({
   );
 }
 
-/** Иконка + короткая подпись (как быстрые действия iOS). */
 export function DevIconAction({
   icon,
   label,
@@ -83,7 +78,7 @@ export function DevIconAction({
   onPress: () => void;
   accessibilityLabel: string;
 }) {
-  const { palette: p } = useAppTheme();
+  const { colors: c } = useAppTheme();
   return (
     <Pressable
       onPress={onPress}
@@ -91,17 +86,17 @@ export function DevIconAction({
       accessibilityLabel={accessibilityLabel}
       style={({ pressed }) => [styles.actionCol, { opacity: pressed ? 0.7 : 1 }]}
     >
-      <View style={[styles.base, { backgroundColor: p.surfaceMuted }]}>
-        <MaterialCommunityIcons name={icon} size={22} color={p.primary} />
+      <View style={[styles.base, { backgroundColor: c.bgGrouped }]}>
+        <MaterialCommunityIcons name={icon} size={22} color={c.brand} />
       </View>
-      <Text variant="labelSmall" style={[styles.actionLabel, { color: p.textMuted }]}>
+      <Text variant="labelSmall" style={[styles.actionLabel, { color: c.labelSecondary }]}>
         {label}
       </Text>
     </Pressable>
   );
 }
 
-const size = devIconButtonSize;
+const size = iconButtonSize;
 
 const styles = StyleSheet.create({
   base: {

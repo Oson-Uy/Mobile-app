@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { View } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
-import type { DeveloperStackParamList } from "../../navigation/RootNavigator";
+import type { DeveloperStackParamList } from "../../navigation/types";
 import { getToken } from "../../auth/token";
 import { registerForPushAndSyncToken } from "../../push/register";
 import { FullScreenLoader } from "../../ui/FullScreenLoader";

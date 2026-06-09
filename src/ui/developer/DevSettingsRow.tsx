@@ -13,18 +13,18 @@ type Props = {
 
 /** Строка как в iOS Settings: label сверху, value снизу. */
 export function DevSettingsRow({ label, value, last }: Props) {
-  const { palette: p } = useAppTheme();
+  const { colors: c } = useAppTheme();
   return (
     <View
       style={[
         styles.row,
-        !last && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: p.outline },
+        !last && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: c.separator },
       ]}
     >
-      <Text variant="labelSmall" style={[styles.label, { color: p.textMuted }]}>
+      <Text variant="labelSmall" style={[styles.label, { color: c.labelSecondary }]}>
         {label}
       </Text>
-      <Text variant="bodyMedium" style={[styles.value, { color: p.text }]}>
+      <Text variant="bodyMedium" style={[styles.value, { color: c.label }]}>
         {value}
       </Text>
     </View>

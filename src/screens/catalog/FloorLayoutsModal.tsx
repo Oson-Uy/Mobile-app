@@ -38,7 +38,7 @@ export function FloorLayoutsModal({
   onRequestLead,
 }: Props) {
   const { t, locale } = useI18n();
-  const { palette: p } = useAppTheme();
+  const { colors: c } = useAppTheme();
   const loc = localeFor(locale);
   /** Ширина контента карусели = экран − padding модалки (`modalRoot`) − padding листа (`sheet`). */
   const slideWidth = Math.max(
@@ -78,41 +78,41 @@ export function FloorLayoutsModal({
       statusBarTranslucent
       onRequestClose={onDismiss}
     >
-      <View style={styles.modalRoot}>
+      <View style={[styles.modalRoot, { backgroundColor: c.overlay }]}>
         <Pressable style={styles.backdrop} onPress={onDismiss} />
         <View
           style={[
             styles.sheet,
             {
-              backgroundColor: p.surface,
-              borderColor: p.outline,
+              backgroundColor: c.bgElevated,
+              borderColor: c.separator,
             },
           ]}
         >
           <View style={styles.header}>
-            <Text variant="titleLarge" style={[styles.title, { color: p.primary }]}>
+            <Text variant="titleLarge" style={[styles.title, { color: c.brand }]}>
               {t("floorTower.floorLabel", { n: floor.floor })}
             </Text>
             <Pressable onPress={onDismiss} hitSlop={12} accessibilityRole="button">
-              <MaterialCommunityIcons name="close" size={24} color={p.textMuted} />
+              <MaterialCommunityIcons name="close" size={24} color={c.labelSecondary} />
             </Pressable>
           </View>
 
-          <Text variant="bodyMedium" style={[styles.priceLine, { color: p.text }]}>
+          <Text variant="bodyMedium" style={[styles.priceLine, { color: c.label }]}>
             {t("floorTower.pricePerM2")}:{" "}
-            <Text style={[styles.bold, { color: p.primary }]}>
+            <Text style={[styles.bold, { color: c.brand }]}>
               {formatUzs(floor.pricePerM2, loc)} {t("common.sum")}/{t("common.m2")}
             </Text>
           </Text>
 
           {areas.length ? (
-            <Text variant="bodySmall" style={[styles.areas, { color: p.textMuted }]}>
+            <Text variant="bodySmall" style={[styles.areas, { color: c.labelSecondary }]}>
               {t("floorTower.areaVariants")}: {areas.join(", ")}{" "}
               {t("floorTower.areaVariantsShort")}
             </Text>
           ) : null}
 
-          <Divider style={[styles.divider, { backgroundColor: p.outline }]} />
+          <Divider style={[styles.divider, { backgroundColor: c.separator }]} />
 
           {layouts.length ? (
             <>
@@ -144,12 +144,12 @@ export function FloorLayoutsModal({
                         source={{ uri: item.imageUrl }}
                         style={[
                           styles.layoutImg,
-                          { width: pageW, backgroundColor: p.surfaceMuted },
+                          { width: pageW, backgroundColor: c.fill },
                         ]}
                         resizeMode="contain"
                       />
                     {item.title ? (
-                      <Text variant="labelMedium" style={[styles.layoutTitle, { color: p.text }]}>
+                      <Text variant="labelMedium" style={[styles.layoutTitle, { color: c.label }]}>
                         {item.title}
                       </Text>
                     ) : null}
@@ -169,8 +169,8 @@ export function FloorLayoutsModal({
                         source={{ uri: item.imageUrl }}
                         style={[
                           styles.thumb,
-                          { backgroundColor: p.surfaceMuted },
-                          active === idx && { borderColor: p.secondary },
+                          { backgroundColor: c.fill },
+                          active === idx && { borderColor: c.brandSecondary },
                         ]}
                       />
                     </Pressable>
@@ -179,14 +179,14 @@ export function FloorLayoutsModal({
               ) : null}
             </>
           ) : (
-            <Text style={[styles.empty, { color: p.textMuted }]}>{t("floorTower.noLayouts")}</Text>
+            <Text style={[styles.empty, { color: c.labelSecondary }]}>{t("floorTower.noLayouts")}</Text>
           )}
 
           <Button
             mode="contained"
             style={styles.cta}
-            buttonColor={p.secondary}
-            textColor="#FFFFFF"
+            buttonColor={c.brandSecondary}
+            textColor={c.brandOn}
             onPress={onRequestLead}
           >
             {t("floorTower.cta")}
@@ -205,7 +205,6 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.55)",
   },
   sheet: {
     borderRadius: radii.xl,

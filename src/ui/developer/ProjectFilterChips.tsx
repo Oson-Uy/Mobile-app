@@ -1,96 +1,67 @@
 import React from "react";
-import { Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet } from "react-native";
 import { Text } from "react-native-paper";
 
 import { useAppTheme } from "../../theme/AppThemeProvider";
-import type { AppPalette } from "../../theme/tokens";
+import { chipOnBrand } from "../../theme/chips";
+import { pillHeight } from "../platform";
 import { radii, spacing } from "../../theme/tokens";
 
-export type ProjectFilterOption = { id: number; name: string };
+type Chip = { id: string; label: string };
 
 type Props = {
-  projects: ProjectFilterOption[];
-  selectedId: number | null;
-  onSelect: (id: number | null) => void;
-  allLabel: string;
+  chips: Chip[];
+  activeId: string;
+  onChange: (id: string) => void;
 };
 
-export function ProjectFilterChips({ projects, selectedId, onSelect, allLabel }: Props) {
-  const { palette: p } = useAppTheme();
+export function ProjectFilterChips({ chips, activeId, onChange }: Props) {
+  const { colors: c } = useAppTheme();
+  const onBrand = chipOnBrand(c);
 
   return (
-    <View style={styles.wrap}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.row}
-      >
-        <Chip
-          label={allLabel}
-          active={selectedId === null}
-          onPress={() => onSelect(null)}
-          p={p}
-        />
-        {projects.map((proj) => (
-          <Chip
-            key={proj.id}
-            label={proj.name}
-            active={selectedId === proj.id}
-            onPress={() => onSelect(proj.id)}
-            p={p}
-          />
-        ))}
-      </ScrollView>
-    </View>
-  );
-}
-
-function Chip({
-  label,
-  active,
-  onPress,
-  p,
-}: {
-  label: string;
-  active: boolean;
-  onPress: () => void;
-  p: AppPalette;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.chip,
-        {
-          backgroundColor: active ? p.primary : p.surfaceMuted,
-          borderColor: active ? p.primary : p.outline,
-          opacity: pressed ? 0.85 : 1,
-        },
-      ]}
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.row}
     >
-      <Text
-        variant="labelLarge"
-        numberOfLines={1}
-        style={[styles.chipTxt, { color: active ? "#FFFFFF" : p.text }]}
-      >
-        {label}
-      </Text>
-    </Pressable>
+      {chips.map((chip) => {
+        const active = chip.id === activeId;
+        return (
+          <Pressable
+            key={chip.id}
+            onPress={() => onChange(chip.id)}
+            style={[
+              styles.chip,
+              {
+                backgroundColor: active ? c.brand : c.bgGrouped,
+                borderColor: active ? c.brand : c.separator,
+              },
+            ]}
+          >
+            <Text style={[styles.chipTxt, { color: active ? onBrand : c.label }]}>
+              {chip.label}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { marginBottom: spacing.sm },
   row: {
     gap: spacing.sm,
-    paddingVertical: Platform.select({ ios: 2, android: 4, default: 2 }),
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
   },
   chip: {
+    height: pillHeight,
     paddingHorizontal: spacing.md,
-    paddingVertical: Platform.select({ ios: 8, android: 10, default: 8 }),
     borderRadius: radii.lg,
     borderWidth: StyleSheet.hairlineWidth,
-    maxWidth: 220,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  chipTxt: { fontWeight: "700", fontSize: Platform.select({ ios: 13, android: 14, default: 13 }) },
+  chipTxt: { fontWeight: "700", fontSize: 13 },
 });

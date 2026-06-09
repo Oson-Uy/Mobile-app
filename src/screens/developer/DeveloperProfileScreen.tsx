@@ -16,6 +16,7 @@ import * as Clipboard from "expo-clipboard";
 
 import { apiFetch } from "../../api/client";
 import { clearToken } from "../../auth/token";
+import { iosScrollInset } from "../../navigation/glassOptions";
 import { exitDeveloperWorkspace } from "../../navigation/navigationRef";
 import { registerForPushAndSyncToken } from "../../push/register";
 import { useI18n } from "../../i18n/I18nProvider";
@@ -24,7 +25,7 @@ import { Screen } from "../../ui/Screen";
 import { SectionCard } from "../../ui/SectionCard";
 import { DevIconButton } from "../../ui/developer/DevIconButton";
 import { DevSettingsRow } from "../../ui/developer/DevSettingsRow";
-import { devListPadding } from "../../ui/developer/devPlatform";
+import { listPadding } from "../../ui/platform";
 import { uploadImageAsset } from "../../dev/uploadImage";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { radii, spacing } from "../../theme/tokens";
@@ -47,7 +48,7 @@ const AVATAR = Platform.select({ ios: 96, android: 104, default: 96 })!;
 export function DeveloperProfileScreen() {
   const { t } = useI18n();
   const { setRole } = useAppPreferences();
-  const { palette: p } = useAppTheme();
+  const { colors: c } = useAppTheme();
   const [dev, setDev] = useState<ApiDeveloper | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -181,13 +182,14 @@ export function DeveloperProfileScreen() {
   return (
     <Screen>
       <ScrollView
+        {...iosScrollInset}
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
         <SectionCard style={styles.card}>
           <View style={styles.toolbar}>
-            <Text variant="titleMedium" style={[styles.screenTitle, { color: p.primary }]}>
+            <Text variant="titleMedium" style={[styles.screenTitle, { color: c.brand }]}>
               {t("developer.profile")}
             </Text>
             <View style={styles.toolbarActions}>
@@ -229,41 +231,46 @@ export function DeveloperProfileScreen() {
             <View
               style={[
                 styles.avatar,
-                { backgroundColor: p.surfaceMuted, borderColor: p.outline },
+                { backgroundColor: c.fill, borderColor: c.separator },
               ]}
             >
               {dev?.logoUrl ? (
                 <Image source={{ uri: dev.logoUrl }} style={styles.avatarImg} />
               ) : (
-                <MaterialCommunityIcons name="domain" size={40} color={p.textMuted} />
+                <MaterialCommunityIcons name="domain" size={40} color={c.labelSecondary} />
               )}
               {logoUploading ? (
                 <View style={styles.avatarOverlay}>
-                  <ActivityIndicator color="#FFFFFF" />
+                  <ActivityIndicator color={c.brandOn} />
                 </View>
               ) : null}
               {editMode && !logoUploading ? (
-                <View style={[styles.avatarBadge, { backgroundColor: p.primary }]}>
-                  <MaterialCommunityIcons name="camera-outline" size={16} color="#FFFFFF" />
+                <View
+                  style={[
+                    styles.avatarBadge,
+                    { backgroundColor: c.brand, borderColor: c.brandOn },
+                  ]}
+                >
+                  <MaterialCommunityIcons name="camera-outline" size={16} color={c.brandOn} />
                 </View>
               ) : null}
             </View>
           </Pressable>
 
-          <Text variant="titleLarge" style={[styles.name, { color: p.text }]}>
+          <Text variant="titleLarge" style={[styles.name, { color: c.label }]}>
             {dev?.name ?? ""}
           </Text>
-          <Text variant="bodyMedium" style={[styles.email, { color: p.textMuted }]}>
+          <Text variant="bodyMedium" style={[styles.email, { color: c.labelSecondary }]}>
             {dev?.email ?? ""}
           </Text>
 
           {editMode ? (
-            <Text variant="bodySmall" style={[styles.editHint, { color: p.secondary }]}>
+            <Text variant="bodySmall" style={[styles.editHint, { color: c.brandSecondary }]}>
               {t("developer.tapToChangeLogo")}
             </Text>
           ) : null}
 
-          <View style={[styles.grouped, { borderColor: p.outline, backgroundColor: p.surfaceMuted }]}>
+          <View style={[styles.grouped, { borderColor: c.separator, backgroundColor: c.fill }]}>
             {!editMode ? (
               <>
                 <DevSettingsRow label={t("developer.phone")} value={dev?.phone?.trim() || "—"} />
@@ -326,10 +333,10 @@ export function DeveloperProfileScreen() {
 
           <Divider style={styles.div} />
 
-          <Text variant="titleSmall" style={[styles.blockTitle, { color: p.primary }]}>
+          <Text variant="titleSmall" style={[styles.blockTitle, { color: c.brand }]}>
             Telegram
           </Text>
-          <Text variant="bodySmall" style={[styles.muted, { color: p.textMuted }]}>
+          <Text variant="bodySmall" style={[styles.muted, { color: c.labelSecondary }]}>
             {dev?.telegramLinked ? t("developer.telegramLinked") : t("developer.telegramNotLinked")}
           </Text>
           <View style={styles.row}>
@@ -356,7 +363,7 @@ export function DeveloperProfileScreen() {
               onPress={() => void copy(tgLink)}
               style={({ pressed }) => [styles.linkRow, { opacity: pressed ? 0.7 : 1 }]}
             >
-              <Text variant="labelLarge" style={{ color: p.primary, fontWeight: "600" }}>
+              <Text variant="labelLarge" style={{ color: c.brand, fontWeight: "600" }}>
                 {t("developer.copyLink")}
               </Text>
             </Pressable>
@@ -372,7 +379,7 @@ export function DeveloperProfileScreen() {
           </Button>
           <Button
             mode="outlined"
-            textColor={p.error}
+            textColor={c.error}
             onPress={() => void signOut()}
             style={styles.footerBtn}
             contentStyle={styles.btnContent}
@@ -389,7 +396,7 @@ export function DeveloperProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  scroll: { padding: devListPadding, paddingBottom: spacing.xxl * 2 },
+  scroll: { padding: listPadding, paddingBottom: spacing.xxl * 2 },
   card: { overflow: "visible" },
   toolbar: {
     flexDirection: "row",
@@ -426,7 +433,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
-    borderColor: "#FFFFFF",
   },
   name: { fontWeight: "800", textAlign: "center" },
   email: { textAlign: "center", marginTop: 4 },

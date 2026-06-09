@@ -17,6 +17,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useRoute } from "@react-navigation/native";
 
 import { apiFetch } from "../../api/client";
+import { iosScrollInset } from "../../navigation/glassOptions";
 import { useI18n } from "../../i18n/I18nProvider";
 import { Screen } from "../../ui/Screen";
 import { SectionCard } from "../../ui/SectionCard";
@@ -93,7 +94,7 @@ const splitCsv = (value: string) =>
 
 export function DeveloperProjectEditorScreen({ navigation }: any) {
   const { t } = useI18n();
-  const { palette: themePalette } = useAppTheme();
+  const { colors: c } = useAppTheme();
   const route = useRoute();
   const { projectId } = (route.params ?? {}) as RouteParams;
 
@@ -253,12 +254,16 @@ export function DeveloperProjectEditorScreen({ navigation }: any) {
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        {...iosScrollInset}
+        contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+      >
         <SectionCard>
           <SectionTitle title={title} subtitle={t("developer.projectEditorSubtitle")} />
 
           {err ? (
-            <Text style={[styles.err, { color: themePalette.error }]}>{err}</Text>
+            <Text style={[styles.err, { color: c.error }]}>{err}</Text>
           ) : null}
 
           <TextInput
@@ -344,7 +349,7 @@ export function DeveloperProjectEditorScreen({ navigation }: any) {
               <Text style={styles.smallMuted}>{t("developer.mainImage")}</Text>
               <Image
                 source={{ uri: form.imageUrl }}
-                style={[styles.mainImg, { backgroundColor: themePalette.surfaceMuted }]}
+                style={[styles.mainImg, { backgroundColor: c.fill }]}
               />
             </View>
           ) : null}
@@ -355,7 +360,7 @@ export function DeveloperProjectEditorScreen({ navigation }: any) {
                   key={`${idx}-${u.slice(-12)}`}
                   style={[
                     styles.thumbWrap,
-                    { backgroundColor: themePalette.surfaceMuted },
+                    { backgroundColor: c.fill },
                   ]}
                 >
                   <Image
@@ -363,7 +368,7 @@ export function DeveloperProjectEditorScreen({ navigation }: any) {
                     style={[
                       styles.thumb,
                       {
-                        backgroundColor: themePalette.outline,
+                        backgroundColor: c.separator,
                       },
                     ]}
                   />
@@ -382,7 +387,7 @@ export function DeveloperProjectEditorScreen({ navigation }: any) {
                   <Button
                     mode="text"
                     compact
-                    textColor={themePalette.error}
+                    textColor={c.error}
                     onPress={() =>
                       setForm((f) => ({
                         ...f,

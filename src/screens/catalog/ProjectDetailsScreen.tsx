@@ -25,7 +25,9 @@ import {
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import type { CatalogStackParamList } from "../../navigation/RootNavigator";
+import { buyerTabBarBottomInset } from "../../navigation/tabBarInsets";
+import { iosScrollInset } from "../../navigation/glassOptions";
+import type { CatalogStackParamList } from "../../navigation/types";
 import { apiFetch } from "../../api/client";
 import { useI18n } from "../../i18n/I18nProvider";
 import type { ApiFloor, ApiProjectFull, ApiProjectPreview } from "../../types/project";
@@ -47,7 +49,7 @@ import { ProjectQrCard } from "../../ui/ProjectQrCard";
 import { SectionCard } from "../../ui/SectionCard";
 import { SectionTitle } from "../../ui/SectionTitle";
 import { useAppTheme } from "../../theme/AppThemeProvider";
-import type { AppPalette } from "../../theme/tokens";
+import type { AppColors } from "../../theme/tokens";
 import { radii, spacing } from "../../theme/tokens";
 
 type Props = NativeStackScreenProps<CatalogStackParamList, "ProjectDetails">;
@@ -63,22 +65,22 @@ type SpecRow = {
 
 type DetailsStyles = ReturnType<typeof createDetailsStyles>;
 
-function createDetailsStyles(p: AppPalette) {
+function createDetailsStyles(c: AppColors) {
   return StyleSheet.create({
     centered: { flex: 1, justifyContent: "center", alignItems: "center", padding: spacing.lg },
     mt: { marginTop: spacing.md },
-    err: { color: p.error, fontWeight: "700", textAlign: "center" },
+    err: { color: c.error, fontWeight: "700", textAlign: "center" },
     heroWrap: { position: "relative", backgroundColor: "#000" },
     heroPh: {
-      backgroundColor: p.surfaceMuted,
+      backgroundColor: c.fill,
       alignItems: "center",
       justifyContent: "center",
     },
     thumbStrip: {
       maxHeight: 72,
-      backgroundColor: p.surfaceMuted,
+      backgroundColor: c.fill,
       borderTopWidth: StyleSheet.hairlineWidth,
-      borderTopColor: p.outline,
+      borderTopColor: c.separator,
     },
     thumbStripIn: { padding: spacing.sm, gap: spacing.sm },
     thumb: {
@@ -89,59 +91,59 @@ function createDetailsStyles(p: AppPalette) {
       borderWidth: 2,
       borderColor: "transparent",
     },
-    thumbOn: { borderColor: p.secondary },
+    thumbOn: { borderColor: c.brandSecondary },
     heroBadges: { position: "absolute", top: spacing.md, left: spacing.md, gap: 6 },
     hBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, alignSelf: "flex-start" },
-    hPop: { backgroundColor: p.popular },
-    hPlan: { backgroundColor: p.secondary },
-    hBadgeTxt: { color: "#fff", fontSize: 10, fontWeight: "900", letterSpacing: 0.5 },
+    hPop: { backgroundColor: c.popular },
+    hPlan: { backgroundColor: c.brandSecondary },
+    hBadgeTxt: { color: c.onMedia, fontSize: 10, fontWeight: "900", letterSpacing: 0.5 },
     body: { padding: spacing.lg, gap: spacing.md },
-    h1: { fontWeight: "900", color: p.primary, letterSpacing: 0.2 },
+    h1: { fontWeight: "900", color: c.brand, letterSpacing: 0.2 },
     locRow: { flexDirection: "row", gap: 6, alignItems: "flex-start" },
-    loc: { flex: 1, fontWeight: "600", color: p.text },
-    priceHero: { fontWeight: "700", color: p.text },
-    priceHeroNum: { color: p.primary },
+    loc: { flex: 1, fontWeight: "600", color: c.label },
+    priceHero: { fontWeight: "700", color: c.label },
+    priceHeroNum: { color: c.brand },
     chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-    chip: { backgroundColor: p.surfaceMuted },
+    chip: { backgroundColor: c.fill },
     metrics: { flexDirection: "row", gap: spacing.sm },
     metric: {
       flex: 1,
-      backgroundColor: p.surfaceMuted,
+      backgroundColor: c.fill,
       borderRadius: radii.md,
       padding: spacing.md,
       borderWidth: StyleSheet.hairlineWidth,
-      borderColor: p.outline,
+      borderColor: c.separator,
     },
     metricLbl: {
       fontSize: 10,
       fontWeight: "800",
-      color: p.textMuted,
+      color: c.labelSecondary,
       textTransform: "uppercase",
       marginBottom: 4,
     },
-    metricVal: { fontWeight: "800", color: p.primary, fontSize: 13 },
+    metricVal: { fontWeight: "800", color: c.brand, fontSize: 13 },
     accHead: {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
       paddingVertical: spacing.sm,
       borderWidth: StyleSheet.hairlineWidth,
-      borderColor: p.outline,
+      borderColor: c.separator,
       borderRadius: radii.md,
       paddingHorizontal: spacing.md,
-      backgroundColor: p.surface,
+      backgroundColor: c.bgElevated,
     },
-    accTitle: { fontWeight: "800", color: p.primary, fontSize: 12, letterSpacing: 0.5 },
+    accTitle: { fontWeight: "800", color: c.brand, fontSize: 12, letterSpacing: 0.5 },
     accBody: {
       marginTop: spacing.sm,
       padding: spacing.md,
-      backgroundColor: p.surfaceMuted,
+      backgroundColor: c.fill,
       borderRadius: radii.md,
       gap: spacing.sm,
     },
-    desc: { lineHeight: 22, color: p.text },
+    desc: { lineHeight: 22, color: c.label },
     advRow: { flexDirection: "row", gap: 8, alignItems: "flex-start" },
-    advTxt: { flex: 1, fontWeight: "600", fontSize: 12, color: p.text },
+    advTxt: { flex: 1, fontWeight: "600", fontSize: 12, color: c.label },
     cta: { marginTop: spacing.sm, borderRadius: radii.lg },
     ctaIn: { paddingVertical: 8 },
     cta2: { marginHorizontal: spacing.lg, marginBottom: spacing.lg, borderRadius: radii.lg },
@@ -151,17 +153,17 @@ function createDetailsStyles(p: AppPalette) {
       gap: spacing.md,
       paddingVertical: spacing.sm,
       borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: p.outline,
+      borderBottomColor: c.separator,
     },
     specTxt: { flex: 1 },
     specLbl: {
       fontSize: 11,
       fontWeight: "800",
-      color: p.textMuted,
+      color: c.labelSecondary,
       textTransform: "uppercase",
       marginBottom: 2,
     },
-    specVal: { color: p.text },
+    specVal: { color: c.label },
     progressHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
     progressPct: { fontWeight: "900" },
     progressTrack: {
@@ -225,36 +227,36 @@ function createDetailsStyles(p: AppPalette) {
     },
     devLogo: { width: 88, height: 40, flexShrink: 0 },
     devHeaderText: { flex: 1, minWidth: 0, gap: 4 },
-    devHeaderTitle: { fontWeight: "800", letterSpacing: 0.2, color: p.text },
-    devHeaderSub: { opacity: 0.75, color: p.text },
-    devSub: { fontWeight: "800", marginBottom: 4, color: p.text },
-    devDesc: { opacity: 0.85, color: p.text },
-    divider: { marginVertical: spacing.md, backgroundColor: p.outline },
+    devHeaderTitle: { fontWeight: "800", letterSpacing: 0.2, color: c.label },
+    devHeaderSub: { opacity: 0.75, color: c.label },
+    devSub: { fontWeight: "800", marginBottom: 4, color: c.label },
+    devDesc: { opacity: 0.85, color: c.label },
+    divider: { marginVertical: spacing.md, backgroundColor: c.separator },
     linkRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm, paddingVertical: 8 },
-    linkTxt: { color: p.primary, fontWeight: "600", flex: 1 },
-    addr: { marginTop: spacing.sm, opacity: 0.85, color: p.text },
-    addrLbl: { fontWeight: "800", color: p.text },
+    linkTxt: { color: c.brand, fontWeight: "600", flex: 1 },
+    addr: { marginTop: spacing.sm, opacity: 0.85, color: c.label },
+    addrLbl: { fontWeight: "800", color: c.label },
     relatedBlock: { marginTop: spacing.lg },
     relatedRow: { flexDirection: "row", gap: spacing.md, paddingVertical: spacing.sm },
     relatedCard: {
       width: 160,
-      backgroundColor: p.surface,
+      backgroundColor: c.bgElevated,
       borderRadius: radii.md,
       borderWidth: StyleSheet.hairlineWidth,
-      borderColor: p.outline,
+      borderColor: c.separator,
       overflow: "hidden",
       paddingBottom: spacing.sm,
     },
-    relatedImg: { width: "100%", height: 88, backgroundColor: p.surfaceMuted },
+    relatedImg: { width: "100%", height: 88, backgroundColor: c.fill },
     relatedPh: {},
     relatedName: {
       fontWeight: "800",
       paddingHorizontal: spacing.sm,
       marginTop: spacing.sm,
       minHeight: 36,
-      color: p.text,
+      color: c.label,
     },
-    relatedPrice: { paddingHorizontal: spacing.sm, color: p.primary, fontWeight: "700" },
+    relatedPrice: { paddingHorizontal: spacing.sm, color: c.brand, fontWeight: "700" },
     floorRow: {
       flexDirection: "row",
       alignItems: "center",
@@ -262,29 +264,29 @@ function createDetailsStyles(p: AppPalette) {
       paddingVertical: spacing.md,
       paddingHorizontal: spacing.sm,
       marginBottom: spacing.sm,
-      backgroundColor: p.surfaceMuted,
+      backgroundColor: c.fill,
       borderRadius: radii.md,
       borderWidth: StyleSheet.hairlineWidth,
-      borderColor: p.outline,
+      borderColor: c.separator,
     },
-    floorNum: { fontWeight: "900", fontSize: 16, color: p.text },
-    floorPrice: { opacity: 0.8, color: p.text },
-    muted: { opacity: 0.7, fontStyle: "italic", color: p.text },
+    floorNum: { fontWeight: "900", fontSize: 16, color: c.label },
+    floorPrice: { opacity: 0.8, color: c.label },
+    muted: { opacity: 0.7, fontStyle: "italic", color: c.label },
     ratingRow: {
       flexDirection: "row",
       alignItems: "center",
       gap: spacing.xs,
       flexWrap: "wrap",
     },
-    mapHint: { color: p.textMuted, marginBottom: spacing.sm },
+    mapHint: { color: c.labelSecondary, marginBottom: spacing.sm },
     mapBox: {
       borderRadius: radii.lg,
       minHeight: PROJECT_MAP_HEIGHT,
       overflow: "hidden",
       alignSelf: "stretch",
-      backgroundColor: p.surfaceMuted,
+      backgroundColor: c.fill,
       borderWidth: StyleSheet.hairlineWidth,
-      borderColor: p.outline,
+      borderColor: c.separator,
     },
     mapLoading: {
       minHeight: PROJECT_MAP_HEIGHT,
@@ -292,17 +294,17 @@ function createDetailsStyles(p: AppPalette) {
       justifyContent: "center",
     },
     mapActionsRow: { flexDirection: "row", gap: spacing.sm, marginTop: spacing.sm, flexWrap: "wrap" },
-    reviewHint: { color: p.textMuted, marginBottom: spacing.sm },
+    reviewHint: { color: c.labelSecondary, marginBottom: spacing.sm },
     reviewCard: {
       padding: spacing.md,
       borderRadius: radii.md,
-      backgroundColor: p.surfaceMuted,
+      backgroundColor: c.fill,
       borderWidth: StyleSheet.hairlineWidth,
-      borderColor: p.outline,
+      borderColor: c.separator,
       marginBottom: spacing.sm,
     },
     reviewStars: { flexDirection: "row", gap: 2, marginBottom: spacing.sm },
-    reviewQuote: { color: p.text, fontStyle: "italic", lineHeight: 20 },
+    reviewQuote: { color: c.label, fontStyle: "italic", lineHeight: 20 },
     mapBtn: { borderRadius: radii.lg, alignSelf: "flex-start" },
     mapBtnIn: Platform.select({
       ios: { paddingVertical: 6 },
@@ -366,8 +368,8 @@ RelatedStrip.displayName = "RelatedStrip";
 export function ProjectDetailsScreen({ route, navigation }: Props) {
   const { id } = route.params;
   const { t, locale } = useI18n();
-  const { palette: p } = useAppTheme();
-  const styles = useMemo(() => createDetailsStyles(p), [p]);
+  const { colors: c } = useAppTheme();
+  const styles = useMemo(() => createDetailsStyles(c), [c]);
   const loc = localeFor(locale);
   const insets = useSafeAreaInsets();
   const slideW = Dimensions.get("window").width;
@@ -635,7 +637,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
 
   if (loading) {
     return (
-      <View style={styles.centered}>
+      <View style={[styles.centered, { backgroundColor: c.bg }]}>
         <FullScreenLoader message={t("common.loading")} />
       </View>
     );
@@ -643,7 +645,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
 
   if (notFound || !data) {
     return (
-      <View style={styles.centered}>
+      <View style={[styles.centered, { backgroundColor: c.bg }]}>
         <Text style={styles.err}>{t("projectDetails.notFound")}</Text>
         <Button mode="contained" onPress={() => navigation.goBack()} style={styles.mt}>
           {t("common.back")}
@@ -684,8 +686,10 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
         }}
       />
       <ScrollView
+        {...iosScrollInset}
+        style={{ backgroundColor: c.bg }}
         contentContainerStyle={{
-          paddingBottom: insets.bottom + spacing.xxl * 2,
+          paddingBottom: buyerTabBarBottomInset(insets.bottom),
         }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} />
@@ -741,7 +745,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
             </>
           ) : (
             <View style={[styles.heroPh, { width: slideW, height: slideW * 0.4 }]}>
-              <MaterialCommunityIcons name="image-off-outline" size={48} color={p.textMuted} />
+              <MaterialCommunityIcons name="image-off-outline" size={48} color={c.labelSecondary} />
             </View>
           )}
           <View style={styles.heroBadges}>
@@ -763,7 +767,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
             {data.name}
           </Text>
           <View style={styles.locRow}>
-            <MaterialCommunityIcons name="map-marker-outline" size={18} color={p.secondary} />
+            <MaterialCommunityIcons name="map-marker-outline" size={18} color={c.brandSecondary} />
             <Text variant="bodyLarge" style={styles.loc}>
               {place}
             </Text>
@@ -780,12 +784,12 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
 
           <View style={styles.chips}>
             {data.hasInstallment ? (
-              <Chip compact style={styles.chip} textStyle={{ color: p.text }}>
+              <Chip compact style={styles.chip} textStyle={{ color: c.label }}>
                 {t("projectCard.installment")}
               </Chip>
             ) : null}
             {data.badgeVerified ? (
-              <Chip compact icon="shield-check" style={styles.chip} textStyle={{ color: p.text }}>
+              <Chip compact icon="shield-check" style={styles.chip} textStyle={{ color: c.label }}>
                 {t("projectCard.verifiedDeveloper")}
               </Chip>
             ) : null}
@@ -800,12 +804,12 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
                   size={18}
                   color={
                     star <= Math.round(Number(data.avgRating) || 0)
-                      ? p.secondary
-                      : p.outline
+                      ? c.brandSecondary
+                      : c.separator
                   }
                 />
               ))}
-              <Text style={{ color: p.text, fontWeight: "700", flex: 1, flexWrap: "wrap" }}>
+              <Text style={{ color: c.label, fontWeight: "700", flex: 1, flexWrap: "wrap" }}>
                 {data.avgRating != null ? String(data.avgRating) : "—"} ·{" "}
                 {t("projectDetails.ratingCount", { n: data.reviewsCount ?? 0 })}
               </Text>
@@ -842,7 +846,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
                 <MaterialCommunityIcons
                   name={descOpen ? "chevron-up" : "chevron-down"}
                   size={22}
-                  color={p.primary}
+                  color={c.brand}
                 />
               </Pressable>
               {descOpen ? (
@@ -854,7 +858,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
                   ) : null}
                   {(data.advantages ?? []).map((adv, i) => (
                     <View key={i} style={styles.advRow}>
-                      <MaterialCommunityIcons name="check-circle-outline" size={18} color={p.success} />
+                      <MaterialCommunityIcons name="check-circle-outline" size={18} color={c.success} />
                       <Text style={styles.advTxt}>{adv}</Text>
                     </View>
                   ))}
@@ -867,8 +871,8 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
             mode="contained"
             style={styles.cta}
             contentStyle={styles.ctaIn}
-            buttonColor={p.secondary}
-            textColor="#FFFFFF"
+            buttonColor={c.brandSecondary}
+            textColor={c.brandOn}
             onPress={() => goLead()}
           >
             {t("projectDetails.leaveRequest")}
@@ -885,7 +889,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
             <SectionTitle title={t("projectDetails.specsTitle")} />
             {specRows.map((row, i) => (
               <View key={`${row.label}-${i}`} style={styles.specRow}>
-                <MaterialCommunityIcons name={row.icon} size={22} color={p.primary} />
+                <MaterialCommunityIcons name={row.icon} size={22} color={c.brand} />
                 <View style={styles.specTxt}>
                   <Text style={styles.specLbl}>{row.label}</Text>
                   <Text variant="bodyMedium" style={styles.specVal}>
@@ -922,7 +926,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
               <Divider style={styles.divider} />
               {dev.phone ? (
                 <Pressable style={styles.linkRow} onPress={() => void openLink(`tel:${dev.phone}`)}>
-                  <MaterialCommunityIcons name="phone-outline" size={20} color={p.primary} />
+                  <MaterialCommunityIcons name="phone-outline" size={20} color={c.brand} />
                   <Text style={styles.linkTxt}>{dev.phone}</Text>
                 </Pressable>
               ) : null}
@@ -931,7 +935,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
                   style={styles.linkRow}
                   onPress={() => void openLink(`mailto:${dev.email}`)}
                 >
-                  <MaterialCommunityIcons name="email-outline" size={20} color={p.primary} />
+                  <MaterialCommunityIcons name="email-outline" size={20} color={c.brand} />
                   <Text style={styles.linkTxt}>{dev.email}</Text>
                 </Pressable>
               ) : null}
@@ -943,7 +947,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
                     void openLink(w ?? "");
                   }}
                 >
-                  <MaterialCommunityIcons name="web" size={20} color={p.primary} />
+                  <MaterialCommunityIcons name="web" size={20} color={c.brand} />
                   <Text style={styles.linkTxt}>{dev.website}</Text>
                 </Pressable>
               ) : null}
@@ -966,16 +970,16 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
             <SectionCard style={styles.section}>
               <View style={styles.progressHead}>
                 <SectionTitle title={t("projectDetails.progressTitle")} />
-                <Text style={[styles.progressPct, { color: p.text }]}>
+                <Text style={[styles.progressPct, { color: c.label }]}>
                   {data.progress.percent != null ? `${data.progress.percent}%` : "—"}
                 </Text>
               </View>
-              <View style={[styles.progressTrack, { backgroundColor: p.outline }]}>
+              <View style={[styles.progressTrack, { backgroundColor: c.separator }]}>
                 <View
                   style={[
                     styles.progressFill,
                     {
-                      backgroundColor: p.primary,
+                      backgroundColor: c.brand,
                       width: `${Math.max(0, Math.min(100, data.progress.percent ?? 0))}%`,
                     },
                   ]}
@@ -991,9 +995,9 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
                         <MaterialCommunityIcons
                           name={m.done ? "check-circle" : "checkbox-blank-circle-outline"}
                           size={18}
-                          color={m.done ? p.success : p.textMuted}
+                          color={m.done ? c.success : c.labelSecondary}
                         />
-                        <Text style={[styles.progressTxt, { color: p.text }]}>{m.title}</Text>
+                        <Text style={[styles.progressTxt, { color: c.label }]}>{m.title}</Text>
                       </View>
                       {m.photoUrls?.length ? (
                         <FlatList
@@ -1013,8 +1017,8 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
                                 style={[
                                   styles.progressPhoto,
                                   {
-                                    borderColor: p.outline,
-                                    backgroundColor: p.surfaceMuted,
+                                    borderColor: c.separator,
+                                    backgroundColor: c.fill,
                                   },
                                 ]}
                               />
@@ -1025,7 +1029,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
                     </View>
                   ))}
               </View>
-              <Text variant="bodySmall" style={[styles.progressHint, { color: p.textMuted }]}>
+              <Text variant="bodySmall" style={[styles.progressHint, { color: c.labelSecondary }]}>
                 {t("projectDetails.progressDone", {
                   done: data.progress.done ?? 0,
                   total: data.progress.total ?? data.progress.milestones.length,
@@ -1060,7 +1064,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
               <View style={styles.mapBox}>
                 {mapGeoLoading ? (
                   <View style={styles.mapLoading}>
-                    <ActivityIndicator color={p.primary} />
+                    <ActivityIndicator color={c.brand} />
                   </View>
                 ) : mapCoords ? (
                   <ProjectMapWebView lat={mapCoords.lat} lon={mapCoords.lon} />
@@ -1097,7 +1101,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
                         key={s}
                         name="star"
                         size={16}
-                        color={s <= (rev.rating ?? 0) ? p.secondary : p.outline}
+                        color={s <= (rev.rating ?? 0) ? c.brandSecondary : c.separator}
                       />
                     ))}
                   </View>
@@ -1126,7 +1130,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
                       {formatUzs(f.pricePerM2, loc)} {t("common.sum")}/{t("common.m2")}
                     </Text>
                   </View>
-                  <MaterialCommunityIcons name="chevron-right" size={22} color={p.textMuted} />
+                  <MaterialCommunityIcons name="chevron-right" size={22} color={c.labelSecondary} />
                 </Pressable>
               ))
             ) : (
@@ -1138,8 +1142,8 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
             mode="contained"
             style={styles.cta2}
             contentStyle={styles.ctaIn}
-            buttonColor={p.secondary}
-            textColor="#FFFFFF"
+            buttonColor={c.brandSecondary}
+            textColor={c.brandOn}
             onPress={() => goLead()}
           >
             {t("projectDetails.leaveRequest")}
@@ -1161,7 +1165,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
               accessibilityRole="button"
               accessibilityLabel={t("developer.close")}
             >
-              <MaterialCommunityIcons name="close" size={26} color="#FFFFFF" />
+              <MaterialCommunityIcons name="close" size={26} color={c.onMedia} />
             </Pressable>
             <Pressable style={styles.viewerCard} onPress={() => {}}>
               {progressPhoto ? (

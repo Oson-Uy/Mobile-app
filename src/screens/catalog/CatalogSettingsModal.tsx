@@ -9,13 +9,13 @@ import {
   navigateToDeveloperWorkspace,
 } from "../../navigation/navigationRef";
 import { useAppPreferences } from "../../preferences/AppPreferencesProvider";
-import { useAppTheme, type ThemeMode } from "../../theme/AppThemeProvider";
+import { useAppTheme } from "../../theme/AppThemeProvider";
+import type { ThemePreference } from "../../theme/tokens";
 import { radii, spacing } from "../../theme/tokens";
 
 type Props = {
   visible: boolean;
   onClose: () => void;
-  /** false внутри кабинета застройщика — без кнопки «в кабинет». */
   showCabinetEntry?: boolean;
 };
 
@@ -25,14 +25,19 @@ const LOCALES: { id: Locale; labelKey: string }[] = [
   { id: "en", labelKey: "settings.langEn" },
 ];
 
+const THEME_OPTIONS: { id: ThemePreference; labelKey: string }[] = [
+  { id: "system", labelKey: "settings.themeSystem" },
+  { id: "light", labelKey: "settings.themeLight" },
+  { id: "dark", labelKey: "settings.themeDark" },
+];
+
 export function CatalogSettingsModal({
   visible,
   onClose,
   showCabinetEntry = true,
 }: Props) {
   const { t, locale, setLocale } = useI18n();
-  const { mode, setMode, palette: p } = useAppTheme();
-  const doneLabelColor = mode === "dark" ? "#0F172A" : "#FFFFFF";
+  const { colors: c, preference, setPreference } = useAppTheme();
   const { setRole } = useAppPreferences();
   const [hasDevSession, setHasDevSession] = useState(false);
 
@@ -61,16 +66,16 @@ export function CatalogSettingsModal({
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View style={styles.modalRoot}>
-        <Pressable style={styles.backdrop} onPress={onClose} />
-        <View style={[styles.sheet, { backgroundColor: p.surface }]}>
+        <Pressable style={[styles.backdrop, { backgroundColor: c.overlay }]} onPress={onClose} />
+        <View style={[styles.sheet, { backgroundColor: c.bgElevated }]}>
           <View style={styles.sheetHeader}>
-            <Text variant="titleLarge" style={{ fontWeight: "800", color: p.text }}>
+            <Text variant="titleLarge" style={{ fontWeight: "800", color: c.label }}>
               {t("settings.title")}
             </Text>
-            <IconButton icon="close" onPress={onClose} iconColor={p.textMuted} />
+            <IconButton icon="close" onPress={onClose} iconColor={c.labelSecondary} />
           </View>
           <ScrollView contentContainerStyle={styles.body}>
-            <Text style={[styles.section, { color: p.textMuted }]}>
+            <Text style={[styles.section, { color: c.labelSecondary }]}>
               {t("settings.language")}
             </Text>
             <RadioButton.Group
@@ -82,35 +87,33 @@ export function CatalogSettingsModal({
                   key={row.id}
                   label={t(row.labelKey)}
                   value={row.id}
-                  labelStyle={{ color: p.text }}
+                  labelStyle={{ color: c.label }}
                 />
               ))}
             </RadioButton.Group>
 
-            <Text style={[styles.section, styles.sectionSpaced, { color: p.textMuted }]}>
+            <Text style={[styles.section, styles.sectionSpaced, { color: c.labelSecondary }]}>
               {t("settings.theme")}
             </Text>
             <RadioButton.Group
-              value={mode}
-              onValueChange={(v) => void setMode(v as ThemeMode)}
+              value={preference}
+              onValueChange={(v) => void setPreference(v as ThemePreference)}
             >
-              <RadioButton.Item
-                label={t("settings.themeLight")}
-                value="light"
-                labelStyle={{ color: p.text }}
-              />
-              <RadioButton.Item
-                label={t("settings.themeDark")}
-                value="dark"
-                labelStyle={{ color: p.text }}
-              />
+              {THEME_OPTIONS.map((row) => (
+                <RadioButton.Item
+                  key={row.id}
+                  label={t(row.labelKey)}
+                  value={row.id}
+                  labelStyle={{ color: c.label }}
+                />
+              ))}
             </RadioButton.Group>
 
-            <Text style={[styles.section, styles.sectionSpaced, { color: p.textMuted }]}>
+            <Text style={[styles.section, styles.sectionSpaced, { color: c.labelSecondary }]}>
               {t("settings.developerSection")}
             </Text>
             {showCabinetEntry ? (
-              <Text variant="bodySmall" style={{ color: p.textMuted, marginBottom: spacing.sm }}>
+              <Text variant="bodySmall" style={{ color: c.labelSecondary, marginBottom: spacing.sm }}>
                 {t("settings.developerSectionHint")}
               </Text>
             ) : null}
@@ -118,8 +121,8 @@ export function CatalogSettingsModal({
               <Button
                 mode="contained"
                 onPress={onDeveloperLogin}
-                buttonColor={p.secondary}
-                textColor="#FFFFFF"
+                buttonColor={c.brandSecondary}
+                textColor={c.brandOn}
                 style={styles.devBtn}
               >
                 {t("settings.goToDeveloperCabinet")}
@@ -141,8 +144,8 @@ export function CatalogSettingsModal({
               style={styles.done}
               contentStyle={styles.doneContent}
               labelStyle={styles.doneLabel}
-              buttonColor={p.primary}
-              textColor={doneLabelColor}
+              buttonColor={c.brand}
+              textColor={c.brandOn}
             >
               {t("settings.done")}
             </Button>
@@ -160,7 +163,6 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(15,23,42,0.45)",
   },
   sheet: {
     borderTopLeftRadius: radii.xl,

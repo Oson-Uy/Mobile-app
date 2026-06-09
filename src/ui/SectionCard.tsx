@@ -1,13 +1,13 @@
 import React from "react";
 import { StyleSheet, View, type ViewProps } from "react-native";
-import { useTheme } from "react-native-paper";
 
+import { useAppTheme } from "../theme/AppThemeProvider";
 import { radii, spacing } from "../theme/tokens";
 
 type Props = ViewProps & { padded?: boolean };
 
 export function SectionCard({ style, children, padded = true, ...rest }: Props) {
-  const theme = useTheme();
+  const { colors: c } = useAppTheme();
   const { color: _ignoreColor, ...safeRest } = rest as Props & {
     color?: unknown;
   };
@@ -16,8 +16,8 @@ export function SectionCard({ style, children, padded = true, ...rest }: Props) 
       style={[
         styles.card,
         {
-          backgroundColor: theme.colors.elevation.level1,
-          borderColor: theme.colors.outlineVariant,
+          backgroundColor: c.bgElevated,
+          borderColor: c.separator,
         },
         padded && styles.padded,
         style,

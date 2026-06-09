@@ -13,6 +13,7 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { apiFetch } from "../../api/client";
+import { iosScrollInset } from "../../navigation/glassOptions";
 import { useI18n } from "../../i18n/I18nProvider";
 import { Screen } from "../../ui/Screen";
 import { SectionCard } from "../../ui/SectionCard";
@@ -48,21 +49,21 @@ type PlanDef = {
 export function DeveloperSubscriptionsScreen() {
   const { t } = useI18n();
   const theme = useTheme();
-  const { palette: p } = useAppTheme();
+  const { colors: c } = useAppTheme();
 
   const PLANS = useMemo<PlanDef[]>(
     () => [
-      { id: "START", price: 0, color: p.primary, icon: "rocket-launch-outline" },
+      { id: "START", price: 0, color: c.brand, icon: "rocket-launch-outline" },
       {
         id: "PRO",
         price: 0,
-        color: p.secondary,
+        color: c.brandSecondary,
         icon: "shield-check-outline",
         popular: true,
       },
-      { id: "ULTIMATE", price: 0, color: p.text, icon: "star-outline" },
+      { id: "ULTIMATE", price: 0, color: c.label, icon: "star-outline" },
     ],
-    [p.primary, p.secondary, p.text],
+    [c.brand, c.brandSecondary, c.label],
   );
 
   const [projects, setProjects] = useState<ApiProject[]>([]);
@@ -161,19 +162,19 @@ export function DeveloperSubscriptionsScreen() {
         >
           <SectionTitle title={t("developer.paymentTitle")} subtitle={`#${active?.externalRef ?? ""}`} />
           <SectionCard style={styles.payCard}>
-            <Text style={[styles.payRow, { color: p.text }]}>
+            <Text style={[styles.payRow, { color: c.label }]}>
               {t("developer.plan")}:{" "}
-              <Text style={[styles.bold, { color: p.primary }]}>{active?.plan ?? ""}</Text>
+              <Text style={[styles.bold, { color: c.brand }]}>{active?.plan ?? ""}</Text>
             </Text>
-            <Text style={[styles.payRow, { color: p.text }]}>
+            <Text style={[styles.payRow, { color: c.label }]}>
               {t("developer.amount")}:{" "}
-              <Text style={[styles.bold, { color: p.primary }]}>
+              <Text style={[styles.bold, { color: c.brand }]}>
                 {formatUzs(active?.amountUzs ?? 0)}
               </Text>
             </Text>
             <Divider style={{ marginVertical: spacing.md }} />
-            <Text style={[styles.payHint, { color: p.textMuted }]}>{t("developer.instructions")}</Text>
-            <Text style={[styles.payText, { color: p.text }]}>{active?.instructions ?? ""}</Text>
+            <Text style={[styles.payHint, { color: c.labelSecondary }]}>{t("developer.instructions")}</Text>
+            <Text style={[styles.payText, { color: c.label }]}>{active?.instructions ?? ""}</Text>
           </SectionCard>
           <View style={styles.row}>
             <Button mode="outlined" style={styles.flex} onPress={() => setActive(null)}>
@@ -193,14 +194,14 @@ export function DeveloperSubscriptionsScreen() {
         </Modal>
       </Portal>
 
-      <ScrollView contentContainerStyle={styles.scroll}>
+      <ScrollView {...iosScrollInset} contentContainerStyle={styles.scroll}>
         <SectionCard>
           <SectionTitle title={t("developer.subscriptions")} subtitle={t("developer.subscriptionsSubtitle")} />
           {err ? (
-            <Text style={[styles.err, { color: p.error }]}>{err}</Text>
+            <Text style={[styles.err, { color: c.error }]}>{err}</Text>
           ) : null}
 
-          <Text style={[styles.small, { color: p.textMuted }]}>{t("developer.selectedProject")}</Text>
+          <Text style={[styles.small, { color: c.labelSecondary }]}>{t("developer.selectedProject")}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={styles.projectRow}>
               {projects.map((proj) => {
@@ -231,7 +232,7 @@ export function DeveloperSubscriptionsScreen() {
             autoCapitalize="characters"
             style={styles.promoField}
           />
-          <Text variant="bodySmall" style={[styles.promoHint, { color: p.textMuted }]}>
+          <Text variant="bodySmall" style={[styles.promoHint, { color: c.labelSecondary }]}>
             {t("developer.promoHint")}
           </Text>
         </SectionCard>
@@ -248,15 +249,17 @@ export function DeveloperSubscriptionsScreen() {
                   <MaterialCommunityIcons name={plan.icon} size={26} color={plan.color} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={[styles.planTitle, { color: p.primary }]}>{plan.id}</Text>
-                  <Text style={[styles.planPrice, { color: p.text }]}>
+                  <Text style={[styles.planTitle, { color: c.brand }]}>{plan.id}</Text>
+                  <Text style={[styles.planPrice, { color: c.label }]}>
                     {formatUzs(plan.price)}{" "}
-                    <Text style={[styles.planPer, { color: p.textMuted }]}>{t("developer.perMonth")}</Text>
+                    <Text style={[styles.planPer, { color: c.labelSecondary }]}>{t("developer.perMonth")}</Text>
                   </Text>
                 </View>
                 {plan.popular ? (
-                  <View style={[styles.popular, { backgroundColor: p.secondary }]}>
-                    <Text style={styles.popularTxt}>{t("developer.popular")}</Text>
+                  <View style={[styles.popular, { backgroundColor: c.brandSecondary }]}>
+                    <Text style={[styles.popularTxt, { color: c.onMedia }]}>
+                      {t("developer.popular")}
+                    </Text>
                   </View>
                 ) : null}
               </View>
@@ -305,7 +308,7 @@ const styles = StyleSheet.create({
   planPrice: { fontWeight: "900", fontSize: 16 },
   planPer: { fontWeight: "700" },
   popular: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
-  popularTxt: { color: "#fff", fontWeight: "900", fontSize: 10, letterSpacing: 0.6, textTransform: "uppercase" },
+  popularTxt: { fontWeight: "900", fontSize: 10, letterSpacing: 0.6, textTransform: "uppercase" },
   modal: {
     marginHorizontal: spacing.lg,
     marginVertical: 42,

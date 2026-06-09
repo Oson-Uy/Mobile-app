@@ -1,23 +1,11 @@
-import { CommonActions, createNavigationContainerRef } from "@react-navigation/native";
-
-import type { RootStackParamList } from "./RootNavigator";
-
-export const navigationRef = createNavigationContainerRef<RootStackParamList>();
+import { router } from "expo-router";
 
 /** Открыть полный кабинет застройщика (стек Gate → Login / Home). */
 export function navigateToDeveloperWorkspace() {
-  if (navigationRef.isReady()) {
-    navigationRef.navigate("DeveloperWorkspace");
-  }
+  router.push("/developer");
 }
 
-/** Закрыть кабинет и вернуться к каталогу (сброс стека — для logout и кнопки «Каталог»). */
+/** Закрыть кабинет и вернуться к каталогу. */
 export function exitDeveloperWorkspace() {
-  if (!navigationRef.isReady()) return;
-  navigationRef.dispatch(
-    CommonActions.reset({
-      index: 0,
-      routes: [{ name: "Main" }],
-    }),
-  );
+  router.replace("/(buyer)/(catalog)");
 }

@@ -2,8 +2,8 @@ import React from "react";
 import { StyleSheet, View, type ViewProps } from "react-native";
 
 import { useAppTheme } from "../../theme/AppThemeProvider";
+import { cardSurface } from "../../theme/surfaces";
 import { spacing } from "../../theme/tokens";
-import { devCardSurface } from "./devPlatform";
 
 type Props = ViewProps & {
   children: React.ReactNode;
@@ -11,12 +11,12 @@ type Props = ViewProps & {
 };
 
 export function DevCard({ style, children, padded = true, ...rest }: Props) {
-  const { palette: p } = useAppTheme();
+  const { colors: c, resolvedMode } = useAppTheme();
   return (
     <View
       style={[
-        devCardSurface(),
-        { backgroundColor: p.surface, borderColor: p.outline },
+        cardSurface(resolvedMode),
+        { backgroundColor: c.bgElevated, borderColor: c.separator },
         padded && styles.padded,
         style,
       ]}

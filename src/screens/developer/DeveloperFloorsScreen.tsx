@@ -16,11 +16,12 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 
 import { apiFetch } from "../../api/client";
+import { iosScrollInset } from "../../navigation/glassOptions";
 import { useI18n } from "../../i18n/I18nProvider";
 import { Screen } from "../../ui/Screen";
 import { DevCard } from "../../ui/developer/DevCard";
 import { DevIconButton } from "../../ui/developer/DevIconButton";
-import { devFabRadius, devListPadding } from "../../ui/developer/devPlatform";
+import { fabRadius, listPadding } from "../../ui/platform";
 import { useAppTheme } from "../../theme/AppThemeProvider";
 import { radii, spacing } from "../../theme/tokens";
 import { FullScreenLoader } from "../../ui/FullScreenLoader";
@@ -39,7 +40,7 @@ type ApiFloor = {
 
 export function DeveloperFloorsScreen() {
   const { t } = useI18n();
-  const { palette: p, mode } = useAppTheme();
+  const { colors: c, resolvedMode } = useAppTheme();
   const navigation = useNavigation<any>();
   const [projects, setProjects] = useState<ApiProject[]>([]);
   const [floors, setFloors] = useState<ApiFloor[]>([]);
@@ -161,7 +162,7 @@ export function DeveloperFloorsScreen() {
           options: [t("developer.cancel"), ...labels],
           cancelButtonIndex: 0,
           title: t("developer.pickProjectTitle"),
-          userInterfaceStyle: mode === "dark" ? "dark" : "light",
+          userInterfaceStyle: resolvedMode === "dark" ? "dark" : "light",
         },
         (idx) => {
           if (idx != null && idx > 0) setSelectedProjectId(projects[idx - 1]!.id);
@@ -182,8 +183,8 @@ export function DeveloperFloorsScreen() {
       >
         <View style={styles.pickerRoot}>
           <Pressable style={styles.pickerBackdrop} onPress={() => setProjectPickerOpen(false)} />
-          <View style={[styles.pickerSheet, { backgroundColor: p.surface }]}>
-            <Text variant="titleLarge" style={[styles.pickerTitle, { color: p.text }]}>
+          <View style={[styles.pickerSheet, { backgroundColor: c.bgElevated }]}>
+            <Text variant="titleLarge" style={[styles.pickerTitle, { color: c.label }]}>
               {t("developer.pickProjectTitle")}
             </Text>
             <ScrollView
@@ -202,11 +203,11 @@ export function DeveloperFloorsScreen() {
                     }}
                     style={[
                       styles.pickerRow,
-                      { borderBottomColor: p.outline },
-                      sel && { backgroundColor: p.surfaceMuted },
+                      { borderBottomColor: c.separator },
+                      sel && { backgroundColor: c.fill },
                     ]}
                   >
-                    <Text style={[styles.pickerRowLabel, { color: p.text }]}>{proj.name}</Text>
+                    <Text style={[styles.pickerRowLabel, { color: c.label }]}>{proj.name}</Text>
                   </Pressable>
                 );
               })}
@@ -216,13 +217,14 @@ export function DeveloperFloorsScreen() {
       </Modal>
 
       <FlatList
+        {...iosScrollInset}
         contentContainerStyle={styles.list}
         data={floorsView}
         keyExtractor={(i) => String(i.id)}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} />}
         ListHeaderComponent={
           <View style={{ marginBottom: spacing.lg }}>
-            <Text variant="titleMedium" style={[styles.head, { color: p.primary }]}>
+            <Text variant="titleMedium" style={[styles.head, { color: c.brand }]}>
               {t("developer.floors")}
             </Text>
             {projects.length > 0 ? (
@@ -231,37 +233,37 @@ export function DeveloperFloorsScreen() {
                 style={({ pressed }) => [
                   styles.filterPill,
                   {
-                    borderColor: p.outline,
-                    backgroundColor: p.surfaceMuted,
+                    borderColor: c.separator,
+                    backgroundColor: c.fill,
                     opacity: pressed ? 0.85 : 1,
                   },
                 ]}
               >
-                <Text style={[styles.filterLabel, { color: p.textMuted }]}>
+                <Text style={[styles.filterLabel, { color: c.labelSecondary }]}>
                   {t("developer.filterByProject")}
                 </Text>
                 <View style={styles.filterValueRow}>
-                  <Text style={[styles.filterValue, { color: p.text }]} numberOfLines={1}>
+                  <Text style={[styles.filterValue, { color: c.label }]} numberOfLines={1}>
                     {selectedProjectName}
                   </Text>
-                  <MaterialCommunityIcons name="chevron-down" size={22} color={p.primary} />
+                  <MaterialCommunityIcons name="chevron-down" size={22} color={c.brand} />
                 </View>
               </Pressable>
             ) : null}
-            {error ? <Text style={[styles.err, { color: p.error }]}>{error}</Text> : null}
+            {error ? <Text style={[styles.err, { color: c.error }]}>{error}</Text> : null}
           </View>
         }
         renderItem={({ item }) => (
           <DevCard style={styles.floorCard}>
             <View style={styles.floorTop}>
               <View style={{ flex: 1 }}>
-                <Text style={[styles.floorTitle, { color: p.text }]}>
+                <Text style={[styles.floorTitle, { color: c.label }]}>
                   {t("developer.floorLabel", { n: item.floor })}
                 </Text>
-                <Text variant="bodySmall" style={{ color: p.textMuted }}>
+                <Text variant="bodySmall" style={{ color: c.labelSecondary }}>
                   {projects.find((proj) => proj.id === item.projectId)?.name ?? "—"}
                 </Text>
-                <Text variant="bodyMedium" style={{ color: p.text, fontWeight: "600", marginTop: 4 }}>
+                <Text variant="bodyMedium" style={{ color: c.label, fontWeight: "600", marginTop: 4 }}>
                   {t("developer.pricePerM2")}: {item.pricePerM2}
                 </Text>
               </View>
@@ -275,14 +277,14 @@ export function DeveloperFloorsScreen() {
                 <DevIconButton
                   icon="trash-can-outline"
                   variant="tonal"
-                  color={p.error}
+                  color={c.error}
                   accessibilityLabel={t("developer.delete")}
                   onPress={() => void remove(item.id)}
                 />
               </View>
             </View>
-            <View style={[styles.metaBlock, { borderTopColor: p.outline }]}>
-              <Text variant="bodySmall" style={{ color: p.textMuted }}>
+            <View style={[styles.metaBlock, { borderTopColor: c.separator }]}>
+              <Text variant="bodySmall" style={{ color: c.labelSecondary }}>
                 {t("developer.areas")}:{" "}
                 {(item.areaOptions ?? [])
                   .slice()
@@ -290,7 +292,7 @@ export function DeveloperFloorsScreen() {
                   .map((a) => a.areaSqm)
                   .join(", ") || "—"}
               </Text>
-              <Text variant="bodySmall" style={{ color: p.textMuted, marginTop: 4 }}>
+              <Text variant="bodySmall" style={{ color: c.labelSecondary, marginTop: 4 }}>
                 {t("developer.layouts")}: {(item.layouts ?? []).length}
               </Text>
             </View>
@@ -303,11 +305,11 @@ export function DeveloperFloorsScreen() {
             </View>
           ) : projects.length === 0 ? (
             <View style={styles.empty}>
-              <Text style={[styles.muted, { color: p.textMuted }]}>{t("developer.emptyProjects")}</Text>
+              <Text style={[styles.muted, { color: c.labelSecondary }]}>{t("developer.emptyProjects")}</Text>
             </View>
           ) : (
             <View style={styles.empty}>
-              <Text style={[styles.muted, { color: p.textMuted }]}>
+              <Text style={[styles.muted, { color: c.labelSecondary }]}>
                 {t("developer.noFloorsForProject")}
               </Text>
             </View>
@@ -317,8 +319,8 @@ export function DeveloperFloorsScreen() {
 
       <FAB
         icon="plus"
-        style={[styles.fab, { backgroundColor: p.primary }]}
-        color="#FFFFFF"
+        style={[styles.fab, { backgroundColor: c.brand }]}
+        color={c.brandOn}
         onPress={openCreate}
         label={t("developer.newFloor")}
       />
@@ -349,7 +351,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   pickerRowLabel: { fontSize: 17, paddingVertical: 12, paddingHorizontal: spacing.lg },
-  list: { padding: devListPadding, paddingBottom: spacing.xxl * 3 },
+  list: { padding: listPadding, paddingBottom: spacing.xxl * 3 },
   head: { fontWeight: "800", fontSize: Platform.select({ ios: 22, android: 24, default: 22 }) },
   filterPill: {
     marginTop: spacing.sm,
@@ -365,9 +367,9 @@ const styles = StyleSheet.create({
   muted: { textAlign: "center" },
   fab: {
     position: "absolute",
-    right: devListPadding,
-    bottom: devListPadding,
-    borderRadius: devFabRadius,
+    right: listPadding,
+    bottom: listPadding,
+    borderRadius: fabRadius,
   },
   floorCard: { marginBottom: spacing.md },
   floorTop: { flexDirection: "row", gap: spacing.md, alignItems: "flex-start" },
