@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Button, IconButton, RadioButton, Text } from "react-native-paper";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
 import { getToken, clearToken } from "../../auth/token";
 import { useI18n, type Locale } from "../../i18n/I18nProvider";
@@ -66,7 +67,13 @@ export function CatalogSettingsModal({
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View style={styles.modalRoot}>
-        <Pressable style={[styles.backdrop, { backgroundColor: c.overlay }]} onPress={onClose} />
+        <Animated.View
+          style={[styles.backdrop, { backgroundColor: c.overlay }]}
+          entering={FadeIn.duration(300)}
+          exiting={FadeOut.duration(200)}
+        >
+          <Pressable onPress={onClose} style={StyleSheet.absoluteFillObject} />
+        </Animated.View>
         <View style={[styles.sheet, { backgroundColor: c.bgElevated }]}>
           <View style={styles.sheetHeader}>
             <Text variant="titleLarge" style={{ fontWeight: "800", color: c.label }}>

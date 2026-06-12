@@ -8,7 +8,10 @@
   "cabinet": {
     "loginTitle": "Xaridor kabineti",
     "loginSubtitle": "Telefon va kirish kodi quruvchidan beriladi.",
+    "contactInfo": "Aloqa maʼlumotlari",
+    "accessInfo": "Kirish maʼlumoti",
     "phone": "Telefon",
+    "name": "Sizning ismingiz",
     "code": "Kirish kodi",
     "submit": "Kirish",
     "error": "Telefon va kodni tekshiring",

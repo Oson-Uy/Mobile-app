@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Button, Divider, Switch, Text, TextInput, useTheme } from "react-native-paper";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
 import type { CatalogFilterState } from "../../catalog/filterProjects";
 import { formatMoneyInput } from "../../lib/currency";
@@ -111,7 +112,13 @@ export function CatalogFilterModal({
   return (
     <Modal visible={visible} animationType="slide" transparent statusBarTranslucent>
       <View style={styles.modalRoot}>
-        <Pressable style={styles.backdrop} onPress={onClose} />
+        <Animated.View
+          style={styles.backdrop}
+          entering={FadeIn.duration(300)}
+          exiting={FadeOut.duration(200)}
+        >
+          <Pressable onPress={onClose} style={StyleSheet.absoluteFillObject} />
+        </Animated.View>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : undefined}
           style={styles.sheetWrap}

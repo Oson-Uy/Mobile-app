@@ -8,7 +8,10 @@
   "cabinet": {
     "loginTitle": "Buyer account",
     "loginSubtitle": "Phone and access code are provided by the developer.",
+    "contactInfo": "Contact information",
+    "accessInfo": "Access information",
     "phone": "Phone",
+    "name": "Your name",
     "code": "Access code",
     "submit": "Sign in",
     "error": "Check your phone and code",
