@@ -126,6 +126,10 @@ export function DeveloperLoginScreen({ navigation, route }: Props) {
               onPress={() => void onSubmit()}
               style={styles.submit}
               contentStyle={styles.submitInner}
+              labelStyle={styles.submitLabel}
+              buttonColor={c.brand}
+              textColor={c.brandOn}
+              icon="login"
             >
               {t("developer.signIn")}
             </Button>
@@ -155,4 +159,5 @@ const styles = StyleSheet.create({
   field: { marginBottom: spacing.md },
   submit: { marginTop: spacing.md, borderRadius: radii.lg },
   submitInner: { paddingVertical: 8, minHeight: 48 },
+  submitLabel: { fontWeight: "800", fontSize: 16 },
 });

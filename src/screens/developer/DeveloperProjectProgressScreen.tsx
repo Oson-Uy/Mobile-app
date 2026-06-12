@@ -285,6 +285,8 @@ export function DeveloperProjectProgressScreen({ navigation }: any) {
       <Modal
         visible={preview != null}
         transparent
+        statusBarTranslucent
+        navigationBarTranslucent
         animationType="fade"
         onRequestClose={() => setPreview(null)}
       >

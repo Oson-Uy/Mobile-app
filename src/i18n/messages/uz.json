@@ -8,6 +8,7 @@
   "cabinet": {
     "loginTitle": "Xaridor kabineti",
     "loginSubtitle": "Telefon va kirish kodi quruvchidan beriladi.",
+    "loginHint": "Shartnomangizda koʻrsatilgan telefon va kirish kodini kiriting.",
     "contactInfo": "Aloqa maʼlumotlari",
     "accessInfo": "Kirish maʼlumoti",
     "phone": "Telefon",
@@ -44,6 +45,8 @@
     "error": "Xatolik",
     "sum": "soʻm",
     "m2": "m²",
+    "price": "Narx",
+    "negotiablePrice": "Kelishilgan narx",
     "loadError": "Maʼlumot yuklanmadi",
     "back": "Orqaga"
   },

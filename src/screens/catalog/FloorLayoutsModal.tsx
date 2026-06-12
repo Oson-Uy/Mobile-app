@@ -76,6 +76,7 @@ export function FloorLayoutsModal({
       animationType="fade"
       transparent
       statusBarTranslucent
+      navigationBarTranslucent
       onRequestClose={onDismiss}
     >
       <View style={[styles.modalRoot, { backgroundColor: c.overlay }]}>

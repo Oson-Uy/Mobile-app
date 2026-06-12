@@ -103,6 +103,23 @@ function createDetailsStyles(c: AppColors) {
     loc: { flex: 1, fontWeight: "600", color: c.label },
     priceHero: { fontWeight: "700", color: c.label },
     priceHeroNum: { color: c.brand },
+    priceCard: {
+      backgroundColor: c.brandSecondary + "14",
+      borderRadius: radii.lg,
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.md,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: c.brandSecondary + "33",
+    },
+    priceCardLbl: {
+      fontSize: 11,
+      fontWeight: "800",
+      color: c.labelSecondary,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+      marginBottom: 2,
+    },
+    priceCardNum: { fontSize: 22, fontWeight: "900", color: c.brandSecondary },
     chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
     chip: { backgroundColor: c.fill },
     metrics: { flexDirection: "row", gap: spacing.sm },
@@ -773,14 +790,16 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
             </Text>
           </View>
 
-          {minM2 > 0 ? (
-            <Text variant="titleMedium" style={styles.priceHero}>
-              {t("projectCard.fromPerM2")}{" "}
-              <Text style={styles.priceHeroNum}>
-                {formatUzs(minM2, loc)} {t("common.sum")}/{t("common.m2")}
-              </Text>
+          <View style={styles.priceCard}>
+            <Text style={styles.priceCardLbl}>
+              {minM2 > 0 ? t("projectCard.fromPerM2") : t("common.price")}
             </Text>
-          ) : null}
+            <Text style={styles.priceCardNum}>
+              {minM2 > 0
+                ? `${formatUzs(minM2, loc)} ${t("common.sum")}/${t("common.m2")}`
+                : t("common.negotiablePrice")}
+            </Text>
+          </View>
 
           <View style={styles.chips}>
             {data.hasInstallment ? (
@@ -1154,6 +1173,8 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
       <Modal
         visible={progressPhoto != null}
         transparent
+        statusBarTranslucent
+        navigationBarTranslucent
         animationType="fade"
         onRequestClose={() => setProgressPhoto(null)}
       >

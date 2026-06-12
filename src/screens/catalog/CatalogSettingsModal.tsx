@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Button, IconButton, RadioButton, Text } from "react-native-paper";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { getToken, clearToken } from "../../auth/token";
 import { useI18n, type Locale } from "../../i18n/I18nProvider";
@@ -40,6 +41,7 @@ export function CatalogSettingsModal({
   const { t, locale, setLocale } = useI18n();
   const { colors: c, preference, setPreference } = useAppTheme();
   const { setRole } = useAppPreferences();
+  const insets = useSafeAreaInsets();
   const [hasDevSession, setHasDevSession] = useState(false);
 
   const refreshSession = useCallback(async () => {
@@ -65,16 +67,30 @@ export function CatalogSettingsModal({
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      statusBarTranslucent
+      navigationBarTranslucent
+    >
       <View style={styles.modalRoot}>
         <Animated.View
           style={[styles.backdrop, { backgroundColor: c.overlay }]}
-          entering={FadeIn.duration(300)}
-          exiting={FadeOut.duration(200)}
+          entering={FadeIn.duration(220)}
+          exiting={FadeOut.duration(180)}
         >
           <Pressable onPress={onClose} style={StyleSheet.absoluteFillObject} />
         </Animated.View>
-        <View style={[styles.sheet, { backgroundColor: c.bgElevated }]}>
+        <View
+          style={[
+            styles.sheet,
+            {
+              backgroundColor: c.bgElevated,
+              paddingBottom: insets.bottom + spacing.md,
+            },
+          ]}
+        >
           <View style={styles.sheetHeader}>
             <Text variant="titleLarge" style={{ fontWeight: "800", color: c.label }}>
               {t("settings.title")}

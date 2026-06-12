@@ -110,12 +110,18 @@ export function CatalogFilterModal({
   const pickerListMaxH = Math.min(Dimensions.get("window").height * 0.55, 420);
 
   return (
-    <Modal visible={visible} animationType="slide" transparent statusBarTranslucent>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      statusBarTranslucent
+      navigationBarTranslucent
+    >
       <View style={styles.modalRoot}>
         <Animated.View
-          style={styles.backdrop}
-          entering={FadeIn.duration(300)}
-          exiting={FadeOut.duration(200)}
+          style={[styles.backdrop, { backgroundColor: c.overlay }]}
+          entering={FadeIn.duration(220)}
+          exiting={FadeOut.duration(180)}
         >
           <Pressable onPress={onClose} style={StyleSheet.absoluteFillObject} />
         </Animated.View>

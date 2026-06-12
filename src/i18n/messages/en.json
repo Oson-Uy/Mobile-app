@@ -8,6 +8,7 @@
   "cabinet": {
     "loginTitle": "Buyer account",
     "loginSubtitle": "Phone and access code are provided by the developer.",
+    "loginHint": "Enter the phone number and access code from your contract.",
     "contactInfo": "Contact information",
     "accessInfo": "Access information",
     "phone": "Phone",
@@ -44,6 +45,8 @@
     "error": "Error",
     "sum": "UZS",
     "m2": "m²",
+    "price": "Price",
+    "negotiablePrice": "Price on request",
     "loadError": "Could not load data",
     "back": "Back"
   },

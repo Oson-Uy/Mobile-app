@@ -179,6 +179,8 @@ export function DeveloperFloorsScreen() {
         visible={projectPickerOpen}
         animationType="slide"
         transparent
+        statusBarTranslucent
+        navigationBarTranslucent
         onRequestClose={() => setProjectPickerOpen(false)}
       >
         <View style={styles.pickerRoot}>
