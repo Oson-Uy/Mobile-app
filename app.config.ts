@@ -27,7 +27,7 @@ export default ({ config }: any) => ({
   ios: {
     supportsTablet: true,
     bundleIdentifier: "com.osonuy.app",
-    buildNumber: "3",
+    buildNumber: "4",
     infoPlist: {
       UIBackgroundModes: ["remote-notification"],
       NSPhotoLibraryUsageDescription:
