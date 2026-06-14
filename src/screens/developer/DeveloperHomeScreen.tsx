@@ -1,9 +1,11 @@
-import React, { useEffect, useMemo, useState, type ComponentProps } from "react";
-import { Platform, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { HeaderButton } from "@react-navigation/elements";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createBottomTabNavigator, BottomTabBarHeightCallbackContext } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useI18n } from "../../i18n/I18nProvider";
@@ -12,6 +14,7 @@ import { CatalogSettingsModal } from "../catalog/CatalogSettingsModal";
 import { HeaderCatalogButton } from "../../ui/HeaderCatalogButton";
 import { registerForPushAndSyncToken } from "../../push/register";
 import { useAppTheme } from "../../theme/AppThemeProvider";
+import { iosSemanticColor } from "../../theme/iosDynamicColor";
 import { DeveloperFloorsScreen } from "./DeveloperFloorsScreen";
 import { DeveloperFloorEditorScreen } from "./DeveloperFloorEditorScreen";
 import { DeveloperLeadsScreen } from "./DeveloperLeadsScreen";
@@ -31,6 +34,14 @@ type TabStackProps = {
   onOpenSettings: () => void;
 };
 
+const TAB_ICONS: Record<string, { default: keyof typeof Ionicons.glyphMap; selected: keyof typeof Ionicons.glyphMap }> = {
+  Projects: { default: "business-outline", selected: "business" },
+  Floors: { default: "layers-outline", selected: "layers" },
+  Leads: { default: "document-text-outline", selected: "document-text" },
+  Subscriptions: { default: "card-outline", selected: "card" },
+  Profile: { default: "person-outline", selected: "person" },
+};
+
 function DeveloperTabStack({ component: Screen, title, onOpenSettings }: TabStackProps) {
   const { t } = useI18n();
   const { colors: c, resolvedMode } = useAppTheme();
@@ -48,7 +59,7 @@ function DeveloperTabStack({ component: Screen, title, onOpenSettings }: TabStac
               accessibilityLabel={t("catalog.settings")}
               onPress={onOpenSettings}
             >
-              <MaterialCommunityIcons name="cog-outline" size={22} color={c.brand} />
+              <Ionicons name="settings-outline" size={22} color={c.brand} />
             </HeaderButton>
           ),
         }}
@@ -57,64 +68,111 @@ function DeveloperTabStack({ component: Screen, title, onOpenSettings }: TabStac
   );
 }
 
+function NativeTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+  const insets = useSafeAreaInsets();
+  const { colors: c } = useAppTheme();
+  const onHeightChange = React.useContext(BottomTabBarHeightCallbackContext);
+
+  const tint = Platform.OS === "ios" ? iosSemanticColor("brand") : c.brand;
+  const muted = Platform.OS === "ios" ? iosSemanticColor("labelSecondary") : c.labelSecondary;
+
+  const BAR_HEIGHT = 49;
+  const bottomPad = insets.bottom;
+  const totalHeight = BAR_HEIGHT + bottomPad;
+
+  return (
+    <View
+      style={{ height: totalHeight, overflow: "hidden" }}
+      onLayout={() => onHeightChange?.(totalHeight)}
+    >
+      <View style={[StyleSheet.absoluteFill, { backgroundColor: c.bgElevated }]} />
+      {Platform.OS === "ios" ? (
+        <BlurView
+          tint="systemChromeMaterial"
+          intensity={100}
+          style={StyleSheet.absoluteFill}
+        />
+      ) : null}
+      <View style={[styles.separator, { backgroundColor: c.separator }]} />
+      <View style={[styles.tabRow, { height: BAR_HEIGHT }]}>
+        {state.routes.map((route, index) => {
+          const { options } = descriptors[route.key];
+          const label = options.tabBarLabel ?? options.title ?? route.name;
+          const isFocused = state.index === index;
+          const icons = TAB_ICONS[route.name];
+
+          const onPress = () => {
+            const event = navigation.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
+            if (!isFocused && !event.defaultPrevented) navigation.navigate(route.name);
+          };
+          const onLongPress = () => navigation.emit({ type: "tabLongPress", target: route.key });
+
+          return (
+            <Pressable
+              key={route.key}
+              onPress={onPress}
+              onLongPress={onLongPress}
+              style={styles.tabItem}
+              accessibilityRole="button"
+              accessibilityState={isFocused ? { selected: true } : {}}
+              accessibilityLabel={options.tabBarAccessibilityLabel}
+            >
+              <Ionicons
+                name={icons ? (isFocused ? icons.selected : icons.default) : "ellipse-outline"}
+                size={24}
+                color={isFocused ? tint : muted}
+              />
+              <Text
+                numberOfLines={1}
+                style={[styles.tabLabel, { color: isFocused ? tint : muted }]}
+              >
+                {typeof label === "string" ? label : route.name}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+      <View style={{ height: bottomPad }} />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  separator: {
+    height: StyleSheet.hairlineWidth,
+  },
+  tabRow: {
+    flexDirection: "row",
+  },
+  tabItem: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 3,
+  },
+  tabLabel: {
+    fontSize: 10,
+    fontWeight: "500",
+    letterSpacing: -0.1,
+  },
+});
+
 function DeveloperTabs() {
   const { t } = useI18n();
   const { colors: c } = useAppTheme();
-  const insets = useSafeAreaInsets();
   const [settingsOpen, setSettingsOpen] = useState(false);
-
-  const icons = useMemo(
-    () => ({
-      Projects: "office-building-outline",
-      Floors: "layers-outline",
-      Leads: "clipboard-text-outline",
-      Subscriptions: "credit-card-outline",
-      Profile: "account-outline",
-    }),
-    [],
-  );
-
   const openSettings = () => setSettingsOpen(true);
 
   return (
     <View style={{ flex: 1 }}>
       <Tab.Navigator
-        screenOptions={({ route }) => ({
+        tabBar={(props) => <NativeTabBar {...props} />}
+        screenOptions={{
           headerShown: false,
-          sceneContainerStyle: { backgroundColor: c.bg },
-          tabBarActiveTintColor: c.brand,
-          tabBarInactiveTintColor: c.labelSecondary,
-          tabBarStyle: {
-            borderTopColor: c.separator,
-            backgroundColor: c.bgElevated,
-            paddingHorizontal: 10,
-            paddingTop: 4,
-            paddingBottom: insets.bottom > 0 ? insets.bottom + 4 : 8,
-          },
-          tabBarItemStyle: {
-            paddingVertical: 2,
-            paddingHorizontal: 2,
-          },
-          tabBarLabelStyle: {
-            fontSize: 10,
-            fontWeight: "700",
-            marginTop: -2,
-          },
-          tabBarIconStyle: { marginTop: 2 },
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons
-              name={
-                (icons as Record<string, ComponentProps<typeof MaterialCommunityIcons>["name"]>)[
-                  route.name
-                ] ?? "account"
-              }
-              color={color}
-              size={Math.min(22, size - 2)}
-            />
-          ),
-        })}
+          tabBarHideOnKeyboard: true,
+        }}
       >
-        <Tab.Screen name="Projects">
+        <Tab.Screen name="Projects" options={{ title: t("developer.projects") ?? "Projects" }}>
           {() => (
             <DeveloperTabStack
               component={DeveloperProjectsScreen}
@@ -123,7 +181,7 @@ function DeveloperTabs() {
             />
           )}
         </Tab.Screen>
-        <Tab.Screen name="Floors">
+        <Tab.Screen name="Floors" options={{ title: t("developer.floors") ?? "Floors" }}>
           {() => (
             <DeveloperTabStack
               component={DeveloperFloorsScreen}
@@ -132,7 +190,7 @@ function DeveloperTabs() {
             />
           )}
         </Tab.Screen>
-        <Tab.Screen name="Leads">
+        <Tab.Screen name="Leads" options={{ title: t("developer.leads") ?? "Leads" }}>
           {() => (
             <DeveloperTabStack
               component={DeveloperLeadsScreen}
@@ -141,7 +199,7 @@ function DeveloperTabs() {
             />
           )}
         </Tab.Screen>
-        <Tab.Screen name="Subscriptions">
+        <Tab.Screen name="Subscriptions" options={{ title: t("developer.subscriptions") ?? "Subscriptions" }}>
           {() => (
             <DeveloperTabStack
               component={DeveloperSubscriptionsScreen}
@@ -150,7 +208,7 @@ function DeveloperTabs() {
             />
           )}
         </Tab.Screen>
-        <Tab.Screen name="Profile">
+        <Tab.Screen name="Profile" options={{ title: t("developer.profile") ?? "Profile" }}>
           {() => (
             <DeveloperTabStack
               component={DeveloperProfileScreen}
