@@ -98,7 +98,7 @@ export function DeveloperProfileScreen() {
     }
     const res = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
-      quality: 0.9,
+      quality: 0.6,
       allowsEditing: true,
       aspect: [1, 1],
     });
