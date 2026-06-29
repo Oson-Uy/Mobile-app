@@ -138,7 +138,7 @@ export function DeveloperFloorEditorScreen({ navigation }: any) {
     }
     const res = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
-      quality: 0.9,
+      quality: 0.6,
     });
     if (res.canceled || !res.assets?.[0]) return;
     try {
