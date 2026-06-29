@@ -900,7 +900,7 @@ export function ProjectDetailsScreen({ route, navigation }: Props) {
           {data.qrCodeUrl?.trim() ? (
             <ProjectQrCard
               imageUrl={data.qrCodeUrl.trim()}
-              shareUrl={`https://oson-uy.uz/projects/${data.id}`}
+              shareUrl={`https://oson-uy.uz/catalog/${data.id}`}
             />
           ) : null}
 

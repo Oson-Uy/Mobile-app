@@ -1,8 +1,8 @@
-import * as Clipboard from "expo-clipboard";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Image,
+  Linking,
   Platform,
   Pressable,
   StyleSheet,
@@ -29,37 +29,18 @@ export function ProjectQrCard({ imageUrl, shareUrl }: Props) {
   const { t } = useI18n();
   const { colors: c } = useAppTheme();
   const { width } = useWindowDimensions();
-  const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
-  const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const size = useMemo(() => {
     const pad = spacing.lg * 4;
     return Math.min(QR_MAX, Math.floor(width - pad));
   }, [width]);
 
-  useEffect(
-    () => () => {
-      if (copyTimer.current) clearTimeout(copyTimer.current);
-    },
-    [],
-  );
-
   useEffect(() => {
     setLoading(true);
     setFailed(false);
   }, [imageUrl]);
-
-  const onCopy = useCallback(async () => {
-    await Clipboard.setStringAsync(shareUrl);
-    if (copyTimer.current) clearTimeout(copyTimer.current);
-    setCopied(true);
-    copyTimer.current = setTimeout(() => {
-      setCopied(false);
-      copyTimer.current = null;
-    }, 2000);
-  }, [shareUrl]);
 
   return (
     <SectionCard style={styles.section}>
@@ -89,7 +70,7 @@ export function ProjectQrCard({ imageUrl, shareUrl }: Props) {
       </View>
 
       <Pressable
-        onPress={() => void onCopy()}
+        onPress={() => void Linking.openURL(shareUrl)}
         style={({ pressed }) => [
           styles.copyRow,
           { borderColor: c.separator, opacity: pressed ? 0.75 : 1 },
@@ -97,7 +78,7 @@ export function ProjectQrCard({ imageUrl, shareUrl }: Props) {
       >
         <MaterialCommunityIcons name="link-variant" size={20} color={c.brand} />
         <Text variant="labelLarge" style={{ color: c.brand, fontWeight: "600" }}>
-          {copied ? t("projectDetails.qrCopied") : t("projectDetails.qrCopyLink")}
+          {t("projectDetails.qrCopyLink")}
         </Text>
       </Pressable>
     </SectionCard>
