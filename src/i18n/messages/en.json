@@ -125,7 +125,8 @@
       "selectDistrict": "Select district",
       "anyRegion": "All regions",
       "anyDistrict": "Any district"
-    }
+    },
+    "showMore": "Show more"
   },
   "projectCard": {
     "popular": "Popular",

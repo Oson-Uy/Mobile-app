@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { FlatList, Platform, Pressable, RefreshControl, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Text, useTheme } from "react-native-paper";
@@ -31,6 +31,7 @@ import { radii, spacing } from "../../theme/tokens";
 type Props = NativeStackScreenProps<CatalogStackParamList, "CatalogList">;
 
 const ICON_SIZE = 22;
+const PAGE_SIZE = 10;
 
 export function CatalogListScreen({ navigation }: Props) {
   const { t } = useI18n();
@@ -50,6 +51,8 @@ export function CatalogListScreen({ navigation }: Props) {
   );
   const [filterOpen, setFilterOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const prevFiltersRef = useRef(appliedFilters);
 
   useEffect(() => {
     if (filterOpen) {
@@ -66,6 +69,16 @@ export function CatalogListScreen({ navigation }: Props) {
     () => filterCatalogProjects(raw, normalizedApplied),
     [raw, normalizedApplied],
   );
+
+  useEffect(() => {
+    if (prevFiltersRef.current !== appliedFilters) {
+      prevFiltersRef.current = appliedFilters;
+      setVisibleCount(PAGE_SIZE);
+    }
+  }, [appliedFilters]);
+
+  const visibleItems = useMemo(() => items.slice(0, visibleCount), [items, visibleCount]);
+  const hasMore = visibleCount < items.length;
 
   const load = useCallback(async () => {
     const data = await apiFetch<ApiProjectListItem[]>("/projects");
@@ -183,7 +196,7 @@ export function CatalogListScreen({ navigation }: Props) {
         {...iosScrollInset}
         ListHeaderComponent={<CatalogHero />}
         contentContainerStyle={[styles.list, { paddingBottom: listBottomPad }]}
-        data={items}
+        data={visibleItems}
         keyExtractor={(i) => String(i.id)}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} />
@@ -222,6 +235,17 @@ export function CatalogListScreen({ navigation }: Props) {
             }
           />
         )}
+        ListFooterComponent={
+          hasMore ? (
+            <Button
+              mode="outlined"
+              onPress={() => setVisibleCount((n) => n + PAGE_SIZE)}
+              style={styles.showMoreBtn}
+            >
+              {t("catalog.showMore")}
+            </Button>
+          ) : null
+        }
       />
     </Screen>
   );
@@ -259,4 +283,5 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   resetBtnTxt: { fontWeight: "700", fontSize: Platform.select({ ios: 15, android: 14, default: 15 }) },
+  showMoreBtn: { marginTop: spacing.md, marginHorizontal: spacing.sm, borderRadius: radii.lg },
 });

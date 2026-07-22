@@ -125,7 +125,8 @@
       "selectDistrict": "Tumanni tanlang",
       "anyRegion": "Barcha viloyatlar",
       "anyDistrict": "Istalgan tuman"
-    }
+    },
+    "showMore": "Ko'proq ko'rsatish"
   },
   "projectCard": {
     "popular": "Mashhur",

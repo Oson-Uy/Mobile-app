@@ -125,7 +125,8 @@
       "selectDistrict": "Выберите район",
       "anyRegion": "Все регионы",
       "anyDistrict": "Любой район"
-    }
+    },
+    "showMore": "Показать ещё"
   },
   "projectCard": {
     "popular": "Популярно",
