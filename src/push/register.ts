@@ -4,15 +4,19 @@ import * as Notifications from "expo-notifications";
 
 import { apiFetch } from "../api/client";
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
+const isExpoGo = Constants.executionEnvironment === "storeClient";
+
+if (!isExpoGo) {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
+}
 
 export type PushRegisterResult =
   | { ok: true; token: string }
@@ -33,7 +37,7 @@ function resolveExpoProjectId(): string | undefined {
 
 /** Регистрирует Expo Push Token и отправляет на API (только кабинет застройщика). */
 export async function registerForPushAndSyncToken(): Promise<PushRegisterResult> {
-  if (!Device.isDevice) {
+  if (isExpoGo || !Device.isDevice) {
     return { ok: false, reason: "simulator" };
   }
 
